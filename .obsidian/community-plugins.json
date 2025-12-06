@@ -6,5 +6,6 @@
   "better-export-pdf",
   "tldraw",
   "obsidian-git",
-  "obsidian-custom-attachment-location"
+  "obsidian-custom-attachment-location",
+  "obsidian-pandoc"
 ]

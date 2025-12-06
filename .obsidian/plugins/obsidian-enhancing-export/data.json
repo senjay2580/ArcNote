@@ -52,8 +52,14 @@
       "name": "PowerPoint (.pptx)"
     }
   ],
-  "defaultExportDirectoryMode": "Auto",
+  "pandocPath": {
+    "win32": "\"D:\\code_utils\\anaconda\\Scripts\\pandoc.exe\""
+  },
+  "defaultExportDirectoryMode": "Custom",
   "openExportedFile": true,
   "env": {},
-  "showExportProgressBar": true
+  "showExportProgressBar": true,
+  "customDefaultExportDirectory": {
+    "win32": "D:\\Desktop"
+  }
 }

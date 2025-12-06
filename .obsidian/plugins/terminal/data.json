@@ -7,17 +7,17 @@
   "focusOnNewInstance": true,
   "hideStatusBar": "focused",
   "interceptLogging": true,
-  "language": "",
-  "newInstanceBehavior": "newHorizontalSplit",
+  "language": "zh-Hans",
+  "newInstanceBehavior": "newRightTab",
   "noticeTimeout": 5,
   "openChangelogOnUpdate": true,
   "pinNewInstance": true,
   "preferredRenderer": "webgl",
   "profiles": {
-    "ed088c85-426b-41ee-81b8-6ac3442cc582": {
+    "437d0de6-c824-4774-bd3c-75a2e5ab795e": {
       "args": [],
       "executable": "powershell",
-      "name": "",
+      "name": "powershell",
       "platforms": {
         "win32": true
       },

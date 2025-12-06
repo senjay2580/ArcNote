@@ -9,5 +9,7 @@
   "obsidian-custom-attachment-location",
   "obsidian-enhancing-export",
   "shell-path-copy",
-  "terminal"
+  "terminal",
+  "code-styler",
+  "highlightr-plugin"
 ]

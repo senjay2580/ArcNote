@@ -2703,6 +2703,7 @@ public class SensitiveWordBs {
 ~~~
 
 ### gateway
+openresty
 
 | 维度      | Nginx（反向代理 / 负载均衡）              | 网关（Gateway，如 Spring Cloud Gateway、Zuul） |
 | ------- | ------------------------------- | --------------------------------------- |
@@ -2712,6 +2713,8 @@ public class SensitiveWordBs {
 | 运行层面    | 操作系统级（C 语言开发，轻量、高性能）            | 应用级（Java/Go 开发，和微服务同语言、易集成）             |
 | 对业务的感知  | 无感知（只认域名 / IP / 端口，不管请求内容）      | 深度感知（能解析请求参数、用户身份、业务逻辑）                 |
 |         |                                 |                                         |
+
+![](assets/ednova/file-20251206234019533.png)
 
 # ==6、多端场景==
 

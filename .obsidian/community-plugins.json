@@ -11,5 +11,6 @@
   "shell-path-copy",
   "terminal",
   "code-styler",
-  "highlightr-plugin"
+  "highlightr-plugin",
+  "obsidian-admonition"
 ]

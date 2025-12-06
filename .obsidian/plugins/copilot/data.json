@@ -11,7 +11,7 @@
   "azureOpenAIApiDeploymentName": "",
   "azureOpenAIApiVersion": "",
   "azureOpenAIApiEmbeddingDeploymentName": "",
-  "googleApiKey": "",
+  "googleApiKey": "AIzaSyCm3kJo2uG3SxWV2ah4yjsmrab36TAHIuw",
   "openRouterAiApiKey": "",
   "defaultChainType": "llm_chain",
   "defaultModelKey": "gpt-4o|openai",

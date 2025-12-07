@@ -1,5 +1,4 @@
 [
-  "obsidian-mind-map",
   "editing-toolbar",
   "copilot",
   "omnisearch",
@@ -22,5 +21,7 @@
   "recent-files-obsidian",
   "obsidian-file-color",
   "cmdr",
-  "surfing"
+  "surfing",
+  "folder-notes",
+  "obsidian-markmind"
 ]

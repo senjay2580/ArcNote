@@ -14,8 +14,8 @@
   "googleApiKey": "AIzaSyCm3kJo2uG3SxWV2ah4yjsmrab36TAHIuw",
   "openRouterAiApiKey": "",
   "defaultChainType": "llm_chain",
-  "defaultModelKey": "gpt-4o|openai",
-  "embeddingModelKey": "text-embedding-3-small|openai",
+  "defaultModelKey": "copilot-plus-flash|copilot-plus",
+  "embeddingModelKey": "text-embedding-004|google",
   "temperature": 0.1,
   "maxTokens": 1000,
   "contextTurns": 15,
@@ -139,6 +139,17 @@
       "provider": "azure openai",
       "enabled": true,
       "isBuiltIn": true
+    },
+    {
+      "name": "glm-4.5",
+      "provider": "3rd party (openai-format)",
+      "enabled": true,
+      "isBuiltIn": false,
+      "baseUrl": "https://open.bigmodel.cn/api/paas/v4/",
+      "apiKey": "469fe4532393488dbb2f4ae3c39cdc66.dI15bFuscmHBZ90O",
+      "isEmbeddingModel": false,
+      "capabilities": [],
+      "stream": true
     }
   ],
   "activeEmbeddingModels": [
@@ -196,7 +207,8 @@
       "provider": "google",
       "enabled": true,
       "isBuiltIn": true,
-      "isEmbeddingModel": true
+      "isEmbeddingModel": true,
+      "enableCors": true
     },
     {
       "name": "azure-openai",

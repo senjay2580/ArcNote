@@ -13,5 +13,8 @@
   "code-styler",
   "highlightr-plugin",
   "obsidian-admonition",
-  "obsidian-image-toolkit"
+  "obsidian-image-toolkit",
+  "floating-toc",
+  "obsidian-icon-folder",
+  "editor-width-slider"
 ]

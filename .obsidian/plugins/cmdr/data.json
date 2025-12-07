@@ -1,0 +1,49 @@
+{
+  "confirmDeletion": true,
+  "showAddCommand": true,
+  "debug": false,
+  "editorMenu": [
+    {
+      "id": "editor:open-search",
+      "icon": "lucide-search",
+      "name": "在当前笔记中查找",
+      "mode": "any"
+    },
+    {
+      "id": "workspace:split-vertical",
+      "icon": "lucide-separator-vertical",
+      "name": "左右分屏",
+      "mode": "any"
+    }
+  ],
+  "fileMenu": [],
+  "leftRibbon": [
+    {
+      "id": "obsidian-mind-map:app:markmap-preview",
+      "icon": "lucide-app-window-mac",
+      "name": "Mind Map: Preview the current note as a Mind Map",
+      "mode": "any"
+    }
+  ],
+  "rightRibbon": [],
+  "titleBar": [],
+  "statusBar": [],
+  "pageHeader": [],
+  "macros": [],
+  "explorer": [],
+  "hide": {
+    "statusbar": [],
+    "leftRibbon": []
+  },
+  "spacing": 8,
+  "advancedToolbar": {
+    "rowHeight": 48,
+    "rowCount": 1,
+    "spacing": 0,
+    "buttonWidth": 48,
+    "columnLayout": false,
+    "mappedIcons": [],
+    "tooltips": false,
+    "heightOffset": 0
+  }
+}

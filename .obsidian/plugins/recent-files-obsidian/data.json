@@ -1,6 +1,18 @@
 {
   "recentFiles": [
     {
+      "basename": "docker配置",
+      "path": "知识荟萃/运维相关/docker配置.md"
+    },
+    {
+      "basename": "05-应用集成指南",
+      "path": "应用监控/05-应用集成指南.md"
+    },
+    {
+      "basename": "01-项目概览",
+      "path": "多端方案/01-项目概览.md"
+    },
+    {
       "basename": "从零掌握大数据治理：ETL与DataWorks实践指南 1",
       "path": "知识荟萃/大数据/从零掌握大数据治理：ETL与DataWorks实践指南 1.md"
     },

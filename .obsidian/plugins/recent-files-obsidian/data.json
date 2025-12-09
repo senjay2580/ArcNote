@@ -1,20 +1,24 @@
 {
   "recentFiles": [
     {
-      "basename": "WrapperPlan",
-      "path": "Intern产出文档/WrapperPlan.md"
-    },
-    {
       "basename": "read",
       "path": "tech-tutorials/read.md"
     },
     {
-      "basename": "计网",
-      "path": "知识荟萃/计算机基础/计网.md"
-    },
-    {
       "basename": "NGINX",
       "path": "知识荟萃/运维相关/NGINX.md"
+    },
+    {
+      "basename": "WrapperPlan",
+      "path": "Intern产出文档/WrapperPlan.md"
+    },
+    {
+      "basename": "集合&IO",
+      "path": "知识荟萃/Java/集合&IO.md"
+    },
+    {
+      "basename": "计网",
+      "path": "知识荟萃/计算机基础/计网.md"
     },
     {
       "basename": "docker配置",
@@ -31,10 +35,6 @@
     {
       "basename": "操作系统",
       "path": "知识荟萃/计算机基础/操作系统.md"
-    },
-    {
-      "basename": "集合&IO",
-      "path": "知识荟萃/Java/集合&IO.md"
     },
     {
       "basename": "MQ",

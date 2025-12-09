@@ -1,3 +1,5 @@
+
+
 ![](https://i-blog.csdnimg.cn/blog_migrate/7a4c9ee492db52f9ccebbf1327c46c5f.png)
 
 **功能分支要求足够细粒度以避免成为长期存在的功能分支，应当小步合并而不是一次合并大量代码。**

@@ -1,12 +1,20 @@
 {
   "recentFiles": [
     {
-      "basename": "JUC&JVM",
-      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
+      "basename": "gitFlow",
+      "path": "知识荟萃/基本工具/gitFlow.md"
+    },
+    {
+      "basename": "运维进阶",
+      "path": "Intern产出文档/运维进阶.md"
     },
     {
       "basename": "read",
       "path": "tech-tutorials/read.md"
+    },
+    {
+      "basename": "JUC&JVM",
+      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
     },
     {
       "basename": "NGINX",
@@ -35,10 +43,6 @@
     {
       "basename": "集合&IO",
       "path": "知识荟萃/Java/集合&IO.md"
-    },
-    {
-      "basename": "运维进阶",
-      "path": "Intern产出文档/运维进阶.md"
     },
     {
       "basename": "操作系统",

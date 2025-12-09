@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "WrapperPlan",
+      "path": "Intern产出文档/WrapperPlan.md"
+    },
+    {
       "basename": "read",
       "path": "tech-tutorials/read.md"
     },
@@ -9,20 +13,24 @@
       "path": "知识荟萃/运维相关/NGINX.md"
     },
     {
-      "basename": "WrapperPlan",
-      "path": "Intern产出文档/WrapperPlan.md"
-    },
-    {
-      "basename": "集合&IO",
-      "path": "知识荟萃/Java/集合&IO.md"
-    },
-    {
       "basename": "计网",
       "path": "知识荟萃/计算机基础/计网.md"
     },
     {
+      "basename": "MQ",
+      "path": "知识荟萃/MQ/MQ.md"
+    },
+    {
+      "basename": "操作系统",
+      "path": "知识荟萃/计算机基础/408/操作系统.md"
+    },
+    {
       "basename": "docker配置",
       "path": "知识荟萃/运维相关/docker配置.md"
+    },
+    {
+      "basename": "集合&IO",
+      "path": "知识荟萃/Java/集合&IO.md"
     },
     {
       "basename": "运维进阶",
@@ -30,15 +38,7 @@
     },
     {
       "basename": "操作系统",
-      "path": "知识荟萃/计算机基础/408/操作系统.md"
-    },
-    {
-      "basename": "操作系统",
       "path": "知识荟萃/计算机基础/操作系统.md"
-    },
-    {
-      "basename": "MQ",
-      "path": "知识荟萃/MQ/MQ.md"
     },
     {
       "basename": "JUC&JVM",

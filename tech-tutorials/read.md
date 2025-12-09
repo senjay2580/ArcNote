@@ -1,4 +1,101 @@
+```mermaid
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'primaryColor': '#ffffff',
+    'primaryTextColor': '#2c3e50',
+    'primaryBorderColor': '#3498db',
+    'lineColor': '#546e7a',
+    'sectionBkgColor': '#f5f7fa',
+    'altSectionBkgColor': '#ffffff',
+    'gridColor': '#e1e8ed',
+    'secondaryColor': '#ecf0f1',
+    'tertiaryColor': '#ffffff',
+    'background': '#f8fafc',
+    'mainBkg': '#f8fafc',
+    'secondBkg': '#f1f5f9',
+    'tertiaryBkg': '#e2e8f0'
+  }
+}}%%
+
+flowchart TD
+    %% 样式定义
+    classDef titleStyle fill:#2c3e50,stroke:#2c3e50,stroke-width:0px,rx:8,ry:8,color:#ffffff,font-size:16px,font-weight:600,padding:8px;
+    classDef reqStage fill:#3498db,stroke:#3498db,stroke-width:0px,rx:8,ry:8,color:#ffffff,font-size:14px,font-weight:500;
+    classDef dataStage fill:#2ecc71,stroke:#2ecc71,stroke-width:0px,rx:8,ry:8,color:#ffffff,font-size:14px,font-weight:500;
+    classDef techStage fill:#9b59b6,stroke:#9b59b6,stroke-width:0px,rx:8,ry:8,color:#ffffff,font-size:14px,font-weight:500;
+    classDef apiStage fill:#f39c12,stroke:#f39c12,stroke-width:0px,rx:8,ry:8,color:#ffffff,font-size:14px,font-weight:500;
+    classDef devStage fill:#e74c3c,stroke:#e74c3c,stroke-width:0px,rx:8,ry:8,color:#ffffff,font-size:14px,font-weight:500;
+    classDef opStyle fill:#95a5a6,stroke:#95a5a6,stroke-width:0px,rx:6,ry:6,color:#ffffff,font-size:13px;
+    classDef noteStyle fill:#f5f5f5,stroke:#e0e0e0,stroke-width:1px,rx:4,ry:4,color:#666,font-size:12px;
+
+    %% 标题
+    T["🎯 系统开发核心流程"]:::titleStyle
+
+    %% 子图1：需求设计阶段（双向迭代）
+    subgraph 需求设计阶段
+        direction LR
+        UI["原型/界面设计"]:::reqStage
+        REQ["需求分析&评审"]:::reqStage
+        UI <-->|迭代确认| REQ
+    end
+
+    %% 子图2：数据设计阶段
+    subgraph 数据设计阶段
+        direction LR
+        TABLE["表设计&评审"]:::dataStage
+    end
+
+    %% 子图3：技术选型阶段
+    subgraph 技术选型阶段
+        direction LR
+        TECH["技术选型"]:::techStage
+        SYS["系统层面考量"]:::techStage
+        TECH -->|兼容/提效| SYS
+    end
+
+    %% 子图4：接口设计阶段
+    subgraph 接口设计阶段
+        direction LR
+        API["接口设计"]:::apiStage
+        APIT["接口测试"]:::opStyle
+        API -->|验证| APIT
+    end
+
+    %% 子图5：开发实现阶段
+    subgraph 开发实现阶段
+        direction LR
+        AICODE["AI辅助写代码"]:::devStage
+        CODECHECK["代码评审&测试"]:::opStyle
+        AICODE -->|校验| CODECHECK
+    end
+
+    %% 流程串联
+    T --> 需求设计阶段
+    REQ --> 数据设计阶段
+    TABLE --> 技术选型阶段
+    SYS --> 接口设计阶段
+    APIT --> 开发实现阶段
+
+    %% 间距调整（留白优化）
+    需求设计阶段 ~~~ 数据设计阶段
+    数据设计阶段 ~~~ 技术选型阶段
+    技术选型阶段 ~~~ 接口设计阶段
+    接口设计阶段 ~~~ 开发实现阶段
+
+    %% 核心说明（补充上下文）
+    Note["✅ 核心说明：<br/>1. 原型与需求双向迭代，确保匹配业务诉求<br/>2. 各阶段增加评审/测试，降低返工风险<br/>3. 系统考量聚焦兼容性、提效等全局问题<br/>4. AI写代码后需人工评审，保障质量"]:::noteStyle
+    开发实现阶段 -.-> Note
+
+    %% 子图样式（分层视觉）
+    style 需求设计阶段 fill:#e3f2fd,stroke:#1976d2,stroke-width:1px,rx:6,ry:6,padding:15px
+    style 数据设计阶段 fill:#e8f5e9,stroke:#27ae60,stroke-width:1px,rx:6,ry:6,padding:15px
+    style 技术选型阶段 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:1px,rx:6,ry:6,padding:15px
+    style 接口设计阶段 fill:#fff3e0,stroke:#f57c00,stroke-width:1px,rx:6,ry:6,padding:15px
+    style 开发实现阶段 fill:#ffebee,stroke:#c62828,stroke-width:1px,rx:6,ry:6,padding:15px
+```
 **开放API**
+
 
 Oauth2.0
 

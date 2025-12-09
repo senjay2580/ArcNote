@@ -1,8 +1,28 @@
 {
   "recentFiles": [
     {
+      "basename": "NGINX",
+      "path": "知识荟萃/运维相关/NGINX.md"
+    },
+    {
       "basename": "read",
       "path": "tech-tutorials/read.md"
+    },
+    {
+      "basename": "docker配置",
+      "path": "知识荟萃/运维相关/docker配置.md"
+    },
+    {
+      "basename": "运维进阶",
+      "path": "Intern产出文档/运维进阶.md"
+    },
+    {
+      "basename": "操作系统",
+      "path": "知识荟萃/计算机基础/408/操作系统.md"
+    },
+    {
+      "basename": "操作系统",
+      "path": "知识荟萃/计算机基础/操作系统.md"
     },
     {
       "basename": "集合&IO",
@@ -25,10 +45,6 @@
       "path": "Intern产出文档/IM理论&实践.md"
     },
     {
-      "basename": "docker配置",
-      "path": "知识荟萃/运维相关/docker配置.md"
-    },
-    {
       "basename": "05-应用集成指南",
       "path": "应用监控/05-应用集成指南.md"
     },
@@ -39,10 +55,6 @@
     {
       "basename": "从零掌握大数据治理：ETL与DataWorks实践指南 1",
       "path": "知识荟萃/大数据/从零掌握大数据治理：ETL与DataWorks实践指南 1.md"
-    },
-    {
-      "basename": "操作系统",
-      "path": "知识荟萃/计算机基础/操作系统.md"
     },
     {
       "basename": "网络编程",

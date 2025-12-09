@@ -99,6 +99,9 @@ git push origin release-1.0
 4. **监控兜底**：部署后通过监控（如Prometheus、ELK）观察服务状态，若异常快速切回旧版本。
 
 
+**这种不稳定的就要演练**
+
+---
 
 
 ![](https://i-blog.csdnimg.cn/blog_migrate/7a4c9ee492db52f9ccebbf1327c46c5f.png)

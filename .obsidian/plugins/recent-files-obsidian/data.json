@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "WrapperPlan",
+      "path": "Intern产出文档/WrapperPlan.md"
+    },
+    {
       "basename": "gitFlow",
       "path": "知识荟萃/基本工具/gitFlow.md"
     },
@@ -19,10 +23,6 @@
     {
       "basename": "NGINX",
       "path": "知识荟萃/运维相关/NGINX.md"
-    },
-    {
-      "basename": "WrapperPlan",
-      "path": "Intern产出文档/WrapperPlan.md"
     },
     {
       "basename": "计网",

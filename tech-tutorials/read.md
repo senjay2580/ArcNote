@@ -105,6 +105,76 @@ sso
 
 # SystemManage
 
+```java:
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.format.FormatterRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Configuration
+public class DateConfig implements WebMvcConfigurer {
+
+    // 1. 定义日期格式常量
+    public static final String DATE_FORMAT = "yyyy-MM-dd";
+    public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    // 2. 配置 Jackson 序列化/反序列化（处理 @RequestBody JSON 参数）
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+
+        // LocalDate 序列化/反序列化
+        javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
+        javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
+
+        // LocalDateTime 序列化/反序列化
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DATE_TIME_FORMAT)));
+
+        objectMapper.registerModule(javaTimeModule);
+        return objectMapper;
+    }
+
+    // 3. 配置 Spring 转换器（处理 URL 参数/表单参数）
+    @Override
+    public void addFormatters(FormatterRegistry registry) {
+        // LocalDate 转换器（前端字符串 → LocalDate）
+        registry.addConverter(new Converter<String, LocalDate>() {
+            @Override
+            public LocalDate convert(String source) {
+                if (source == null || source.isBlank()) {
+                    return null;
+                }
+                return LocalDate.parse(source, DateTimeFormatter.ofPattern(DATE_FORMAT));
+            }
+        });
+
+        // LocalDateTime 转换器
+        registry.addConverter(new Converter<String, LocalDateTime>() {
+            @Override
+            public LocalDateTime convert(String source) {
+                if (source == null || source.isBlank()) {
+                    return null;
+                }
+                return LocalDateTime.parse(source, DateTimeFormatter.ofPattern(DATE_TIME_FORMAT));
+            }
+        });
+    }
+}
+```
+
 ## **功能模块：**
 
 ~~~css

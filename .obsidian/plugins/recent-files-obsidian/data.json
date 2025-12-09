@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "JUC&JVM",
+      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
+    },
+    {
       "basename": "read",
       "path": "tech-tutorials/read.md"
     },
@@ -51,10 +55,6 @@
     {
       "basename": "操作系统",
       "path": "知识荟萃/计算机基础/操作系统.md"
-    },
-    {
-      "basename": "JUC&JVM",
-      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
     },
     {
       "basename": "IM理论&实践",

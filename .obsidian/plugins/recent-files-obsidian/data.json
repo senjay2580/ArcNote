@@ -5,6 +5,10 @@
       "path": "tech-tutorials/read.md"
     },
     {
+      "basename": "NGINX",
+      "path": "知识荟萃/运维相关/NGINX.md"
+    },
+    {
       "basename": "未命名",
       "path": "未命名.base"
     },
@@ -15,10 +19,6 @@
     {
       "basename": "未命名",
       "path": "未命名.canvas"
-    },
-    {
-      "basename": "NGINX",
-      "path": "知识荟萃/运维相关/NGINX.md"
     },
     {
       "basename": "WrapperPlan",

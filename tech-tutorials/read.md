@@ -1,4 +1,4 @@
-
+**开放API**
 
 Oauth2.0
 
@@ -32,6 +32,8 @@ sso
     - 重复代码、注释率、代码规范合规性（如阿里 Java 规范、PMD 规则）。
 - 扫描结果会在 SonarQube 网页控制台展示，方便开发 / 运维查看代码质量报告。
 ```
+
+
 
 # 架构全景图
 
@@ -174,7 +176,7 @@ public class DateConfig implements WebMvcConfigurer {
     }
 }
 ```
-
+**controller 也可以继承（BaseContorller） 巧用继承机制 实现复用**
 ## **功能模块：**
 
 ~~~css

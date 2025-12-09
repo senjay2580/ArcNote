@@ -74,3 +74,12 @@
 
 WebRTC 依赖两大核心：**信令通道（WebSocket）** + **媒体流穿透（ICE/STUN/TURN）**，Nginx 主要做代理转发和穿透优化。
 WebRTC 穿透依赖 STUN/TURN 服务器（推荐用 coturn），Nginx 可代理其端口，统一域名访问：
+
+```ad-info
+前端发的 WebSocket 请求，首先是一个 HTTP 请求（带`Upgrade: websocket`头），需要服务端响应 “协议升级”；
+
+如果后端直接接收请求，需要自己解析 HTTP 头、处理升级逻辑（比如 Node.js 的`ws`库要写代码处理）；
+
+而 Nginx 可以一键配置`proxy_set_header Upgrade $http_upgrade`，自动完成协议升级，后端完全感知不到这个过程，只需专注业务逻辑。
+```
+

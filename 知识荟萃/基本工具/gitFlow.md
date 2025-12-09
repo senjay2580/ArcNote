@@ -1,4 +1,90 @@
+```ad-info
+一、核心前提：部署架构适配无中断
+无中断部署的基础是部署环境支持「灰度发布 / 蓝绿部署 / 滚动更新」，如果是单机裸奔，至少要保证：
+服务进程支持热重启（如 Java 的 arthas 热更、Node.js 的 pm2 reload、Python 的 gunicorn reload）；
+反向代理（Nginx）配置健康检查，避免流量打到异常实例。
+二、场景 1：线上问题，需修改代码修复（最常见）
+步骤 1：拉取线上分支，本地紧急修复
+假设线上运行的是origin/release-1.0分支，先确保本地代码与远程一致：
+bash
+运行
+# 1. 切换到线上分支，拉取最新代码
+git checkout release-1.0
+git pull origin release-1.0
 
+# 2. 创建临时修复分支（避免直接改主分支，便于追溯）
+git checkout -b hotfix-xxx（xxx为问题编号，如hotfix-500报错）
+
+# 3. 本地修改代码，修复问题（测试通过后）
+git add .
+git commit -m "fix: 紧急修复线上500报错（xxx问题）"
+
+# 4. （可选）推送到远程修复分支，便于团队审核
+git push origin hotfix-xxx
+步骤 2：合并修复到线上分支（远程更新）
+优先用「合并（merge）」而非「强制推送（force push）」（强制推送会覆盖远程历史，风险极高）：
+bash
+运行
+# 1. 切回线上分支，合并修复分支
+git checkout release-1.0
+git merge --no-ff hotfix-xxx  # --no-ff保留合并记录，便于回溯
+
+# 2. 推送到远程线上分支（核心：更新远程分支）
+git push origin release-1.0
+步骤 3：无中断部署到线上
+根据部署架构选择对应方式，核心是「先启动新实例→切流量→停旧实例」：
+方式 A：蓝绿部署（无感知，推荐）
+部署「绿环境」：基于更新后的release-1.0分支，部署到备用服务器 / 容器（绿环境）；
+验证绿环境：测试接口、日志，确认修复生效；
+切换流量：修改 Nginx / 负载均衡配置，将流量从「蓝环境（旧版本）」切到「绿环境（新版本）」；
+下线蓝环境：确认流量稳定后，停止旧版本实例。
+方式 B：滚动更新（适合 K8s / 容器化）
+bash
+运行
+# 以K8s为例，假设部署文件是deploy.yaml
+kubectl apply -f deploy.yaml  # K8s会逐台替换Pod，保留可用实例，无中断
+# 验证
+kubectl rollout status deployment/xxx
+方式 C：单机热重启（无容器 / 集群的兜底方案）
+bash
+运行
+# 示例1：Node.js（pm2）
+pm2 reload app.js  # 热重启，不中断连接
+# 示例2：Python（gunicorn）
+gunicorn -c gunicorn.conf.py app:app --reload  # 平滑重启
+# 示例3：Java（SpringBoot）
+# 用arthas热更class文件（仅应急，长期需重启）
+arthas redefine /path/to/fixed.class
+三、场景 2：线上分支代码错误，需回滚到历史版本
+如果修复来不及，直接回滚远程分支到上一个稳定版本（禁止直接 git push -f，除非团队明确约定）：
+步骤 1：找到稳定版本的 commit ID
+bash
+运行
+# 查看提交历史，找到上一个稳定的commit（比如abc123）
+git log --oneline
+步骤 2：本地回滚并推送到远程（安全方式）
+bash
+运行
+# 1. 切回线上分支
+git checkout release-1.0
+
+# 2. 用revert创建回滚提交（保留历史，可追溯）
+git revert abc123  # 生成一个新提交，撤销abc123的修改
+# （如果是多个提交，用git revert abc123..def456）
+
+# 3. 推送到远程（无强制，安全）
+git push origin release-1.0
+步骤 3：无中断部署（同场景 1 的部署步骤）
+四、绝对禁止的操作（避免服务中断 / 数据丢失）
+禁止直接强制推送远程分支：git push -f origin release-1.0会覆盖远程历史，若其他节点拉取代码会导致代码不一致，引发服务异常；
+禁止直接停掉所有实例再部署：必须保留至少一个可用实例承接流量；
+禁止未测试就部署：本地 / 测试环境验证修复效果后，再推远程 + 部署。
+五、优化建议（提升紧急修复效率）
+提前配置 CI/CD：绑定线上分支，代码推送到远程后自动触发灰度部署，减少手动操作时间；
+保留分支版本快照：每次发布后给分支打 tag（git tag v1.0.1），回滚时直接基于 tag 操作；
+制定应急流程：明确谁负责改代码、谁审核、谁部署，避免紧急时混乱；
+监控兜底：部署后通过监控（如 Prometheus、ELK）观察服务状态，若异常快速切回旧版本。
+```
 
 ![](https://i-blog.csdnimg.cn/blog_migrate/7a4c9ee492db52f9ccebbf1327c46c5f.png)
 

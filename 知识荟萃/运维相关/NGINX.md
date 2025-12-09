@@ -55,3 +55,11 @@
 
 
 # 有关静态资源 和 媒体资源
+
+1. **HTTPS 强制要求**：WebRTC 仅允许在 HTTPS/WSS 环境下运行（本地[localhost](https://localhost/)除外），Nginx 必须配置 SSL 证书。
+2. **UDP 支持**：WebRTC 媒体流优先用 UDP，Nginx 1.9.13+ 才支持 UDP 代理，需确认版本。
+3. **跨域处理**：若前端和信令服务器跨域，Nginx 需配置 CORS，前端无需额外处理（浏览器自动适配）。
+4. **调试工具**：Chrome 可通过 `chrome://webrtc-internals` 查看 WebRTC 状态（ICE 候选、流质量、延迟等）。
+5. **性能优化**：
+    - 静态资源：开启 HTTP/2、雪碧图、资源压缩；
+    - WebRTC：调整视频分辨率（如 720p→480p）、关闭回声消除（按需）、设置 JitterBuffer 大小（减少延迟）。

@@ -1,6 +1,14 @@
 {
   "recentFiles": [
     {
+      "basename": "read",
+      "path": "tech-tutorials/read.md"
+    },
+    {
+      "basename": "NGINX",
+      "path": "知识荟萃/运维相关/NGINX.md"
+    },
+    {
       "basename": "WrapperPlan",
       "path": "Intern产出文档/WrapperPlan.md"
     },
@@ -13,16 +21,8 @@
       "path": "Intern产出文档/运维进阶.md"
     },
     {
-      "basename": "read",
-      "path": "tech-tutorials/read.md"
-    },
-    {
       "basename": "JUC&JVM",
       "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
-    },
-    {
-      "basename": "NGINX",
-      "path": "知识荟萃/运维相关/NGINX.md"
     },
     {
       "basename": "计网",

@@ -189,6 +189,8 @@ flowchart TD
 
 
 **开放API**
+sso
+RBAC 前后端如何协作 ？ ABAC？
 Oauth2.0
 redis 集群 缓存问题（
 
@@ -198,11 +200,11 @@ redis 集群 缓存问题（
 
 网络波动 可靠性？
 
-RBAC 前后端如何协作 ？ ABAC？
-sso
 多端问题
 
-分布式rpc框架 ？
+
+
+
 
 每次请求都刷新Redis过期时间,会导致大量写操作
 

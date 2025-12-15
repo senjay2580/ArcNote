@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吴生杰 - 简历</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #525659;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 12mm 15mm;
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* 标题栏样式 */
+        .section-header {
+            display: flex;
+            align-items: center;
+            background-color: #f3f4f6; /* gray-100 */
+            color: #1f2937; /* gray-800 */
+            font-weight: 700;
+            padding: 5px 10px;
+            margin-top: 18px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-left: 4px solid #374151; /* gray-700 highlight */
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* 列表样式 */
+        .bullet-list li {
+            position: relative;
+            padding-left: 0.85rem;
+            margin-bottom: 3px;
+            line-height: 1.5;
+            color: #374151;
+            text-align: justify;
+        }
+        .bullet-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #6b7280;
+            font-weight: bold;
+        }
+
+        /* 技能模块样式 */
+        .skill-card {
+            margin-bottom: 2px;
+        }
+        .skill-title {
+            font-weight: 700;
+            color: #111827;
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+            border-bottom: 1px dashed #e5e7eb;
+            padding-bottom: 2px;
+            display: inline-block;
+        }
+
+        /* 技术点胶囊样式 */
+        .tech-tag {
+            display: inline-block;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.7rem;
+            padding: 1px 6px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        /* 链接悬停 */
+        a:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        @media print {
+            body { background: white; margin: 0; }
+            .page { margin: 0; box-shadow: none; width: 100%; padding: 10mm 15mm; }
+            .section-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .tech-tag { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .bg-gray-100 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page text-gray-800 text-sm">
+        
+        <!-- Header -->
+        <header class="border-b-2 border-gray-800 pb-4 mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-3 tracking-wide">吴生杰</h1>
+            
+            <!-- Contact Info -->
+            <div class="flex justify-between items-center text-gray-600 text-sm">
+                <div class="flex items-center">
+                    <div class="flex items-center gap-1.5 hover:text-gray-900 transition-colors cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        <span>3381335358@qq.com</span>
+                    </div>
+                    <span class="mx-3 text-gray-300">|</span>
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        <span>18750767579</span>
+                    </div>
+                    <span class="mx-3 text-gray-300">|</span>
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 8 9 8z"></path></svg>
+                        <span>WeChat: wwwsj21</span>
+                    </div>
+                </div>
+                <div class="font-medium text-gray-500">2005-06-21</div>
+            </div>
+        </header>
+
+        <!-- Education -->
+        <section>
+            <div class="section-header">教育背景</div>
+            <div class="flex justify-between items-baseline mb-2">
+                <div class="text-base">
+                    <span class="font-bold text-gray-900">福建农林大学</span>
+                    <span class="mx-2 text-gray-300">|</span>
+                    <span class="text-gray-700">软件工程 (本科)</span>
+                </div>
+                <span class="font-semibold text-gray-700 font-mono text-xs">2023.09 - 至今</span>
+            </div>
+            <div class="text-xs text-gray-700 leading-snug space-y-1">
+                <p>
+                    <span class="font-bold text-gray-900">专业成绩:</span> GPA: <strong>3.4/4.0</strong> (专业前10%) &nbsp;<span class="text-gray-300">|</span>&nbsp; 
+                    <span class="font-bold text-gray-900">个人荣誉:</span> 英语四级 (<strong>536分</strong>)、六级 (<strong>494分</strong>)、蓝桥杯省二等奖
+                </p>
+                <p class="truncate text-gray-600"><span class="font-bold text-gray-900">主修课程:</span> 数据结构、软件项目管理、操作系统、计算机网络、JavaWeb应用开发、数据库系统概论、企业级框架开发</p>
+            </div>
+        </section>
+
+        <!-- Internship Experience (Moved Up) -->
+        <section>
+            <div class="section-header">实习经历</div>
+            <div class="flex justify-between items-center mb-2">
+                <div class="flex items-center gap-3">
+                    <h3 class="font-bold text-base text-gray-900">福州琢木鸟信息科技有限公司</h3>
+                    <span class="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded border border-gray-200">后端开发实习生</span>
+                </div>
+                <span class="font-semibold text-gray-700 font-mono text-xs">2025/6 – 2025/8</span>
+            </div>
+            
+            <p class="text-xs text-gray-700 mb-2 pl-1 border-l-2 border-gray-200">
+                <strong>主要职责：</strong>负责社会福利院轮候审批流程、床位管理、统计分析等核心业务模块的后端开发与性能优化。
+            </p>
+            <ul class="bullet-list text-xs">
+                <li>针对入住户数据统计接口 <strong>900ms</strong> 的响应瓶颈，使用<strong>窗口函数</strong>替代关联子查询，并基于 <strong>CompletableFuture</strong> + <strong>自定义线程池</strong>实现 4 个核心查询并行执行，最终接口响应降至 <strong>9ms</strong>，性能提升超 <strong>99%</strong>。</li>
+                <li>针对集中审批期全局锁导致的阻塞问题，自研申请单 ID 级<strong>读写锁组件</strong>，通过 <strong>ConcurrentHashMap</strong> 管理独立锁、<strong>AtomicInteger</strong> 实现锁动态释放，搭配 tryLock() 实现非阻塞获取。</li>
+                <li>优化审批流程<strong>状态机</strong>，构建条件校验、业务动作、上下文传递三层架构，适配状态回滚、申请撤销等场景，实现规则<strong>动态调整（无需重启）</strong>，大幅降低维护成本。</li>
+                <li>基于 <strong>RBAC 模型</strong>搭建多角色权限体系，实现接口级权限拦截与通配符匹配，通过缓存+事件监听实现<strong>权限热更新</strong>并留存审计日志。</li>
+            </ul>
+        </section>
+
+        <!-- Project Experience (Moved Up) -->
+        <section>
+            <div class="section-header">项目经历</div>
+            
+            <!-- Project 1: ArcHat -->
+            <div class="mb-5">
+                <div class="flex justify-between items-center mb-1.5">
+                    <div class="flex items-center gap-3">
+                        <h3 class="font-bold text-base text-gray-900">ArcHat 通讯协作平台</h3>
+                        <span class="text-xs px-2 py-0.5 bg-gray-200 text-gray-700 rounded">前后端开发</span>
+                        <a href="https://github.com/senjay2580/ArcHat-server" target="_blank" class="text-xs text-blue-600 flex items-center group font-medium">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            github.com/senjay2580/ArcHat-server
+                        </a>
+                    </div>
+                    <span class="font-semibold text-gray-700 font-mono text-xs">2025/5 – 2025/8</span>
+                </div>
+                
+                <p class="text-xs text-gray-700 mb-2 leading-relaxed">
+                    项目描述：仿飞书企业级平台，集私聊/群聊与权限管理于一体。支持接口<strong>多维限流</strong>、<strong>敏感词过滤</strong>、消息实时推送及<strong>智能 AI 助手</strong>。
+                </p>
+
+                <!-- Tags for Tech Points -->
+                <div class="mb-2">
+                    <span class="text-xs font-bold text-gray-900 mr-1">核心技术:</span>
+                    <span class="tech-tag">SpringBoot3</span>
+                    <span class="tech-tag">MyBatis Plus</span>
+                    <span class="tech-tag">Netty</span>
+                    <span class="tech-tag">WebRTC</span>
+                    <span class="tech-tag">RabbitMQ</span>
+                    <span class="tech-tag">Docker</span>
+                    <span class="tech-tag">Nginx</span>
+                    <span class="tech-tag">Redis</span>
+                    <span class="tech-tag">JWT</span>
+                    <span class="tech-tag">Langchain4j</span>
+                </div>
+
+                <ul class="bullet-list text-xs">
+                    <li><strong>消息推送/处理：</strong>基于 <strong>Netty</strong> 构建<strong>长连接</strong>服务，支持私聊/群聊实时分发。抽象消息处理器，结合 Spring 容器与<strong>策略模式</strong>，实现文本/图片/文件等多类型消息的动态分发与高扩展性。</li>
+                    <li><strong>AI Chat集成：</strong>使用 <strong>Langchain4j</strong> 集成大模型，实现多轮对话、记忆持久化、会话隔离及 <strong>RAG 知识库</strong>导入。</li>
+                    <li><strong>性能/安全：</strong>基于<strong>事件驱动</strong>与敏感词过滤机制，实现群聊消息的<strong>异步入库</strong>与推送，确保合规同时显著提升性能。</li>
+                    <li><strong>限流控制：</strong>自定义注解结合 <strong>AOP + SpEL</strong>，实现<strong>接口级限流</strong>防刷功能，支持用户/IP/接口维度灵活限流。</li>
+                    <li><strong>日志记录：</strong>利用 <strong>MDC 日志上下文</strong>，通过 Filter 统一生成 traceId 并注入线程，实现全链路日志自动携带 traceId。</li>
+                </ul>
+            </div>
+
+            <!-- Project 2: ArcLearn -->
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <div class="flex items-center gap-3">
+                        <h3 class="font-bold text-base text-gray-900">ArcLearn 社区</h3>
+                        <span class="text-xs px-2 py-0.5 bg-gray-200 text-gray-700 rounded">后端开发</span>
+                    </div>
+                    <span class="font-semibold text-gray-700 font-mono text-xs">2024/9 – 2025/1</span>
+                </div>
+                
+                <p class="text-xs text-gray-700 mb-2 leading-relaxed">
+                    项目描述：面向开发者的技术交流平台，支持 Markdown 文章发布、评论互动、用户签到及行为统计。
+                </p>
+
+                <!-- Tags for Tech Points -->
+                <div class="mb-2">
+                    <span class="text-xs font-bold text-gray-900 mr-1">核心技术:</span>
+                    <span class="tech-tag">SpringBoot</span>
+                    <span class="tech-tag">MyBatis</span>
+                    <span class="tech-tag">Redis</span>
+                    <span class="tech-tag">RabbitMQ</span>
+                    <span class="tech-tag">JWT</span>
+                    <span class="tech-tag">Nginx</span>
+                    <span class="tech-tag">OSS</span>
+                    <span class="tech-tag">Vue3</span>
+                </div>
+
+                <ul class="bullet-list text-xs">
+                    <li><strong>异步解耦：</strong>构建基于 <strong>RabbitMQ</strong> 的<strong>事件驱动</strong>架构，将文章发布、评论提醒等任务异步化，提高响应速度。</li>
+                    <li><strong>缓存优化：</strong>使用 <strong>Redis</strong> 缓存热点数据，结合<strong>布隆过滤器</strong>与<strong>互斥锁</strong>，有效防止缓存<strong>击穿/穿透</strong>问题。</li>
+                    <li><strong>架构设计：</strong>基于 SpringBoot+MyBatis 实现高效持久化，利用 <strong>AOP</strong> 切面统一日志采集。</li>
+                    <li><strong>安全认证：</strong>使用 <strong>JWT</strong> 无状态令牌实现鉴权，保障接口安全。</li>
+                    <li><strong>用户统计：</strong>利用 <strong>HyperLogLog</strong> 统计独立访客（UV），结合 <strong>Bitmap</strong> 记录签到，实现数据可视化。</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Professional Skills (Moved to Bottom) -->
+        <section>
+            <div class="section-header">专业技能</div>
+            <div class="grid grid-cols-3 gap-x-6 gap-y-4 text-xs leading-relaxed">
+                <!-- Column 1 -->
+                <div class="space-y-3">
+                    <div class="skill-card">
+                        <h4 class="skill-title">Java 基础</h4>
+                        <p class="text-gray-700">扎实的 Java 面向对象编程能力，熟练掌握集合、IO、Stream API。</p>
+                    </div>
+                    <div class="skill-card">
+                        <h4 class="skill-title">数据库</h4>
+                        <p class="text-gray-700">熟练使用 MySQL，掌握事务、索引及 SQL 性能优化。</p>
+                    </div>
+                    <div class="skill-card">
+                        <h4 class="skill-title">主流框架</h4>
+                        <p class="text-gray-700">熟悉 <strong>Spring Boot、Spring MVC、MyBatis Plus</strong>，具备工程化技术。</p>
+                    </div>
+                </div>
+
+                <!-- Column 2 -->
+                <div class="space-y-3">
+                    <div class="skill-card">
+                        <h4 class="skill-title">分布式与中间件</h4>
+                        <p class="text-gray-700">了解 <strong>Spring Cloud (Nacos、Feign、Gateway)、RabbitMQ、Kafka、Docker</strong> 等技术栈。熟悉 Redis <strong>缓存机制</strong>与常见问题<strong>(穿透/击穿/雪崩)</strong>解决方案。</p>
+                    </div>
+                    <div class="skill-card">
+                        <h4 class="skill-title">AI 应用</h4>
+                        <p class="text-gray-700">有使用 Langchain4j 将大模型<strong>集成</strong>到项目的经验，熟练使用各种<strong>AI工具、MCP server、工作流</strong>，编写优质提示词提高效率。</p>
+                    </div>
+                    <div class="skill-card">
+                        <h4 class="skill-title">前端开发</h4>
+                        <p class="text-gray-700">熟悉 HTML5/CSS3/Js/Ts，<strong>熟练</strong>使用 <strong>Vue2/3、React18、Element Plus</strong> 及<strong>AI编程工具</strong>进行组件化开发。</p>
+                    </div>
+                </div>
+
+                <!-- Column 3 -->
+                <div class="space-y-3">
+                    <div class="skill-card">
+                        <h4 class="skill-title">项目部署</h4>
+                        <p class="text-gray-700"><strong>熟练</strong> GitFlow 及分支管理，<strong>掌握</strong> Linux 常用命令，具备云服务器/Docker <strong>部署</strong>经验。</p>
+                    </div>
+                    <div class="skill-card">
+                        <h4 class="skill-title">计算机基础</h4>
+                        <p class="text-gray-700">掌握 TCP/IP、HTTP/HTTPS、WebSocket 等协议，了解进程线程、并发控制等操作系统知识。</p>
+                    </div>
+                    <div class="skill-card">
+                        <h4 class="skill-title">协作能力</h4>
+                        <p class="text-gray-700"><strong>了解</strong>从需求分析到上线运维的完整项目生命周期，具备跨部门沟通与协同推进能力。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Self Evaluation -->
+        <section>
+            <div class="section-header">自我评价</div>
+            <div class="text-xs text-gray-700 leading-relaxed text-justify">
+                性格乐观，善于沟通，英文读写能力良好。对技术保持高度热情，学习能力强。热衷探索开源项目与利用 <strong>AI 提升开发效率</strong>，积极参与开源社区。业余爱好包括运动、骑行、社交，注重身心平衡与持续成长。乐于分享技术经验并与团队共同成长。
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>

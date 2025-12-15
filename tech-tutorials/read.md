@@ -173,6 +173,21 @@ flowchart TD
 国际化：不同语言的文本映射
 ```
 
+
+```ad-tip
+- application.yml           # 主配置文件
+- application-dev.yml       # 开发环境
+- application-test.yml      # 测试环境
+- application-prod.yml      # 生产环境
+- application-local.yml     # 本地环境
+  
+  
+==激活方式==
+**命令行参数 > JVM参数 > 环境变量 > 配置文件**
+
+```
+
+
 **开放API**
 
 	

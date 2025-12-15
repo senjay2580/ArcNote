@@ -229,18 +229,13 @@ flowchart TD
 ```
 
 
-
 **开放API**
-sso
-RBAC 前后端如何协作 ？ ABAC？
-Oauth2.0
-redis 集群 缓存问题（
-	
-- 使用Jedis连接池
-- 集群模式部署
-- 6个节点负载均衡）
+**sso**
+**Oauth2.0**
+**RBAC 前后端如何协作 ？ ABAC？**
 
-网络波动 可靠性？
+
+
 
 
 ```ad-tip

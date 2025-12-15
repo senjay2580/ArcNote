@@ -1,12 +1,20 @@
 {
   "recentFiles": [
     {
+      "basename": "read",
+      "path": "tech-tutorials/read.md"
+    },
+    {
       "basename": "API 开放文档",
       "path": "Intern产出文档/API 开放文档.md"
     },
     {
-      "basename": "read",
-      "path": "tech-tutorials/read.md"
+      "basename": "WrapperPlan",
+      "path": "Intern产出文档/WrapperPlan.md"
+    },
+    {
+      "basename": "JUC&JVM",
+      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
     },
     {
       "basename": "密码学",
@@ -17,20 +25,12 @@
       "path": "知识荟萃/运维相关/NGINX.md"
     },
     {
-      "basename": "WrapperPlan",
-      "path": "Intern产出文档/WrapperPlan.md"
-    },
-    {
       "basename": "gitFlow",
       "path": "知识荟萃/基本工具/gitFlow.md"
     },
     {
       "basename": "运维进阶",
       "path": "Intern产出文档/运维进阶.md"
-    },
-    {
-      "basename": "JUC&JVM",
-      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
     },
     {
       "basename": "计网",

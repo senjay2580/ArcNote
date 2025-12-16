@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "密码学",
+      "path": "tech-tutorials/密码学.md"
+    },
+    {
       "basename": "NLP Tech",
       "path": "tech-tutorials/NLP Tech.md"
     },
@@ -15,10 +19,6 @@
     {
       "basename": "JUC&JVM",
       "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
-    },
-    {
-      "basename": "密码学",
-      "path": "tech-tutorials/密码学.md"
     },
     {
       "basename": "NGINX",

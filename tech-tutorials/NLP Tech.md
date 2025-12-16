@@ -163,6 +163,7 @@ flowchart TD
     - 基于契约与测试数据搭建接口自动化测试（Postman/Newman/JMeter），纳入 CI/CD，后续迭代自动验证，减少人工联调。
 ```
 
+**数据字典**
 ```ad-note
 数据字典是存储系统配置项、枚举值、常量的表，避免硬编码。
 
@@ -173,7 +174,7 @@ flowchart TD
 国际化：不同语言的文本映射
 ```
 
-
+**配置参数**
 ```ad-tip
 - application.yml           # 主配置文件
 - application-dev.yml       # 开发环境
@@ -188,6 +189,7 @@ flowchart TD
 ```
 
 
+**网络问题**
 ```ad-warning
 ### 一、网络波动下的可靠性保障（Web/APP/ 桌面端）
 
@@ -229,7 +231,7 @@ flowchart TD
 ```
 
 
-
+**代码质量检查**
 ```ad-tip
 #### SonarQube 是什么？
 
@@ -242,7 +244,7 @@ flowchart TD
 
 
 
-# 架构全景图
+# **架构全景图**
 
 
 
@@ -385,6 +387,7 @@ public class DateConfig implements WebMvcConfigurer {
 ```
 **controller 也可以继承（BaseContorller） 巧用继承机制 实现复用**
 
+**零拷贝**
 ```ad-note
 零拷贝是**减少数据在 “内核态” 和 “用户态” 之间拷贝次数**的传输技术，核心是 “让 CPU 少干活，直接在内核态完成数据传输”，大幅提升大文件 / 高并发传输效率。
 #### 1. 先懂：传统数据拷贝（比如 “磁盘读文件→发网络”）
@@ -417,6 +420,7 @@ public class DateConfig implements WebMvcConfigurer {
 - 价值：提升传输速度（比如大文件下载快 50%+）、降低 CPU 占用（减少内存拷贝开销）、支撑更高并发。
 ```
 
+**零信任**
 
 ```ad-success
 零信任是**打破 “内网 = 可信、外网 = 不可信” 传统边界思维**的安全理念，核心原则：

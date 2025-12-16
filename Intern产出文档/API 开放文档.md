@@ -2020,6 +2020,268 @@ public class ArcChatOpenApiClient {
 5. **参数校验**：对业务参数做前置校验（如非空、格式），提前抛出异常；
 6. **重试策略**：对限流 / 网络抖动等异常做自动重试（可配置重试次数 / 间隔）；
 7. **连接池优化**：统一管理 HTTP 连接池，避免资源泄漏。
+#### 步骤 1：封装配置类（统一管理密钥和基础地址）
+
+
+```java
+// 配置类：对外只需要配置这几个参数
+public class ApiConfig {
+    private String appKey;      // 应用标识
+    private String appSecret;   // 签名密钥
+    private String baseUrl = "https://api.example.com/open/v1"; // 默认基础地址
+    private int connectTimeout = 10; // 默认连接超时（秒）
+    private int readTimeout = 30;    // 默认读取超时（秒）
+
+    // 构造器（只暴露核心参数，其他用默认值）
+    public ApiConfig(String appKey, String appSecret) {
+        this.appKey = appKey;
+        this.appSecret = appSecret;
+    }
+
+    // getter/setter（可选：允许自定义超时、基础地址）
+    // ...
+}
+```
+
+#### 步骤 2：抽离签名工具类（解耦核心逻辑）
+
+
+```java
+// 签名工具类：屏蔽签名算法细节
+public class SignUtils {
+    /**
+     * 生成HMAC-SHA256签名
+     * @param params 请求参数
+     * @param appSecret 签名密钥
+     * @param timestamp 时间戳（毫秒）
+     * @param nonce 随机字符串
+     * @return 签名结果
+     */
+    public static String generateSignature(Map<String, String> params, String appSecret, long timestamp, String nonce) {
+        // 按字典序排序参数
+        TreeMap<String, String> sortedParams = new TreeMap<>(params);
+        // 拼接参数
+        String paramString = sortedParams.entrySet().stream()
+                .filter(e -> e.getValue() != null && !e.getValue().isEmpty())
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.joining("&"));
+        // 拼接签名原文
+        String stringToSign = paramString + "&timestamp=" + timestamp + "&nonce=" + nonce;
+        // 生成签名
+        return new HmacUtils(HmacAlgorithms.HMAC_SHA_256, appSecret).hmacHex(stringToSign);
+    }
+
+    // 生成随机数（屏蔽UUID处理细节）
+    public static String generateNonce() {
+        return UUID.randomUUID().toString().replace("-", "");
+    }
+}
+```
+
+#### 步骤 3：封装核心客户端（屏蔽 HTTP 请求细节）
+
+
+
+```java
+// 核心客户端：对外不暴露HTTP相关方法，只提供业务入口
+public class ArcChatOpenApiClient {
+    private final ApiConfig config;
+    private final OkHttpClient httpClient;
+
+    // 对外只需要传入配置类（核心参数：appKey/appSecret）
+    public ArcChatOpenApiClient(ApiConfig config) {
+        this.config = config;
+        // 统一初始化HTTP客户端（屏蔽连接池、超时配置）
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(config.getConnectTimeout(), TimeUnit.SECONDS)
+                .readTimeout(config.getReadTimeout(), TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true) // 增加重试（成熟SDK必备）
+                .build();
+    }
+
+    // 私有方法：统一构造请求（屏蔽请求头、签名、参数拼接）
+    private Request buildRequest(String path, Map<String, String> params, String jsonBody, String method) {
+        long timestamp = System.currentTimeMillis();
+        String nonce = SignUtils.generateNonce();
+        // 生成签名
+        String signature = SignUtils.generateSignature(params, config.getAppSecret(), timestamp, nonce);
+
+        // 构造URL
+        String url = config.getBaseUrl() + path;
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
+        if (params != null) {
+            params.forEach(urlBuilder::addQueryParameter);
+        }
+
+        // 构造请求体
+        RequestBody requestBody = null;
+        if (jsonBody != null && !jsonBody.isEmpty()) {
+            requestBody = RequestBody.create(jsonBody, MediaType.parse("application/json"));
+        }
+
+        // 统一设置请求头
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(urlBuilder.build())
+                .header("X-App-Key", config.getAppKey())
+                .header("X-Signature", signature)
+                .header("X-Timestamp", String.valueOf(timestamp))
+                .header("X-Nonce", nonce);
+
+        // 根据方法设置请求方式
+        switch (method.toUpperCase()) {
+            case "GET":
+                requestBuilder.get();
+                break;
+            case "POST":
+                requestBuilder.post(requestBody);
+                requestBuilder.header("Content-Type", "application/json");
+                break;
+            // 可扩展PUT/DELETE等
+            default:
+                throw new IllegalArgumentException("不支持的请求方法：" + method);
+        }
+
+        return requestBuilder.build();
+    }
+
+    // 私有方法：统一处理响应（屏蔽响应解析、异常处理）
+    private <T> Result<T> executeRequest(Request request, Class<T> dataClass) throws ApiException {
+        try (Response response = httpClient.newCall(request).execute()) {
+            String responseBody = response.body().string();
+            // 统一解析Result格式
+            Result<T> result = JsonUtils.parseObject(responseBody, new TypeReference<Result<T>>() {});
+            // 根据错误码抛出语义化异常
+            if (result.getCode() != 200000) {
+                handleErrorCode(result.getCode(), result.getMsg());
+            }
+            return result;
+        } catch (IOException e) {
+            throw new ApiException("HTTP请求失败：" + e.getMessage(), e);
+        }
+    }
+
+    // 私有方法：处理错误码，抛出对应异常
+    private void handleErrorCode(int code, String msg) throws ApiException {
+        if (code >= 401000 && code < 402000) {
+            throw new ApiAuthException(code, msg); // 认证异常
+        } else if (code >= 403000 && code < 404000) {
+            throw new ApiAuthzException(code, msg); // 授权异常
+        } else if (code >= 429000 && code < 430000) {
+            throw new ApiLimitException(code, msg); // 限流异常
+        } else {
+            throw new ApiBusinessException(code, msg); // 通用业务异常
+        }
+    }
+
+    // ---------------------- 对外暴露的业务API（使用者只需要调用这些方法） ----------------------
+    /**
+     * 示例：获取用户信息（业务方法）
+     * @param userId 用户ID
+     * @return 用户信息
+     */
+    public UserInfo getUserInfo(String userId) throws ApiException {
+        Map<String, String> params = new HashMap<>();
+        params.put("userId", userId);
+        Request request = buildRequest("/user/info", params, null, "GET");
+        Result<UserInfo> result = executeRequest(request, UserInfo.class);
+        return result.getData();
+    }
+
+    /**
+     * 示例：发送消息（业务方法）
+     * @param sendMsgRequest 发送消息请求参数
+     * @return 发送结果
+     */
+    public SendMsgResponse sendMessage(SendMsgRequest sendMsgRequest) throws ApiException {
+        Map<String, String> params = new HashMap<>(); // POST请求如果有URL参数可加
+        String jsonBody = JsonUtils.toJsonString(sendMsgRequest);
+        Request request = buildRequest("/message/send", params, jsonBody, "POST");
+        Result<SendMsgResponse> result = executeRequest(request, SendMsgResponse.class);
+        return result.getData();
+    }
+}
+```
+
+#### 步骤 4：封装异常类和响应类（屏蔽解析细节）
+
+
+
+```java
+// 统一响应类（泛型，自动解析data）
+public class Result<T> {
+    private int code;
+    private String msg;
+    private T data;
+
+    // getter/setter
+}
+
+// 基础API异常
+public class ApiException extends Exception {
+    public ApiException(String message) {
+        super(message);
+    }
+    public ApiException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+
+// 认证异常（401xxx）
+public class ApiAuthException extends ApiException {
+    private int code;
+    public ApiAuthException(int code, String message) {
+        super(message);
+        this.code = code;
+    }
+}
+
+// 授权异常（403xxx）
+public class ApiAuthzException extends ApiException { /* 同理 */ }
+
+// 限流异常（429xxx）
+public class ApiLimitException extends ApiException { /* 同理 */ }
+
+// 业务异常
+public class ApiBusinessException extends ApiException { /* 同理 */ }
+```
+
+#### 步骤 5：使用者最终的调用方式（极简）
+
+
+
+```java
+public class Demo {
+    public static void main(String[] args) {
+        // 1. 只需要配置AppKey/AppSecret（核心参数）
+        ApiConfig config = new ApiConfig("你的AppKey", "你的AppSecret");
+        // 可选：自定义基础地址/超时
+        // config.setBaseUrl("https://test-api.example.com/open/v1");
+
+        // 2. 创建客户端（一行代码）
+        ArcChatOpenApiClient client = new ArcChatOpenApiClient(config);
+
+        // 3. 调用业务方法（无需关心HTTP/签名/解析）
+        try {
+            // 获取用户信息
+            UserInfo userInfo = client.getUserInfo("123456");
+            System.out.println("用户信息：" + userInfo);
+
+            // 发送消息
+            SendMsgRequest request = new SendMsgRequest();
+            request.setToUserId("654321");
+            request.setContent("Hello World");
+            SendMsgResponse response = client.sendMessage(request);
+            System.out.println("发送结果：" + response);
+        } catch (ApiAuthException e) {
+            System.out.println("认证失败：" + e.getMessage());
+        } catch (ApiLimitException e) {
+            System.out.println("请求限流：" + e.getMessage());
+        } catch (ApiException e) {
+            System.out.println("调用失败：" + e.getMessage());
+        }
+    }
+}
+```
 ### 3.4 错误码说明
 
 | 错误码    | 说明        | 处理建议         |

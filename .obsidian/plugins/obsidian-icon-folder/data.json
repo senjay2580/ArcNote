@@ -6,6 +6,7 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "LiAlarmClockMinus",
       "LiActivitySquare",
       "LiArchive",
       "LiAlertCircle",
@@ -44,5 +45,9 @@
   "Intern产出文档": {
     "iconName": "LiActivitySquare",
     "iconColor": "#26e30d"
+  },
+  "tech-tutorials": {
+    "iconName": "LiAlarmClockMinus",
+    "iconColor": "#d78614"
   }
 }

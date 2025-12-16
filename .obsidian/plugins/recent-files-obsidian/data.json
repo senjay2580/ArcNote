@@ -5,6 +5,10 @@
       "path": "知识荟萃/框架&设计模式/设计模式.md"
     },
     {
+      "basename": "JUC&JVM",
+      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
+    },
+    {
       "basename": "spring",
       "path": "知识荟萃/框架&设计模式/spring.md"
     },
@@ -23,10 +27,6 @@
     {
       "basename": "WrapperPlan",
       "path": "Intern产出文档/WrapperPlan.md"
-    },
-    {
-      "basename": "JUC&JVM",
-      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
     },
     {
       "basename": "NGINX",

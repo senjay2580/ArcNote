@@ -549,14 +549,6 @@ public class ApiAccessLog {
 ### 2.3 SignatureUtil - 签名工具类
 
 ```java
-package com.senjay.archat.common.openapi.util;
-
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 /**
  * API签名工具类
@@ -697,31 +689,6 @@ public final class SignatureUtil {
 ### 2.4 OpenApiAuthInterceptor - 认证鉴权拦截器
 
 ```java
-package com.senjay.archat.common.openapi.interceptor;
-
-import cn.hutool.core.util.StrUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.senjay.archat.common.openapi.context.OpenApiContext;
-import com.senjay.archat.common.openapi.context.OpenApiContextHolder;
-import com.senjay.archat.common.openapi.domain.entity.ApiCredential;
-import com.senjay.archat.common.openapi.service.ApiCredentialService;
-import com.senjay.archat.common.openapi.util.SignatureUtil;
-import com.senjay.archat.common.user.domain.vo.response.Result;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.HandlerInterceptor;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 /**
  * 开放API认证拦截器
  * <p>

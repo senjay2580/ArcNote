@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "API 开放文档",
+      "path": "Intern产出文档/API 开放文档.md"
+    },
+    {
       "basename": "设计模式",
       "path": "知识荟萃/框架&设计模式/设计模式.md"
     },
@@ -15,10 +19,6 @@
     {
       "basename": "NLP Tech",
       "path": "tech-tutorials/NLP Tech.md"
-    },
-    {
-      "basename": "API 开放文档",
-      "path": "Intern产出文档/API 开放文档.md"
     },
     {
       "basename": "密码学",

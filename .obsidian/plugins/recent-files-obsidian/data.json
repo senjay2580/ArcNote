@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "设计模式",
+      "path": "知识荟萃/框架&设计模式/设计模式.md"
+    },
+    {
       "basename": "API 开放文档",
       "path": "Intern产出文档/API 开放文档.md"
     },
@@ -15,10 +19,6 @@
     {
       "basename": "JUC&JVM",
       "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
-    },
-    {
-      "basename": "设计模式",
-      "path": "知识荟萃/框架&设计模式/设计模式.md"
     },
     {
       "basename": "spring",

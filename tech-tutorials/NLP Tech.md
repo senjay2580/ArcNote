@@ -300,71 +300,7 @@ git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
 后端导出 Excel 的性能瓶颈主要集中在「数据读取」「文件生成」「传输下载」三个环节，高性能方案的核心是**减少内存占用、避免同步阻塞、优化传输方式**  (核心注意点)
 ~~~mermaid
 flowchart TD
-    %% 定义样式（单独成行，避免与flowchart TD同列）
-    classDef coreStep fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
-    classDef asyncStep fill:#f3e5f5,stroke:#4a148c,stroke-width:2px;
-    classDef errorStep fill:#ffebee,stroke:#c62828,stroke-width:2px;
-    classDef ioStep fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px;
 
-    %% 1. 前端触发导出请求
-    A[前端触发导出]:::coreStep -->|1.传递筛选参数| B[后端接收请求]:::coreStep
-    B --> C{判断数据量阈值}:::coreStep
-    C -->|小量（<1万条）| D[同步线程处理]:::coreStep
-    C -->|大量（≥1万条）| E[生成导出任务ID]:::asyncStep
-    E --> F[任务参数存入Redis（待处理）]:::asyncStep
-    F --> G[返回任务ID给前端]:::asyncStep
-    G --> H[前端轮询任务状态]:::coreStep
-    F --> I[异步线程池接管任务]:::asyncStep
-
-    %% 2. 数据读取逻辑
-    D --> J[开启数据库游标查询]:::coreStep
-    I --> J
-    J --> K{游标是否有数据？}:::coreStep
-    K -->|无数据| L[标记状态为「无数据」]:::errorStep
-    K -->|有数据| M[读取单批数据（1000条）]:::coreStep
-    M --> N[多线程处理数据]:::coreStep
-    N --> O[数据格式转换]:::coreStep
-    O --> P[EasyExcel流式写入临时流]:::ioStep
-    P --> K[继续读取下一批]
-
-    %% 3. 流式输出与存储
-    L --> Q[更新状态为「无数据」]:::asyncStep
-    K -->|处理完成| R[关闭游标连接]:::coreStep
-    R --> S[流式输出Excel流]:::ioStep
-    D --> S
-    S --> T[临时文件存储到OSS]:::ioStep
-    T --> U[更新状态为「成功」]:::asyncStep
-
-    %% 4. 前端下载
-    Q --> H
-    U --> H
-    H --> V{任务状态是否完成？}:::asyncStep
-    V -->|否| H[继续轮询]
-    V -->|是（成功）| W[前端调用下载接口]:::coreStep
-    W --> X[读取OSS临时文件]:::ioStep
-    X --> Y[流式返回二进制流]:::ioStep
-    Y --> Z[浏览器触发下载]:::coreStep
-    V -->|是（失败）| AA[前端提示导出失败]:::errorStep
-
-    %% 5. 异常处理
-    J --> AB[数据库连接异常]:::errorStep
-    M --> AB
-    N --> AC[线程执行异常]:::errorStep
-    P --> AD[Excel写入异常]:::errorStep
-    S --> AE[流式输出异常]:::errorStep
-    T --> AF[文件存储异常]:::errorStep
-    AB --> AG[记录异常日志]:::errorStep
-    AC --> AG
-    AD --> AG
-    AE --> AG
-    AF --> AG
-    AG --> AH[更新状态为「失败」]:::errorStep
-    AH --> H
-
-    %% 6. 清理临时文件
-    Z --> AI[删除OSS临时文件]:::ioStep
-    AA --> AI
-~~~
 ```
 
 # **接口联调**

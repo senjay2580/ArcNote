@@ -299,7 +299,67 @@ git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
 ```ad-info
 后端导出 Excel 的性能瓶颈主要集中在「数据读取」「文件生成」「传输下载」三个环节，高性能方案的核心是**减少内存占用、避免同步阻塞、优化传输方式**  (核心注意点)
 ~~~mermaid
-flowchart TD
+flowchart TB
+    subgraph 前端["🖥️ 前端 (Vue)"]
+        A[("👆 用户点击导出")] --> B{"📊 数据量判断"}
+        B -->|"< 1000条"| C["前端直接导出"]
+        B -->|"> 1000条"| D["请求后端导出"]
+        
+        C --> C1["调用 xlsx 库生成"]
+        C1 --> C2["Blob 下载"]
+        
+        D --> D1["显示导出进度条"]
+        D1 --> D2["轮询导出状态"]
+    end
+
+    subgraph 后端["⚙️ 后端 (Spring Boot)"]
+        D --> E["接收导出请求"]
+        E --> F{"数据量评估"}
+        
+        F -->|"< 10万条"| G["同步导出"]
+        F -->|"> 10万条"| H["异步导出"]
+        
+        G --> G1["EasyExcel 流式写入"]
+        G1 --> G2["直接返回文件流"]
+        
+        H --> H1["创建导出任务"]
+        H1 --> H2["存入 Redis 队列"]
+        H2 --> H3["后台线程处理"]
+    end
+
+    subgraph 异步处理["🔄 异步导出流程"]
+        H3 --> I["分页查询数据库"]
+        I --> J["每 5000 条写入一次"]
+        J --> K{"是否还有数据?"}
+        K -->|"是"| I
+        K -->|"否"| L["生成临时文件"]
+        L --> M["上传到 OSS/MinIO"]
+        M --> N["更新任务状态"]
+        N --> O["通知前端完成"]
+    end
+
+    subgraph 数据库优化["🗄️ 数据库层优化"]
+        I --> DB1["游标查询 / 流式读取"]
+        DB1 --> DB2["避免全量加载内存"]
+        DB2 --> DB3["索引优化"]
+    end
+
+    subgraph 下载["📥 文件下载"]
+        G2 --> DL["浏览器下载"]
+        O --> D2
+        D2 --> DL2["获取下载链接"]
+        DL2 --> DL3["OSS 直接下载"]
+    end
+
+    style A fill:#e1f5fe
+    style B fill:#fff3e0
+    style F fill:#fff3e0
+    style H fill:#ffebee
+    style G fill:#e8f5e9
+    style M fill:#f3e5f5
+    style DL fill:#e8f5e9
+    style DL3 fill:#e8f5e9
+
 
 ```
 

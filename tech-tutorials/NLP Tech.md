@@ -302,6 +302,8 @@ git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
 - **数据库游标**：是数据库端逐行处理结果集的机制，偏向 “数据处理”；
 - **游标分页**：是应用层的一种分页方案（也叫 “键集分页 / Keyset Pagination”），核心是用**唯一且有序的字段**（比如消息 ID、时间戳 + ID）作为 “游标”，定位下一页数据的起始位置，偏向 “数据查询分页”。
   
+  传统的`LIMIT offset, size`分页（比如`SELECT * FROM msg WHERE user_id=1 LIMIT 10 OFFSET 20`）有个致命问题：偏移量（offset）越大，数据库需要扫描越多的行再丢弃，效率极低（比如`OFFSET 100000`要先扫描 10 万行再取后面的 10 行）。
+  
 ```
 
 ```ad-info

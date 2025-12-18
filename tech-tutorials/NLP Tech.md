@@ -262,11 +262,13 @@ VUE_APP_API_BASE_REQUEST = 'http://10.1.12.191:9081'
 
 
 ~~~bash
+# - **适用场景**：Windows PowerShell 终端下，验证哪些文件被标记为 `--assume-unchanged`（假装未变更），避免本地修改被误提交；
 git ls-files -v | Select-String '^h'
 ~~~
 
 
 ~~~bash
+# Windows 系统下，标记指定本地配置文件（如 `.env.local`），让 Git 忽略其后续所有修改，确保本地修改（b 版）不会被提交到远程仓库（保留远程 a 版）；
 git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
 ~~~
 

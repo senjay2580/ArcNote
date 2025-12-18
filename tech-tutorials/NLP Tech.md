@@ -299,6 +299,78 @@ git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
 ```ad-info
 后端导出 Excel 的性能瓶颈主要集中在「数据读取」「文件生成」「传输下载」三个环节，高性能方案的核心是**减少内存占用、避免同步阻塞、优化传输方式**  (核心注意点)
 ~~~mermaid
+flowchart TB
+    subgraph 前端["🖥️ 前端交互层"]
+        A["👆 用户点击导出"] --> B{"数据量预估"}
+        B -->|"< 5000条"| C["同步导出<br/>responseType: blob"]
+        B -->|"> 5000条"| D["异步导出<br/>返回任务ID"]
+        
+        D --> E["轮询任务状态<br/>或 WebSocket 推送"]
+        E --> F{"任务完成?"}
+        F -->|"否"| G["显示进度条<br/>已处理: 50000/100000"]
+        G --> E
+        F -->|"是"| H["获取下载链接"]
+        H --> I["CDN/OSS 直接下载"]
+        
+        C --> J["浏览器直接下载"]
+    end
+
+    subgraph 网关层["🚪 API 网关"]
+        C & D --> K["限流控制<br/>同时导出任务数 ≤ 10"]
+        K --> L["请求路由"]
+    end
+
+    subgraph 应用层["⚙️ 应用服务层"]
+        L --> M{"同步/异步?"}
+        
+        M -->|"同步"| N["游标查询 + 流式写入<br/>直接返回文件流"]
+        
+        M -->|"异步"| O["创建导出任务"]
+        O --> P["任务入队<br/>Redis/RabbitMQ"]
+        P --> Q["返回任务ID"]
+    end
+
+    subgraph 异步处理层["🔄 异步任务处理集群"]
+        P --> R["消费者集群<br/>多实例并行消费"]
+        
+        R --> S["任务分片"]
+        S --> T1["Worker-1<br/>处理 0-10万"]
+        S --> T2["Worker-2<br/>处理 10-20万"]
+        S --> T3["Worker-N<br/>处理 N*10万"]
+        
+        T1 & T2 & T3 --> U["分片文件合并<br/>或多Sheet"]
+        U --> V["上传 OSS/MinIO"]
+        V --> W["更新任务状态<br/>Redis"]
+        W --> X["通知前端<br/>WebSocket/回调"]
+    end
+
+    subgraph 数据层["🗄️ 数据访问层"]
+        N & T1 & T2 & T3 --> Y["MyBatis 游标查询<br/>fetchSize=1000"]
+        Y --> Z["从库读取<br/>读写分离"]
+        Z --> DB[("📀 数据库")]
+    end
+
+    subgraph 存储层["💾 文件存储"]
+        V --> OSS["☁️ OSS/MinIO<br/>设置过期时间 24h"]
+        OSS --> CDN["🌐 CDN 加速下载"]
+    end
+
+    subgraph 监控层["📊 监控告警"]
+        MON1["任务队列积压监控"]
+        MON2["导出耗时监控"]
+        MON3["失败率告警"]
+        MON4["内存/CPU 监控"]
+    end
+
+    style A fill:#e3f2fd
+    style D fill:#fff3e0
+    style R fill:#e8f5e9
+    style T1 fill:#f3e5f5
+    style T2 fill:#f3e5f5
+    style T3 fill:#f3e5f5
+    style OSS fill:#e0f7fa
+    style CDN fill:#e0f7fa
+    style Z fill:#fff8e1
 
 
 ```

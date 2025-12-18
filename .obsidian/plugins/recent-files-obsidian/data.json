@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "NLP Tech",
+      "path": "tech-tutorials/NLP Tech.md"
+    },
+    {
       "basename": "缓存",
       "path": "Intern产出文档/缓存.md"
     },
@@ -31,10 +35,6 @@
     {
       "basename": "spring",
       "path": "知识荟萃/框架&设计模式/spring.md"
-    },
-    {
-      "basename": "NLP Tech",
-      "path": "tech-tutorials/NLP Tech.md"
     },
     {
       "basename": "NGINX",

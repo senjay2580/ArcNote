@@ -99,7 +99,112 @@ flowchart TD
 
 # 前端开发规范
 ```ad-attention
+# 前端项目开发规范
+## 一、文件夹结构
+~~~
+├── mock                       # 项目mock 模拟数据
+├── public                     # 静态资源
+│   ├── theme-green            # 主题文件（命名规则：theme-主题色）
+│   ├── favicon.ico            # favicon图标
+│   └── index.html             # html模板
+├── src                        # 源代码
+│   ├── api                    # 所有接口请求
+│   ├── assets                 # 主题、字体等静态资源
+│   ├── components             # 全局公用组件
+│   ├── directive              # 全局指令
+│   ├── filters                # 全局过滤器
+│   ├── icons                  # 项目所有svg icons
+│   ├── lang                   # 国际化配置
+│   ├── layout                 # 全局布局
+│   ├── router                 # 路由配置
+│   ├── store                  # 全局状态管理
+│   ├── styles                 # 全局样式
+│   ├── utils                  # 全局公用方法
+│   ├── vendor                 # 公用第三方依赖
+│   ├── views                  # 业务页面
+│   ├── App.vue                # 入口页面
+│   ├── main.js                # 入口文件（加载组件、初始化）
+│   ├── common-config.js       # 基础自定义配置
+│   ├── permission.js          # 权限管理
+│   └── setting.js             # 页面全局设置
+├── tests                      # 测试用例
+├── .env.xxx                   # 环境变量配置（多环境区分）
+├── .eslintrc.js               # eslint 规则配置
+├── .babelrc                   # babel-loader 配置
+├── .travis.yml                # 自动化CI配置
+├── vue.config.js              # vue-cli 全局配置
+├── postcss.config.js          # postcss 配置
+└── package.json               # 依赖/脚本配置
+~~~
 
+## 二、UI规范（基于ElementUI 2.x）
+### 1. 组件通用规则
+- 所有ElementUI组件默认使用 `size: small`，无size属性的组件以产品经理要求为准；
+- 组件size统一在 `src/theme-setting.js` 中配置，避免页面硬编码；
+- 对话框（Dialog）：无需全屏，按钮固定在弹窗右下角，遮罩为全局遮罩；
+- 表格：
+  - 操作列使用文字说明，禁止使用纯图标；
+  - 表格右上方操作按钮需「图标+文字」组合，右对齐表格，与表格间距8px；
+- 多按钮间距统一为15px。
+
+### 2. 搜索区域规范（参考：vue-element-admin 复杂表格）
+- 查询字段不显示前置说明文字，通过 `placeholder` 提示含义；
+- 查询字段之间间隔10px；
+- 查询按钮紧跟表单右侧，新增/导出等操作按钮另起一行；
+- 搜索区域自适应屏幕宽度，不固定显示字段数量。
+
+### 3. 主题色规范
+~~~css
+/* 全局色值配置（建议在src/styles/variables.scss中定义） */
+$--color-primary: #1C5A9E;  // 主色
+$--color-success: #62B259;  // 成功色
+$--color-warning: #DF861D;  // 警告色
+$--color-danger: #B82D2E;   // 危险色
+$--color-info: #909399;     // 信息色
+~~~
+
+## 三、命名规范
+### 1. 文件命名
+| 文件类型       | 命名规则                                  | 示例                  |
+|----------------|-------------------------------------------|-----------------------|
+| .js/.scss      | 小写单单词，多单词用 `-` 连接             | permission.js、common-config.js |
+| .vue（非index）| 大驼峰命名                                | AppMain.vue、UserList.vue |
+| .vue（入口）   | 固定为 index.vue                          | views/test-page/index.vue |
+
+### 2. 组件存放规则
+- 全局公用组件：`components/大驼峰组件名/index.vue`（例：`components/UploadFile/index.vue`）；
+- 页面级私有组件：`views/页面文件夹/components/大驼峰组件名.vue`（例：`views/test-page/components/TableSearch.vue`）。
+
+### 3. 模块文件存放规则
+- 全局文件直接放对应文件夹根目录，模块专属文件放在对应文件夹的 `modules` 子目录（无则新建）；
+- 模块文件命名与路由页面名称一致（例：api/modules/test-page.js、mock/modules/test-page.js）；
+- API方法命名建议与后端接口名称保持一致。
+
+## 四、开发步骤（以新增test-page页面为例）
+### 步骤1：创建页面文件
+- 有页面私有组件：`src/views/test-page/components/[大驼峰组件名].vue` + `src/views/test-page/index.vue`；
+- 无页面私有组件：仅创建 `src/views/test-page/index.vue`；
+- **强制要求**：页面文件第一行添加注释，注明菜单路径+页面说明  
+  示例：`// 企业中心->企业资料->基本信息`
+
+### 步骤2：配置路由
+新建路由文件：`src/router/modules/test-page.js`，并在路由入口文件中引入该模块。
+
+### 步骤3：编写接口请求
+新建API文件：`src/api/modules/test-page.js`，统一管理该页面所有接口请求。
+
+### 步骤4：编写模拟数据
+新建mock文件：`mock/modules/test-page.js`，实现前端数据模拟。
+
+## 五、开发注意事项
+1. **主题适配**：避免页面硬编码主题样式，需自定义主题样式时，在对应主题文件（如theme-green）中提供覆盖入口；
+2. **请求规范**：接口参数、请求逻辑统一放在api目录下，页面中仅调用api方法；
+3. **Mock调试**：前端开发完成后，先通过mock数据自测，联调/提测时切换为正式请求并提交Git；
+4. **配置文件提交**：非变量新增/修改场景，禁止提交本地开发配置文件（如.env.local、vue.config.js本地修改版）；
+5. **页面布局**：所有页面最外层必须包裹 `<div class="app-container"></div>`（统一控制页面边距）；
+6. **样式隔离**：页面样式优先使用 `scoped` 属性，避免样式污染；
+7. **代码提交**：不同模块的文件分开提交，提交说明需清晰（例：「test-page：新增表格查询功能」）；
+8. **工具方法复用**：非业务类通用方法（如日期格式化、数据校验）需提取到 `src/utils` 目录，按功能命名（例：formatDate.js、validate.js）。
 ```
 
 

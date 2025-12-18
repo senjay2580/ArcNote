@@ -638,6 +638,7 @@ public interface OrderMapper {
 ~~~
 
 #### 正确方式2：MyBatis流式查询（逐行读取）
+**MyBatis 流式查询的核心是：**数据库逐行返回数据，Java 逐行处理，内存中永远只保留当前行数据**，彻底避免 OOM。**
 ~~~java
 // Mapper接口（适合超大数据量）
 @Options(

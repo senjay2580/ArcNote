@@ -262,12 +262,12 @@ VUE_APP_API_BASE_REQUEST = 'http://10.1.12.191:9081'
 
 
 ~~~bash
-git ls-files -v | grep '^h'
+git ls-files -v | Select-String '^h'
 ~~~
 
 
 ~~~bash
-git ls-files -v | grep '^h'
+git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
 ~~~
 
 

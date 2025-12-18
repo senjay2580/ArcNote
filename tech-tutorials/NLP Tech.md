@@ -255,6 +255,25 @@ VUE_APP_API_BASE_REQUEST = 'http://10.1.12.191:9081'
     
     把已经联调好的代码，提交到团队的代码仓库，然后告诉测试人员：「我这个`test-page`页面开发完了，你可以在测试环境里测了」
 ```
+
+
+```ad-note
+# git 小技巧
+
+
+~~~bash
+git ls-files -v | grep '^h'
+~~~
+
+
+~~~bash
+git ls-files -v | grep '^h'
+~~~
+
+
+
+```
+
 # **低流量期间DO**
 ```ad-info
 1. **数据层维护**

@@ -295,6 +295,11 @@ git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
     - **日志清理与分析**：清理过期日志、扩容日志存储，对历史日志进行批量分析，定位潜在的系统隐患或业务异常。
 ```
 
+# Excel 导出
+```ad-info
+后端导出 Excel 的性能瓶颈主要集中在「数据读取」「文件生成」「传输下载」三个环节，高性能方案的核心是**减少内存占用、避免同步阻塞、优化传输方式**
+
+```
 
 # **接口联调**
 ```ad-attention

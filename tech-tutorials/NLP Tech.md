@@ -298,7 +298,9 @@ git update-index --assume-unchanged UIPMP-WEB\uipmp-web\.env.local
 # Excel 导出
 ```ad-info
 后端导出 Excel 的性能瓶颈主要集中在「数据读取」「文件生成」「传输下载」三个环节，高性能方案的核心是**减少内存占用、避免同步阻塞、优化传输方式**  (核心注意点)
-
+~~~mermaid
+flowchart TD %% 定义样式（可选，增强可读性） classDef coreStep fill:#e1f5fe,stroke:#01579b,stroke-width:2px; classDef asyncStep fill:#f3e5f5,stroke:#4a148c,stroke-width:2px; classDef errorStep fill:#ffebee,stroke:#c62828,stroke-width:2px; %% 主流程：前端触发→异步接管→游标读取→多线程处理→流式输出 A[前端触发导出]:::coreStep -->|1.传递筛选参数（时间/条件）| B[后端接收请求]:::coreStep B --> C{是否异步处理？}:::asyncStep C -->|是（大数据量推荐）| D[生成唯一导出任务ID]:::asyncStep D --> E[任务参数+状态存入Redis/DB（待处理）]:::asyncStep E --> F[返回任务ID给前端]:::asyncStep F --> F1[前端轮询/WebSocket监听任务状态]:::coreStep E --> G[异步线程池接管任务（@Async）]:::asyncStep C -->|否（小量数据应急）| G %% 数据读取+处理核心逻辑 G --> H[开启数据库游标查询]:::coreStep H --> I[游标分页读取数据（每次1000条）]:::coreStep I --> J{是否有下一页数据？}:::coreStep J -->|是| K[多线程分片处理数据（单线程处理1页）]:::coreStep K --> L[EasyExcel流式写入（逐行flush，不缓存）]:::coreStep L --> I[继续读取下一页] J -->|否| M[结束游标查询，关闭数据库连接]:::coreStep %% 流式响应+文件下载 M --> N[通过StreamingResponseBody流式输出Excel流]:::coreStep N --> O[更新任务状态为「成功」+ 存储文件链接（可选）]:::asyncStep F1 --> P{任务状态是否完成？}:::asyncStep P -->|是（成功）| Q[前端调用下载接口，接收流式Blob]:::coreStep Q --> R[浏览器触发Excel文件下载]:::coreStep P -->|否| F1[继续轮询] %% 异常分支（全链路覆盖） H --> S[数据读取异常]:::errorStep I --> S K --> S L --> S N --> S S --> T[更新任务状态为「失败」+ 记录异常日志]:::errorStep T --> F1[前端轮询到失败状态] F1 --> U[前端提示用户导出失败+展示原因]:::errorStep
+~~~
 ```
 
 # **接口联调**

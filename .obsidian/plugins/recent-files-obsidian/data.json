@@ -1,6 +1,14 @@
 {
   "recentFiles": [
     {
+      "basename": "自我介绍：",
+      "path": "知识荟萃/Resume/自我介绍：.md"
+    },
+    {
+      "basename": "计网",
+      "path": "知识荟萃/计算机基础/计网.md"
+    },
+    {
       "basename": "算法思维",
       "path": "tech-tutorials/算法思维.md"
     },
@@ -55,10 +63,6 @@
     {
       "basename": "运维进阶",
       "path": "Intern产出文档/运维进阶.md"
-    },
-    {
-      "basename": "计网",
-      "path": "知识荟萃/计算机基础/计网.md"
     },
     {
       "basename": "MQ",

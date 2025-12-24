@@ -11,7 +11,7 @@
   "azureOpenAIApiDeploymentName": "",
   "azureOpenAIApiVersion": "",
   "azureOpenAIApiEmbeddingDeploymentName": "",
-  "googleApiKey": "AIzaSyCm3kJo2uG3SxWV2ah4yjsmrab36TAHIuw",
+  "googleApiKey": "",
   "openRouterAiApiKey": "",
   "defaultChainType": "llm_chain",
   "defaultModelKey": "copilot-plus-flash|copilot-plus",

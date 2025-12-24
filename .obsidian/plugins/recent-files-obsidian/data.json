@@ -1,8 +1,16 @@
 {
   "recentFiles": [
     {
+      "basename": "MySQL数据库备份方案",
+      "path": "tech-tutorials/MySQL数据库备份方案.md"
+    },
+    {
       "basename": "自我介绍：",
       "path": "知识荟萃/Resume/自我介绍：.md"
+    },
+    {
+      "basename": "NGINX",
+      "path": "知识荟萃/运维相关/NGINX.md"
     },
     {
       "basename": "计网",
@@ -51,10 +59,6 @@
     {
       "basename": "spring",
       "path": "知识荟萃/框架&设计模式/spring.md"
-    },
-    {
-      "basename": "NGINX",
-      "path": "知识荟萃/运维相关/NGINX.md"
     },
     {
       "basename": "gitFlow",

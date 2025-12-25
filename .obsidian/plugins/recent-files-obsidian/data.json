@@ -1,6 +1,22 @@
 {
   "recentFiles": [
     {
+      "basename": "NLP Tech",
+      "path": "tech-tutorials/NLP Tech.md"
+    },
+    {
+      "basename": "缓存",
+      "path": "Intern产出文档/缓存.md"
+    },
+    {
+      "basename": "多端问题",
+      "path": "tech-tutorials/多端问题.md"
+    },
+    {
+      "basename": "API 开放文档",
+      "path": "Intern产出文档/API 开放文档.md"
+    },
+    {
       "basename": "01-项目概述",
       "path": "个人踪迹/01-项目概述.md"
     },
@@ -29,20 +45,8 @@
       "path": "tech-tutorials/Ruoyi.md"
     },
     {
-      "basename": "API 开放文档",
-      "path": "Intern产出文档/API 开放文档.md"
-    },
-    {
-      "basename": "NLP Tech",
-      "path": "tech-tutorials/NLP Tech.md"
-    },
-    {
       "basename": "接口最佳实践",
       "path": "tech-tutorials/接口最佳实践.md"
-    },
-    {
-      "basename": "缓存",
-      "path": "Intern产出文档/缓存.md"
     },
     {
       "basename": "设计模式",

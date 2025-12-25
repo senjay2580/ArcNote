@@ -50,5 +50,8 @@
     "iconName": "LiAlarmClockMinus",
     "iconColor": "#d78614"
   },
-  "Tmp": "LiAlignJustify"
+  "Tmp": {
+    "iconName": "LiAlignJustify",
+    "iconColor": "#13ddec"
+  }
 }

@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "MySQL数据库备份方案",
+      "path": "tech-tutorials/MySQL数据库备份方案.md"
+    },
+    {
       "basename": "接口最佳实践",
       "path": "tech-tutorials/接口最佳实践.md"
     },
@@ -31,10 +35,6 @@
     {
       "basename": "01-项目概述",
       "path": "个人踪迹/01-项目概述.md"
-    },
-    {
-      "basename": "MySQL数据库备份方案",
-      "path": "tech-tutorials/MySQL数据库备份方案.md"
     },
     {
       "basename": "自我介绍：",

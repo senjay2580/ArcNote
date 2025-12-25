@@ -6,11 +6,11 @@
     "emojiStyle": "native",
     "iconColor": null,
     "recentlyUsedIcons": [
+      "LiAlignJustify",
       "LiAlarmClockMinus",
       "LiActivitySquare",
       "LiArchive",
-      "LiAlertCircle",
-      "LiAlertTriangle"
+      "LiAlertCircle"
     ],
     "recentlyUsedIconsSize": 5,
     "rules": [],
@@ -49,5 +49,6 @@
   "tech-tutorials": {
     "iconName": "LiAlarmClockMinus",
     "iconColor": "#d78614"
-  }
+  },
+  "Tmp": "LiAlignJustify"
 }

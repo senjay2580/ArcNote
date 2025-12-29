@@ -1,6 +1,22 @@
 {
   "recentFiles": [
     {
+      "basename": "01-数据库表结构与增删查改",
+      "path": "Tmp/01-数据库表结构与增删查改.md"
+    },
+    {
+      "basename": "02-前端页面技术应用",
+      "path": "Tmp/02-前端页面技术应用.md"
+    },
+    {
+      "basename": "00-评分总结",
+      "path": "Tmp/00-评分总结.md"
+    },
+    {
+      "basename": "API 开放文档",
+      "path": "Intern产出文档/API 开放文档.md"
+    },
+    {
       "basename": "MySQL数据库备份方案",
       "path": "tech-tutorials/MySQL数据库备份方案.md"
     },
@@ -27,10 +43,6 @@
     {
       "basename": "缓存",
       "path": "Intern产出文档/缓存.md"
-    },
-    {
-      "basename": "API 开放文档",
-      "path": "Intern产出文档/API 开放文档.md"
     },
     {
       "basename": "01-项目概述",

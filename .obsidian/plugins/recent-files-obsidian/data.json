@@ -1,12 +1,20 @@
 {
   "recentFiles": [
     {
-      "basename": "01-数据库表结构与增删查改",
-      "path": "Tmp/01-数据库表结构与增删查改.md"
+      "basename": "04-验证器和拦截器",
+      "path": "Tmp/04-验证器和拦截器.md"
+    },
+    {
+      "basename": "03-Admin管理与路由分离",
+      "path": "Tmp/03-Admin管理与路由分离.md"
     },
     {
       "basename": "02-前端页面技术应用",
       "path": "Tmp/02-前端页面技术应用.md"
+    },
+    {
+      "basename": "01-数据库表结构与增删查改",
+      "path": "Tmp/01-数据库表结构与增删查改.md"
     },
     {
       "basename": "00-评分总结",

@@ -49,9 +49,5 @@
   "tech-tutorials": {
     "iconName": "LiAlarmClockMinus",
     "iconColor": "#d78614"
-  },
-  "Tmp": {
-    "iconName": "LiAlignJustify",
-    "iconColor": "#13ddec"
   }
 }

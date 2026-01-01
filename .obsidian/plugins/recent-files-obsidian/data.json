@@ -1,6 +1,14 @@
 {
   "recentFiles": [
     {
+      "basename": "01-项目概述",
+      "path": "个人踪迹/01-项目概述.md"
+    },
+    {
+      "basename": "02-核心算法与数据处理",
+      "path": "个人踪迹/02-核心算法与数据处理.md"
+    },
+    {
       "basename": "缓存",
       "path": "Intern产出文档/缓存.md"
     },
@@ -31,10 +39,6 @@
     {
       "basename": "NLP Tech",
       "path": "tech-tutorials/NLP Tech.md"
-    },
-    {
-      "basename": "01-项目概述",
-      "path": "个人踪迹/01-项目概述.md"
     },
     {
       "basename": "自我介绍：",

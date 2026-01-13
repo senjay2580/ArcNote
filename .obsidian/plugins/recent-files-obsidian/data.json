@@ -1,8 +1,48 @@
 {
   "recentFiles": [
     {
+      "basename": "Ruoyi",
+      "path": "tech-tutorials/Ruoyi.md"
+    },
+    {
+      "basename": "NLP Tech",
+      "path": "tech-tutorials/NLP Tech.md"
+    },
+    {
+      "basename": "MySQL数据库备份方案",
+      "path": "tech-tutorials/MySQL数据库备份方案.md"
+    },
+    {
+      "basename": "HuLa-Server多设备与在线离线状态实现分析",
+      "path": "tech-tutorials/HuLa-Server多设备与在线离线状态实现分析.md"
+    },
+    {
+      "basename": "密码学",
+      "path": "tech-tutorials/密码学.md"
+    },
+    {
       "basename": "接口最佳实践",
       "path": "tech-tutorials/接口最佳实践.md"
+    },
+    {
+      "basename": "设计模式",
+      "path": "知识荟萃/框架&设计模式/设计模式.md"
+    },
+    {
+      "basename": "WrapperPlan",
+      "path": "Intern产出文档/WrapperPlan.md"
+    },
+    {
+      "basename": "JUC&JVM",
+      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
+    },
+    {
+      "basename": "01-Redis集群缓存完全指南",
+      "path": "tech-tutorials/01-Redis集群缓存完全指南.md"
+    },
+    {
+      "basename": "00-监控方案总览",
+      "path": "应用监控/00-监控方案总览.md"
     },
     {
       "basename": "01-项目概述",
@@ -21,24 +61,8 @@
       "path": "Intern产出文档/API 开放文档.md"
     },
     {
-      "basename": "MySQL数据库备份方案",
-      "path": "tech-tutorials/MySQL数据库备份方案.md"
-    },
-    {
-      "basename": "密码学",
-      "path": "tech-tutorials/密码学.md"
-    },
-    {
       "basename": "多端问题",
       "path": "tech-tutorials/多端问题.md"
-    },
-    {
-      "basename": "01-Redis集群缓存完全指南",
-      "path": "tech-tutorials/01-Redis集群缓存完全指南.md"
-    },
-    {
-      "basename": "NLP Tech",
-      "path": "tech-tutorials/NLP Tech.md"
     },
     {
       "basename": "自我介绍：",
@@ -55,22 +79,6 @@
     {
       "basename": "算法思维",
       "path": "tech-tutorials/算法思维.md"
-    },
-    {
-      "basename": "Ruoyi",
-      "path": "tech-tutorials/Ruoyi.md"
-    },
-    {
-      "basename": "设计模式",
-      "path": "知识荟萃/框架&设计模式/设计模式.md"
-    },
-    {
-      "basename": "WrapperPlan",
-      "path": "Intern产出文档/WrapperPlan.md"
-    },
-    {
-      "basename": "JUC&JVM",
-      "path": "知识荟萃/JUC&JVM/JUC&JVM.md"
     },
     {
       "basename": "spring",

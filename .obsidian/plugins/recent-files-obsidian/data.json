@@ -1,6 +1,10 @@
 {
   "recentFiles": [
     {
+      "basename": "接口最佳实践",
+      "path": "tech-tutorials/接口最佳实践.md"
+    },
+    {
       "basename": "WDAT",
       "path": "tech-tutorials/WDAT.md"
     },
@@ -23,10 +27,6 @@
     {
       "basename": "密码学",
       "path": "tech-tutorials/密码学.md"
-    },
-    {
-      "basename": "接口最佳实践",
-      "path": "tech-tutorials/接口最佳实践.md"
     },
     {
       "basename": "设计模式",

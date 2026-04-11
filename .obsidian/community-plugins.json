@@ -27,5 +27,6 @@
   "mermaid-tools",
   "any-block",
   "smart-connections",
-  "smart-connections-visualizer"
+  "smart-connections-visualizer",
+  "open-in-terminal"
 ]

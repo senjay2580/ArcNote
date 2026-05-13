@@ -11,3 +11,9 @@ PostGraduate/408/TextBook/
 PostGraduate/答题卡/
 PostGraduate/英语/作文/作文背诵20篇.pdf
 PostGraduate/英语/翻译/唐迟翻译.pdf
+
+# Backups produced by replace-jsdelivr.ps1
+_backups/
+
+# Locally downloaded note images (notes reference GitHub raw URLs instead)
+PostGraduate/408/Notes/img/

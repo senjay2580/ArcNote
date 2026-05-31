@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OS Boot Explainer</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #10141c;
+        font-family: sans-serif;
+        color: #f7f1e8;
+      }
+
+      #main-video {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 18% 14%, rgba(23, 190, 187, 0.24), transparent 28%),
+          radial-gradient(circle at 88% 70%, rgba(255, 107, 74, 0.18), transparent 26%),
+          linear-gradient(135deg, #10141c 0%, #18202c 58%, #0f141b 100%);
+      }
+
+      .grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(247, 241, 232, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(247, 241, 232, 0.06) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: radial-gradient(circle at 50% 48%, black, transparent 74%);
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        padding: 86px 104px;
+        box-sizing: border-box;
+        opacity: 0;
+      }
+
+      .kicker {
+        color: #17bebb;
+        font-size: 30px;
+        font-weight: 700;
+        letter-spacing: 0;
+        margin-bottom: 18px;
+      }
+
+      .title {
+        max-width: 1180px;
+        font-size: 82px;
+        line-height: 1.08;
+        font-weight: 800;
+        letter-spacing: 0;
+        margin: 0;
+      }
+
+      .sub {
+        max-width: 1020px;
+        margin-top: 28px;
+        font-size: 34px;
+        line-height: 1.45;
+        color: rgba(247, 241, 232, 0.84);
+      }
+
+      .stage {
+        position: absolute;
+        left: 104px;
+        right: 104px;
+        bottom: 170px;
+        height: 360px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px 28px;
+        border: 2px solid rgba(247, 241, 232, 0.2);
+        border-radius: 8px;
+        background: rgba(247, 241, 232, 0.09);
+        color: #f7f1e8;
+        font-size: 31px;
+        font-weight: 800;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+      }
+
+      .boot-path {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 152px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(247, 241, 232, 0.13);
+      }
+
+      .boot-line {
+        position: absolute;
+        left: 0;
+        top: 152px;
+        width: 0;
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #17bebb, #f2c94c, #ff6b4a);
+      }
+
+      .node {
+        position: absolute;
+        top: 86px;
+        width: 250px;
+        min-height: 124px;
+        padding: 22px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        border: 2px solid rgba(247, 241, 232, 0.2);
+        background: rgba(16, 20, 28, 0.84);
+      }
+
+      .node strong {
+        display: block;
+        color: #f2c94c;
+        font-size: 28px;
+        margin-bottom: 10px;
+      }
+
+      .node span {
+        display: block;
+        color: rgba(247, 241, 232, 0.78);
+        font-size: 23px;
+        line-height: 1.34;
+      }
+
+      .node:nth-child(3) {
+        left: 0;
+      }
+
+      .node:nth-child(4) {
+        left: 344px;
+      }
+
+      .node:nth-child(5) {
+        left: 688px;
+      }
+
+      .node:nth-child(6) {
+        left: 1032px;
+      }
+
+      .node:nth-child(7) {
+        left: 1376px;
+      }
+
+      .panel {
+        position: absolute;
+        top: 232px;
+        right: 110px;
+        width: 620px;
+        padding: 36px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        background: rgba(247, 241, 232, 0.92);
+        color: #111827;
+        box-shadow: 0 28px 90px rgba(0, 0, 0, 0.32);
+      }
+
+      .panel h2 {
+        margin: 0 0 18px;
+        font-size: 48px;
+        line-height: 1.1;
+        letter-spacing: 0;
+      }
+
+      .panel p {
+        margin: 0;
+        font-size: 28px;
+        line-height: 1.48;
+      }
+
+      .stack {
+        position: absolute;
+        left: 115px;
+        top: 300px;
+        width: 700px;
+        height: 430px;
+      }
+
+      .layer {
+        position: absolute;
+        left: 0;
+        width: 620px;
+        height: 76px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 0 28px;
+        box-sizing: border-box;
+        font-size: 30px;
+        font-weight: 800;
+        color: #10141c;
+        background: #f7f1e8;
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
+      }
+
+      .layer:nth-child(1) {
+        top: 0;
+        background: #17bebb;
+      }
+
+      .layer:nth-child(2) {
+        top: 102px;
+        background: #f2c94c;
+      }
+
+      .layer:nth-child(3) {
+        top: 204px;
+        background: #ff6b4a;
+      }
+
+      .layer:nth-child(4) {
+        top: 306px;
+      }
+
+      .arrow {
+        position: absolute;
+        height: 8px;
+        background: #17bebb;
+        transform-origin: left center;
+        border-radius: 999px;
+      }
+
+      .arrow::after {
+        content: "";
+        position: absolute;
+        right: -2px;
+        top: -12px;
+        border-left: 26px solid #17bebb;
+        border-top: 16px solid transparent;
+        border-bottom: 16px solid transparent;
+      }
+
+      .card-row {
+        position: absolute;
+        left: 110px;
+        right: 110px;
+        bottom: 235px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+      }
+
+      .mini-card {
+        min-height: 240px;
+        padding: 32px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        background: rgba(247, 241, 232, 0.1);
+        border: 2px solid rgba(247, 241, 232, 0.16);
+      }
+
+      .mini-card b {
+        display: block;
+        font-size: 38px;
+        color: #f2c94c;
+        margin-bottom: 20px;
+      }
+
+      .mini-card span {
+        display: block;
+        font-size: 28px;
+        line-height: 1.42;
+        color: rgba(247, 241, 232, 0.82);
+      }
+
+      .caption {
+        position: absolute;
+        left: 220px;
+        right: 220px;
+        bottom: 54px;
+        min-height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px 36px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        background: rgba(16, 20, 28, 0.74);
+        border: 1px solid rgba(247, 241, 232, 0.18);
+        color: #f7f1e8;
+        font-size: 32px;
+        line-height: 1.32;
+        text-align: center;
+        opacity: 0;
+      }
+
+      .badge {
+        position: absolute;
+        right: 104px;
+        top: 86px;
+        padding: 16px 22px;
+        border-radius: 8px;
+        font-size: 25px;
+        font-weight: 800;
+        color: #10141c;
+        background: #f2c94c;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main-video" data-composition-id="main-video" data-width="1920" data-height="1080" data-start="0" data-duration="62">
+      <div class="grid"></div>
+      <audio id="narration" src="assets/narration.wav" data-start="0" data-duration="62" data-track-index="5" data-volume="1"></audio>
+
+      <section id="scene-1" class="scene">
+        <div class="badge">408 操作系统 · 第一章</div>
+        <div class="kicker">Explainer 01</div>
+        <h1 class="title">计算机按下电源后，操作系统还没开始运行</h1>
+        <div class="sub">真正先动起来的是固件和引导程序。它们像接力赛，把 CPU 从“只会从固定地址取指令”的状态，送到“内核接管机器”的状态。</div>
+        <div class="stage">
+          <div class="boot-path"></div>
+          <div class="boot-line" id="line-1"></div>
+          <div class="node"><strong>上电</strong><span>CPU 复位，跳到固件入口</span></div>
+          <div class="node"><strong>自检</strong><span>检查内存、设备、启动项</span></div>
+          <div class="node"><strong>找盘</strong><span>定位可启动设备</span></div>
+          <div class="node"><strong>引导</strong><span>加载 bootloader</span></div>
+          <div class="node"><strong>内核</strong><span>OS 开始接管</span></div>
+        </div>
+      </section>
+
+      <section id="scene-2" class="scene">
+        <div class="kicker">Step 1 · 固件先启动</div>
+        <h1 class="title">BIOS / UEFI 做的事：让硬件进入“可启动”状态</h1>
+        <div class="stack">
+          <div class="layer">CPU 从复位地址取第一条指令</div>
+          <div class="layer">固件初始化主板、内存和基本设备</div>
+          <div class="layer">按照启动顺序查找可启动介质</div>
+          <div class="layer">把控制权交给引导程序</div>
+        </div>
+        <div class="panel">
+          <h2>考点抓法</h2>
+          <p>这里不是“操作系统启动了”，而是“操作系统被启动”。固件负责找到入口，引导程序负责把内核搬进内存。</p>
+        </div>
+      </section>
+
+      <section id="scene-3" class="scene">
+        <div class="kicker">Step 2 · 引导程序接力</div>
+        <h1 class="title">Bootloader 的核心任务：定位内核、加载内核、跳转内核入口</h1>
+        <div class="card-row">
+          <div class="mini-card"><b>定位</b><span>在磁盘或 EFI 分区里找到内核映像与启动配置。</span></div>
+          <div class="mini-card"><b>加载</b><span>把内核读入内存，并准备必要的参数。</span></div>
+          <div class="mini-card"><b>跳转</b><span>把 CPU 控制权交给内核入口地址。</span></div>
+        </div>
+        <div class="arrow" id="arrow-a" style="left: 370px; top: 690px; width: 370px"></div>
+        <div class="arrow" id="arrow-b" style="left: 990px; top: 690px; width: 370px"></div>
+      </section>
+
+      <section id="scene-4" class="scene">
+        <div class="kicker">Step 3 · 内核接管</div>
+        <h1 class="title">内核一旦运行，就开始建立真正的操作系统环境</h1>
+        <div class="card-row">
+          <div class="mini-card"><b>中断</b><span>建立中断向量和异常处理，让 CPU 能响应事件。</span></div>
+          <div class="mini-card"><b>内存</b><span>建立页表、管理物理内存和虚拟地址空间。</span></div>
+          <div class="mini-card"><b>进程</b><span>创建第一个系统进程，用户态程序随后启动。</span></div>
+        </div>
+      </section>
+
+      <section id="scene-5" class="scene">
+        <div class="kicker">408 记忆框架</div>
+        <h1 class="title">一句话记住：固件找入口，引导搬内核，内核管全局</h1>
+        <div class="sub">做题时看到“系统启动、引导、装入内核、初始化”，先判断题目问的是哪一棒。不要把 BIOS/UEFI、Bootloader、OS Kernel 的职责混在一起。</div>
+        <div class="stage">
+          <div class="boot-path"></div>
+          <div class="boot-line" id="line-2"></div>
+          <div class="node"><strong>固件</strong><span>硬件初始化与启动设备选择</span></div>
+          <div class="node"><strong>引导程序</strong><span>加载内核与启动参数</span></div>
+          <div class="node"><strong>内核</strong><span>中断、内存、进程、设备</span></div>
+          <div class="node"><strong>用户态</strong><span>服务、Shell、应用程序</span></div>
+          <div class="node"><strong>答题</strong><span>按阶段拆职责</span></div>
+        </div>
+      </section>
+
+      <div id="cap-1" class="caption">先记住一个大方向：按下电源时，操作系统并没有立刻运行。</div>
+      <div id="cap-2" class="caption">第一棒是 BIOS 或 UEFI，它完成基本硬件初始化，并寻找可以启动的设备。</div>
+      <div id="cap-3" class="caption">第二棒是引导程序，它把操作系统内核从磁盘加载到内存，再跳到内核入口。</div>
+      <div id="cap-4" class="caption">第三棒才是内核：建立中断、内存管理、进程和设备管理，系统环境逐步成形。</div>
+      <div id="cap-5" class="caption">所以做 408 题时，要按“固件、引导程序、内核”三层分清职责。</div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+        const scenes = ["#scene-1", "#scene-2", "#scene-3", "#scene-4", "#scene-5"];
+        const caps = ["#cap-1", "#cap-2", "#cap-3", "#cap-4", "#cap-5"];
+
+        function showScene(id, at) {
+          const has = (selector) => document.querySelector(selector);
+          const fromIf = (selector, vars, time) => {
+            if (has(selector)) tl.from(selector, vars, time);
+          };
+          tl.to(id, { opacity: 1, duration: 0.7, ease: "power2.out" }, at);
+          fromIf(id + " .kicker", { y: 36, opacity: 0, duration: 0.62, ease: "expo.out" }, at + 0.12);
+          fromIf(id + " .title", { y: 52, opacity: 0, duration: 0.7, ease: "back.out(1.35)" }, at + 0.3);
+          fromIf(id + " .sub", { x: -42, opacity: 0, duration: 0.62, ease: "power3.out" }, at + 0.58);
+          fromIf(id + " .badge", { scale: 0.86, opacity: 0, duration: 0.48, ease: "circ.out" }, at + 0.18);
+          fromIf(id + " .panel", { x: 80, rotation: 1.5, opacity: 0, duration: 0.68, ease: "power4.out" }, at + 0.62);
+          fromIf(id + " .layer", { x: -90, opacity: 0, stagger: 0.16, duration: 0.55, ease: "power2.out" }, at + 0.55);
+          fromIf(id + " .mini-card", { y: 70, opacity: 0, stagger: 0.18, duration: 0.64, ease: "expo.out" }, at + 0.7);
+          fromIf(id + " .node", { y: 38, opacity: 0, stagger: 0.12, duration: 0.52, ease: "sine.out" }, at + 0.8);
+        }
+
+        function hideScene(id, at) {
+          tl.to(id, { opacity: 0, duration: 0.55, ease: "power2.inOut" }, at);
+        }
+
+        function caption(id, at, dur) {
+          tl.to(id, { opacity: 1, y: -6, duration: 0.35, ease: "power2.out" }, at);
+          tl.to(id, { opacity: 0, y: 0, duration: 0.3, ease: "power2.in" }, at + dur);
+        }
+
+        showScene(scenes[0], 0.2);
+        tl.to("#line-1", { width: "100%", duration: 6.2, ease: "power1.inOut" }, 2.6);
+        caption(caps[0], 0.8, 9.1);
+        hideScene(scenes[0], 10.0);
+
+        showScene(scenes[1], 10.8);
+        caption(caps[1], 11.4, 10.0);
+        hideScene(scenes[1], 22.0);
+
+        showScene(scenes[2], 22.8);
+        tl.from("#arrow-a", { scaleX: 0, duration: 0.65, ease: "power2.out" }, 25.8);
+        tl.from("#arrow-b", { scaleX: 0, duration: 0.65, ease: "power2.out" }, 26.5);
+        caption(caps[2], 23.4, 10.6);
+        hideScene(scenes[2], 35.0);
+
+        showScene(scenes[3], 35.8);
+        caption(caps[3], 36.4, 10.2);
+        hideScene(scenes[3], 48.0);
+
+        showScene(scenes[4], 48.8);
+        tl.to("#line-2", { width: "100%", duration: 6.4, ease: "power1.inOut" }, 52.4);
+        caption(caps[4], 49.4, 9.5);
+        tl.to(scenes[4], { opacity: 0, duration: 1.2, ease: "power2.inOut" }, 60.4);
+
+        window.__timelines["main-video"] = tl;
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "strict_quality": false,
+  "min_output_chars": 20,
+  "expected_pages": 2,
+  "recorded_pages": 2,
+  "missing_pages": 0,
+  "duplicate_pages": 0,
+  "unexpected_pages": 0,
+  "unresolved_pages": 0,
+  "weak_output_warnings": 0,
+  "file_summaries": [
+    {
+      "file_name": "27王道《操作系统》高清带书签.pdf",
+      "expected_pages": 2,
+      "recorded_pages": 2,
+      "complete": true
+    }
+  ],
+  "missing_examples": [],
+  "duplicate_key_examples": [],
+  "unexpected_examples": [],
+  "unresolved_examples": [],
+  "weak_output_examples": []
+}

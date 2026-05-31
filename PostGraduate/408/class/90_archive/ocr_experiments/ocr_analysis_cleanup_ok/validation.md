@@ -1,0 +1,12 @@
+# OCR Scan Validation
+
+- Passed: True
+- Expected pages: 1
+- Recorded pages: 1
+- Missing pages: 0
+- Duplicate pages: 0
+- Unexpected pages: 0
+- Unresolved pages: 0
+- Weak output warnings: 0
+
+Hard failures mean the scan is not complete enough to trust without rerunning or changing OCR settings.

@@ -1,0 +1,1339 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>408 OS Boot Explainer V2.2</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MotionPathPlugin.min.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        color: #171717;
+        background: #f6f1e8;
+        font-family: sans-serif;
+      }
+
+      #main-video {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #f6f1e8;
+      }
+
+      .header {
+        position: absolute;
+        left: 96px;
+        right: 96px;
+        top: 66px;
+        height: 112px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        border-bottom: 2px solid #171717;
+        transform-origin: left top;
+      }
+
+      .course {
+        font-size: 30px;
+        font-weight: 900;
+        color: #2563eb;
+      }
+
+      .topic {
+        margin-top: 12px;
+        font-size: 50px;
+        font-weight: 950;
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .time-pill {
+        min-width: 238px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #fffaf0;
+        font-size: 26px;
+        font-weight: 900;
+      }
+
+      .rail {
+        position: absolute;
+        left: 96px;
+        top: 230px;
+        width: 230px;
+        bottom: 166px;
+        transform-origin: left center;
+      }
+
+      .rail-line {
+        position: absolute;
+        left: 31px;
+        top: 28px;
+        bottom: 28px;
+        width: 8px;
+        background: rgba(23, 23, 23, 0.16);
+        border-radius: 999px;
+      }
+
+      .rail-progress {
+        position: absolute;
+        left: 31px;
+        top: 28px;
+        width: 8px;
+        height: 0;
+        background: #0f9f8f;
+        border-radius: 999px;
+      }
+
+      .rail-step {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        height: 150px;
+        font-size: 28px;
+        font-weight: 900;
+      }
+
+      .dot {
+        width: 68px;
+        height: 68px;
+        display: grid;
+        place-items: center;
+        border: 2px solid #171717;
+        border-radius: 50%;
+        background: #f6f1e8;
+        box-sizing: border-box;
+        z-index: 2;
+      }
+
+      .rail-step.active .dot {
+        color: white;
+        background: #2563eb;
+      }
+
+      .rail-step.done .dot {
+        color: white;
+        background: #0f9f8f;
+      }
+
+      .scene {
+        position: absolute;
+        left: 376px;
+        right: 96px;
+        top: 230px;
+        bottom: 166px;
+        opacity: 0;
+      }
+
+      .scene-title {
+        margin: 0;
+        font-size: 62px;
+        line-height: 1.08;
+        letter-spacing: 0;
+        font-weight: 950;
+      }
+
+      .scene-sub {
+        margin: 18px 0 0;
+        max-width: 1040px;
+        font-size: 31px;
+        line-height: 1.42;
+        color: rgba(23, 23, 23, 0.75);
+        font-weight: 650;
+      }
+
+      .board {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 435px;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #fffaf0;
+        box-shadow: 10px 10px 0 rgba(23, 23, 23, 0.08);
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .relay-stage {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 435px;
+        border-radius: 8px;
+        background: #141414;
+        color: #fffaf0;
+        overflow: hidden;
+        box-shadow: 10px 10px 0 rgba(23, 23, 23, 0.08);
+      }
+
+      .relay-stage::before {
+        content: "";
+        position: absolute;
+        inset: 38px;
+        border: 2px dashed rgba(255, 250, 240, 0.28);
+        border-radius: 999px;
+      }
+
+      .relay-svg,
+      .flow-svg,
+      .decision-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        pointer-events: none;
+      }
+
+      .relay-path,
+      .flow-path,
+      .decision-path {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .relay-path {
+        stroke: rgba(255, 250, 240, 0.68);
+        stroke-width: 6;
+        stroke-dasharray: 14 18;
+      }
+
+      .relay-signal {
+        fill: #f59e0b;
+        opacity: 0;
+      }
+
+      .relay-stamp {
+        position: absolute;
+        left: 54px;
+        top: 42px;
+        padding: 10px 16px;
+        border: 2px solid #fffaf0;
+        border-radius: 8px;
+        color: #fffaf0;
+        font-size: 22px;
+        font-weight: 900;
+      }
+
+      .relay-word {
+        position: absolute;
+        top: 98px;
+        width: 300px;
+        height: 190px;
+        display: grid;
+        place-items: center;
+        border: 3px solid #fffaf0;
+        border-radius: 50%;
+        font-size: 50px;
+        font-weight: 950;
+      }
+
+      .relay-word.firmware {
+        left: 120px;
+        background: #2563eb;
+      }
+
+      .relay-word.loader {
+        left: 525px;
+        background: #0f9f8f;
+      }
+
+      .relay-word.kernel {
+        left: 930px;
+        background: #f59e0b;
+        color: #171717;
+      }
+
+      .relay-track {
+        position: absolute;
+        left: 180px;
+        right: 280px;
+        bottom: 88px;
+        height: 16px;
+        border-radius: 999px;
+        background: rgba(255, 250, 240, 0.12);
+      }
+
+      .baton {
+        position: absolute;
+        left: 162px;
+        bottom: 56px;
+        width: 148px;
+        height: 52px;
+        border-radius: 999px;
+        background: #fffaf0;
+        color: #171717;
+        display: grid;
+        place-items: center;
+        font-size: 24px;
+        font-weight: 950;
+        box-shadow: 0 14px 0 rgba(255, 255, 255, 0.2);
+      }
+
+      .handoff-flash {
+        position: absolute;
+        left: 285px;
+        bottom: 70px;
+        width: 82px;
+        height: 82px;
+        border: 5px solid #f59e0b;
+        border-radius: 50%;
+        opacity: 0;
+      }
+
+      .boot-screen {
+        position: absolute;
+        left: 52px;
+        top: 86px;
+        width: 575px;
+        height: 290px;
+        padding: 30px;
+        box-sizing: border-box;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #111827;
+        color: #d1fae5;
+        font-size: 31px;
+        line-height: 1.55;
+        font-family: monospace;
+        font-weight: 800;
+      }
+
+      .boot-screen::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 36px;
+        height: 4px;
+        background: rgba(209, 250, 229, 0.55);
+        box-shadow: 0 0 18px rgba(209, 250, 229, 0.95);
+      }
+
+      .terminal-cursor {
+        display: inline-block;
+        width: 16px;
+        height: 32px;
+        margin-left: 8px;
+        vertical-align: -5px;
+        background: #d1fae5;
+        opacity: 0.8;
+      }
+
+      .firmware-bus {
+        position: absolute;
+        left: 590px;
+        top: 120px;
+        width: 220px;
+        height: 180px;
+        pointer-events: none;
+      }
+
+      .bus-path {
+        fill: none;
+        stroke: #171717;
+        stroke-width: 4;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 10 12;
+        opacity: 0.34;
+      }
+
+      .bus-pulse {
+        fill: #0f9f8f;
+        opacity: 0;
+      }
+
+      .firmware-chip {
+        position: absolute;
+        left: 606px;
+        top: 184px;
+        width: 154px;
+        height: 82px;
+        display: grid;
+        place-items: center;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #f59e0b;
+        color: #171717;
+        font-size: 22px;
+        font-weight: 950;
+      }
+
+      .firmware-chip::before,
+      .firmware-chip::after {
+        content: "";
+        position: absolute;
+        left: -28px;
+        right: -28px;
+        height: 3px;
+        background: repeating-linear-gradient(90deg, #171717 0 12px, transparent 12px 22px);
+      }
+
+      .firmware-chip::before {
+        top: 20px;
+      }
+
+      .firmware-chip::after {
+        bottom: 20px;
+      }
+
+      .device-column {
+        position: absolute;
+        right: 52px;
+        top: 84px;
+        width: 600px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .device-row {
+        display: flex;
+        align-items: center;
+        height: 78px;
+        padding: 0 24px;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #ffffff;
+        box-sizing: border-box;
+        font-size: 29px;
+        font-weight: 900;
+      }
+
+      .device-row.good {
+        background: #e5f7f5;
+      }
+
+      .transfer-map {
+        position: absolute;
+        left: 56px;
+        right: 56px;
+        top: 88px;
+        height: 285px;
+      }
+
+      .flow-svg {
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 285px;
+      }
+
+      .flow-path {
+        stroke: rgba(23, 23, 23, 0.2);
+        stroke-width: 10;
+      }
+
+      .flow-active {
+        stroke: #2563eb;
+        stroke-width: 10;
+        stroke-dasharray: 720;
+        stroke-dashoffset: 720;
+      }
+
+      .flow-pulse {
+        fill: #f59e0b;
+        opacity: 0;
+      }
+
+      .station {
+        position: absolute;
+        top: 20px;
+        width: 300px;
+        height: 230px;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 12px;
+        background: #ffffff;
+        box-sizing: border-box;
+      }
+
+      .station.disk {
+        left: 0;
+        background: #fff4d6;
+      }
+
+      .station.ram {
+        left: 472px;
+        background: #e8f0ff;
+      }
+
+      .station.cpu {
+        left: 944px;
+        background: #e5f7f5;
+      }
+
+      .station b {
+        font-size: 45px;
+        font-weight: 950;
+      }
+
+      .station span {
+        max-width: 230px;
+        text-align: center;
+        font-size: 27px;
+        line-height: 1.28;
+        font-weight: 750;
+      }
+
+      .transfer-line {
+        position: absolute;
+        top: 132px;
+        left: 290px;
+        width: 705px;
+        height: 10px;
+        background: transparent;
+        border-radius: 999px;
+      }
+
+      .transfer-line::before {
+        content: "读取内核映像";
+        position: absolute;
+        left: 94px;
+        top: -62px;
+        color: #2563eb;
+        font-size: 28px;
+        font-weight: 950;
+      }
+
+      .transfer-line::after {
+        content: "跳到入口地址";
+        position: absolute;
+        right: 56px;
+        top: 28px;
+        color: #0f9f8f;
+        font-size: 28px;
+        font-weight: 950;
+      }
+
+      .transfer-fill {
+        position: absolute;
+        top: 132px;
+        left: 290px;
+        width: 0;
+        height: 10px;
+        background: transparent;
+        border-radius: 999px;
+      }
+
+      .payload {
+        position: absolute;
+        top: 104px;
+        left: 286px;
+        width: 96px;
+        height: 62px;
+        display: grid;
+        place-items: center;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 23px;
+        font-weight: 950;
+        opacity: 0;
+      }
+
+      .jump-label {
+        position: absolute;
+        right: 72px;
+        top: 24px;
+        padding: 12px 18px;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #171717;
+        color: #fffaf0;
+        font-size: 25px;
+        font-weight: 950;
+        opacity: 0;
+      }
+
+      .kernel-stack {
+        position: absolute;
+        left: 70px;
+        right: 70px;
+        top: 84px;
+        height: 300px;
+      }
+
+      .kernel-core {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 230px;
+        height: 230px;
+        margin-left: -115px;
+        margin-top: -115px;
+        border: 3px solid #171717;
+        border-radius: 50%;
+        background: #2563eb;
+        color: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 47px;
+        font-weight: 950;
+      }
+
+      .kernel-ring {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 304px;
+        height: 304px;
+        margin-left: -152px;
+        margin-top: -152px;
+        border: 3px dashed rgba(37, 99, 235, 0.42);
+        border-radius: 50%;
+      }
+
+      .kernel-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .kernel-path {
+        fill: none;
+        stroke: rgba(23, 23, 23, 0.28);
+        stroke-width: 4;
+        stroke-linecap: round;
+        stroke-dasharray: 340;
+        stroke-dashoffset: 340;
+      }
+
+      .kernel-pulse {
+        fill: #2563eb;
+        opacity: 0;
+      }
+
+      .kernel-link {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 330px;
+        height: 4px;
+        background: rgba(23, 23, 23, 0.28);
+        transform-origin: left center;
+      }
+
+      .kernel-link.l1 {
+        transform: rotate(207deg);
+      }
+
+      .kernel-link.l2 {
+        transform: rotate(333deg);
+      }
+
+      .kernel-link.l3 {
+        transform: rotate(153deg);
+      }
+
+      .kernel-link.l4 {
+        transform: rotate(27deg);
+      }
+
+      .kernel-node {
+        position: absolute;
+        width: 275px;
+        height: 92px;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #ffffff;
+        display: grid;
+        place-items: center;
+        font-size: 33px;
+        font-weight: 950;
+      }
+
+      .kernel-node.n1 {
+        left: 40px;
+        top: 22px;
+        background: #ffe8ee;
+      }
+
+      .kernel-node.n2 {
+        right: 40px;
+        top: 22px;
+        background: #e8f0ff;
+      }
+
+      .kernel-node.n3 {
+        left: 40px;
+        bottom: 22px;
+        background: #e5f7f5;
+      }
+
+      .kernel-node.n4 {
+        right: 40px;
+        bottom: 22px;
+        background: #fff4d6;
+      }
+
+      .board-label {
+        position: absolute;
+        left: 28px;
+        top: 24px;
+        color: #2563eb;
+        font-size: 26px;
+        font-weight: 950;
+      }
+
+      .flow {
+        position: absolute;
+        left: 52px;
+        right: 52px;
+        bottom: 70px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 34px;
+      }
+
+      .box {
+        min-height: 205px;
+        padding: 28px;
+        border: 3px solid #171717;
+        border-radius: 8px;
+        background: #ffffff;
+        box-sizing: border-box;
+      }
+
+      .box b {
+        display: block;
+        margin-bottom: 18px;
+        color: #171717;
+        font-size: 42px;
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      .box span {
+        display: block;
+        font-size: 29px;
+        line-height: 1.36;
+        color: rgba(23, 23, 23, 0.78);
+        font-weight: 650;
+      }
+
+      .box.blue {
+        background: #e8f0ff;
+      }
+
+      .box.teal {
+        background: #e5f7f5;
+      }
+
+      .box.amber {
+        background: #fff4d6;
+      }
+
+      .box.rose {
+        background: #ffe8ee;
+      }
+
+      .arrow {
+        position: absolute;
+        top: 246px;
+        width: 110px;
+        height: 8px;
+        background: #171717;
+        border-radius: 999px;
+        transform-origin: left center;
+      }
+
+      .arrow::after {
+        content: "";
+        position: absolute;
+        right: -2px;
+        top: -13px;
+        width: 0;
+        height: 0;
+        border-left: 25px solid #171717;
+        border-top: 17px solid transparent;
+        border-bottom: 17px solid transparent;
+      }
+
+      .a1 {
+        left: 430px;
+      }
+
+      .a2 {
+        left: 900px;
+      }
+
+      .formula {
+        position: absolute;
+        left: 52px;
+        right: 52px;
+        top: 96px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 34px;
+      }
+
+      .formula .box {
+        min-height: 245px;
+      }
+
+      .cue-grid {
+        position: absolute;
+        left: 52px;
+        right: 52px;
+        top: 160px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+      }
+
+      .decision-root {
+        position: absolute;
+        left: 50%;
+        top: 52px;
+        width: 352px;
+        height: 84px;
+        margin-left: -176px;
+        display: grid;
+        place-items: center;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #171717;
+        color: #fffaf0;
+        font-size: 30px;
+        font-weight: 950;
+        z-index: 2;
+      }
+
+      .decision-stem {
+        position: absolute;
+        left: 50%;
+        top: 136px;
+        width: 3px;
+        height: 62px;
+        background: #171717;
+        transform-origin: top;
+      }
+
+      .decision-branch {
+        position: absolute;
+        top: 198px;
+        left: 235px;
+        width: 860px;
+        height: 3px;
+        background: #171717;
+        transform-origin: center;
+      }
+
+      .decision-svg {
+        top: 34px;
+        height: 300px;
+      }
+
+      .decision-path {
+        stroke: #171717;
+        stroke-width: 4;
+        stroke-dasharray: 980;
+        stroke-dashoffset: 980;
+      }
+
+      .cue {
+        min-height: 206px;
+        padding: 22px;
+        border-radius: 8px;
+        border: 2px solid #171717;
+        background: #ffffff;
+        box-sizing: border-box;
+      }
+
+      .cue small {
+        display: inline-flex;
+        margin-bottom: 12px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        background: #171717;
+        color: white;
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .cue b {
+        display: block;
+        margin-bottom: 12px;
+        color: #e11d48;
+        font-size: 34px;
+      }
+
+      .cue span {
+        display: block;
+        font-size: 26px;
+        line-height: 1.36;
+        color: rgba(23, 23, 23, 0.76);
+        font-weight: 650;
+      }
+
+      .memory-line {
+        position: absolute;
+        left: 52px;
+        right: 52px;
+        bottom: 68px;
+        height: 18px;
+        border-radius: 999px;
+        background: rgba(23, 23, 23, 0.13);
+      }
+
+      .memory-phrase {
+        position: absolute;
+        left: 52px;
+        right: 52px;
+        top: 76px;
+        display: grid;
+        gap: 18px;
+      }
+
+      .memory-strip {
+        height: 78px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 38px;
+        font-weight: 950;
+      }
+
+      .memory-strip:nth-child(1) {
+        background: #e8f0ff;
+      }
+
+      .memory-strip:nth-child(2) {
+        background: #e5f7f5;
+      }
+
+      .memory-strip:nth-child(3) {
+        background: #fff4d6;
+      }
+
+      .memory-strip em {
+        font-style: normal;
+        color: #e11d48;
+      }
+
+      .title-mark {
+        position: relative;
+        display: inline-block;
+      }
+
+      .mark-sweep {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -8px;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(245, 158, 11, 0.35);
+        transform: scaleX(0);
+        transform-origin: left center;
+        z-index: -1;
+      }
+
+      .soft-shadow {
+        box-shadow: 0 18px 30px rgba(23, 23, 23, 0.08);
+      }
+
+      .memory-fill {
+        position: absolute;
+        left: 52px;
+        bottom: 68px;
+        height: 18px;
+        width: 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #2563eb, #0f9f8f, #f59e0b);
+      }
+
+      .caption {
+        position: absolute;
+        left: 96px;
+        right: 96px;
+        bottom: 52px;
+        height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 42px;
+        border: 2px solid #171717;
+        border-radius: 8px;
+        background: #171717;
+        color: #fffaf0;
+        box-sizing: border-box;
+        font-size: 34px;
+        line-height: 1.25;
+        font-weight: 850;
+        opacity: 0;
+        text-align: center;
+      }
+
+      .mark {
+        color: #2563eb;
+      }
+
+      .caption .mark {
+        color: #f59e0b;
+      }
+
+      .relay-stage,
+      .relay-word,
+      .baton,
+      .board,
+      .boot-screen,
+      .firmware-chip,
+      .station,
+      .kernel-core,
+      .kernel-node,
+      .cue,
+      .memory-strip,
+      .caption {
+        will-change: transform, opacity;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="main-video" data-composition-id="main-video" data-width="1920" data-height="1080" data-start="0" data-duration="73">
+      <audio id="narration" src="assets/narration.mp3" data-start="0" data-duration="71.2" data-track-index="5" data-volume="1"></audio>
+
+      <div class="header">
+        <div>
+          <div class="course">408 操作系统 · 第一章</div>
+          <div class="topic">启动流程：谁先运行，谁接管机器？</div>
+        </div>
+        <div class="time-pill">1 分钟讲清</div>
+      </div>
+
+      <aside class="rail">
+        <div class="rail-line"></div>
+        <div id="rail-progress" class="rail-progress"></div>
+        <div id="step-1" class="rail-step"><div class="dot">1</div><span>固件</span></div>
+        <div id="step-2" class="rail-step"><div class="dot">2</div><span>引导</span></div>
+        <div id="step-3" class="rail-step"><div class="dot">3</div><span>内核</span></div>
+        <div id="step-4" class="rail-step"><div class="dot">4</div><span>做题</span></div>
+      </aside>
+
+      <section id="scene-overview" class="scene">
+        <h1 class="scene-title">把启动过程想成 <span class="mark title-mark"><span class="mark-sweep"></span>三棒接力</span></h1>
+        <p class="scene-sub">先别急着说“操作系统启动了”。408 更爱考的是：当前阶段到底是谁在执行，职责边界在哪里。</p>
+        <div class="relay-stage">
+          <svg class="relay-svg" viewBox="0 0 1448 435" aria-hidden="true">
+            <path id="relay-path" class="relay-path" d="M 270 315 C 395 245, 520 245, 675 315 S 955 385, 1080 315" />
+            <circle id="relay-signal" class="relay-signal" r="13" cx="270" cy="315" />
+          </svg>
+          <div class="relay-stamp">CONTROL HANDOFF</div>
+          <div class="relay-word firmware">固件</div>
+          <div class="relay-word loader">引导</div>
+          <div class="relay-word kernel">内核</div>
+          <div class="relay-track"></div>
+          <div id="baton" class="baton">控制权</div>
+          <div id="flash-1" class="handoff-flash"></div>
+          <div id="flash-2" class="handoff-flash"></div>
+        </div>
+      </section>
+
+      <section id="scene-firmware" class="scene">
+        <h1 class="scene-title">第一棒：BIOS / UEFI 让硬件进入可启动状态</h1>
+        <p class="scene-sub">它不是普通应用，也不是内核。它是机器上电后最早执行的固件代码。</p>
+        <div class="board">
+          <div class="board-label">固件阶段</div>
+          <div class="boot-screen">
+            <div>&gt; CPU_RESET_VECTOR</div>
+            <div>&gt; init memory ... OK</div>
+            <div>&gt; scan boot order</div>
+            <div>&gt; EFI disk found<span class="terminal-cursor"></span></div>
+          </div>
+          <svg class="firmware-bus" viewBox="0 0 520 170" aria-hidden="true">
+              <path id="bus-path" class="bus-path" d="M 12 140 C 42 52, 104 35, 112 86 S 178 150, 208 42" />
+            <circle id="bus-pulse" class="bus-pulse" r="10" cx="10" cy="92" />
+          </svg>
+          <div class="firmware-chip">FIRMWARE</div>
+          <div class="device-column">
+            <div class="device-row">1. 内存 / 主板 / 基础 I/O 初始化</div>
+            <div class="device-row">2. 启动顺序：USB -> SSD -> Network</div>
+            <div class="device-row good">3. 找到可启动项，交给 bootloader</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-loader" class="scene">
+        <h1 class="scene-title">第二棒：Bootloader 只做一件核心事</h1>
+        <p class="scene-sub">它负责把“内核文件”变成“内存中可以开始执行的内核”。</p>
+        <div class="board">
+          <div class="board-label">引导程序阶段</div>
+          <div class="transfer-map">
+            <svg class="flow-svg" viewBox="0 0 1336 285" aria-hidden="true">
+              <path class="flow-path" d="M 150 142 C 330 88, 500 88, 622 142 S 915 196, 1095 142" />
+              <path id="flow-active" class="flow-active" d="M 150 142 C 330 88, 500 88, 622 142 S 915 196, 1095 142" />
+              <circle id="flow-pulse" class="flow-pulse" r="12" cx="150" cy="142" />
+            </svg>
+            <div class="station disk"><b>DISK</b><span>内核映像与启动配置</span></div>
+            <div class="station ram"><b>RAM</b><span>内核被装入约定位置</span></div>
+            <div class="station cpu"><b>CPU</b><span>跳转到内核入口</span></div>
+            <div class="transfer-line"></div>
+            <div id="transfer-fill" class="transfer-fill"></div>
+            <div id="payload" class="payload">kernel</div>
+            <div id="jump-label" class="jump-label">jump entry()</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-kernel" class="scene">
+        <h1 class="scene-title">第三棒：内核接管后，OS 环境才开始建立</h1>
+        <p class="scene-sub">从这里开始，才进入操作系统核心功能的世界。</p>
+        <div class="board">
+          <div class="board-label">内核阶段</div>
+          <div class="kernel-stack">
+            <svg class="kernel-svg" viewBox="0 0 1308 300" aria-hidden="true">
+              <path id="kernel-path-1" class="kernel-path" d="M 654 150 C 520 70, 380 54, 178 68" />
+              <path id="kernel-path-2" class="kernel-path" d="M 654 150 C 790 70, 930 54, 1130 68" />
+              <path id="kernel-path-3" class="kernel-path" d="M 654 150 C 520 230, 380 246, 178 232" />
+              <path id="kernel-path-4" class="kernel-path" d="M 654 150 C 790 230, 930 246, 1130 232" />
+              <circle id="kernel-pulse" class="kernel-pulse" r="9" cx="654" cy="150" />
+            </svg>
+            <div class="kernel-ring"></div>
+            <div class="kernel-core">内核</div>
+            <div class="kernel-node n1">中断处理</div>
+            <div class="kernel-node n2">页表 / 内存</div>
+            <div class="kernel-node n3">进程管理</div>
+            <div class="kernel-node n4">设备驱动</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-exam" class="scene">
+        <h1 class="scene-title">做题时，按关键词判断“第几棒”</h1>
+        <p class="scene-sub">把题干里的动作先归类，再判断职责，错误率会明显下降。</p>
+        <div class="board">
+          <div class="board-label">408 判题提示</div>
+          <svg class="decision-svg" viewBox="0 0 1448 300" aria-hidden="true">
+            <path id="decision-path" class="decision-path" d="M 724 70 L 724 150 M 290 150 H 1158 M 290 150 V 238 M 724 150 V 238 M 1158 150 V 238" />
+          </svg>
+          <div class="decision-root">题干动作属于谁？</div>
+          <div class="cue-grid">
+            <div class="cue"><small>固件</small><b>上电 / 自检 / 启动项</b><span>优先想到 BIOS 或 UEFI。</span></div>
+            <div class="cue"><small>引导程序</small><b>加载内核 / 跳转入口</b><span>优先想到 bootloader。</span></div>
+            <div class="cue"><small>内核</small><b>中断 / 页表 / 进程 / 设备</b><span>才是 OS 真正接管后的工作。</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-final" class="scene">
+        <h1 class="scene-title">一句话记忆：<span class="mark title-mark"><span class="mark-sweep"></span>固件找入口，引导搬内核，内核管全局</span></h1>
+        <p class="scene-sub">这句话就是启动流程题的最小知识框架。先定位阶段，再分析职责。</p>
+        <div class="board">
+          <div class="board-label">最小闭环</div>
+          <div class="memory-phrase">
+            <div class="memory-strip">固件 <em>找入口</em><span>上电后先跑</span></div>
+            <div class="memory-strip">引导 <em>搬内核</em><span>从磁盘到内存</span></div>
+            <div class="memory-strip">内核 <em>管全局</em><span>OS 正式接管</span></div>
+          </div>
+          <div class="memory-line"></div>
+          <div id="memory-fill" class="memory-fill"></div>
+        </div>
+      </section>
+
+      <div id="cap-1" class="caption">计算机启动，可以看成一场 <span class="mark">三棒接力</span>。</div>
+      <div id="cap-2" class="caption">第一棒是固件，也就是 <span class="mark">BIOS 或 UEFI</span>。</div>
+      <div id="cap-3" class="caption">它先让 CPU 从固定入口开始执行，初始化内存和基础设备，然后寻找可启动磁盘。</div>
+      <div id="cap-4" class="caption">第二棒是引导程序，也叫 <span class="mark">bootloader</span>。</div>
+      <div id="cap-5" class="caption">它找到操作系统内核，把内核加载到内存，并准备启动参数。</div>
+      <div id="cap-6" class="caption">第三棒才轮到 <span class="mark">内核</span>。</div>
+      <div id="cap-7" class="caption">内核运行以后，会建立中断、内存管理、进程管理和设备管理。</div>
+      <div id="cap-8" class="caption">所以做 408 题时，不要把这三层混在一起。</div>
+      <div id="cap-9" class="caption">看到上电、自检、启动项，优先想到固件。</div>
+      <div id="cap-10" class="caption">看到加载内核、跳转内核入口，优先想到引导程序。</div>
+      <div id="cap-11" class="caption">看到中断、页表、进程、设备，才是操作系统内核真正接管。</div>
+      <div id="cap-12" class="caption">一句话记忆：<span class="mark">固件找入口，引导搬内核，内核管全局</span>。</div>
+
+      <script>
+        gsap.registerPlugin(MotionPathPlugin);
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        const captionTimes = [
+          [0.1, 3.852, "#cap-1"],
+          [3.802, 8.315, "#cap-2"],
+          [8.315, 18.513, "#cap-3"],
+          [18.513, 22.157, "#cap-4"],
+          [22.157, 33.394, "#cap-5"],
+          [33.394, 35.828, "#cap-6"],
+          [35.828, 43.184, "#cap-7"],
+          [43.184, 48.144, "#cap-8"],
+          [48.144, 52.828, "#cap-9"],
+          [52.828, 58.315, "#cap-10"],
+          [58.315, 65.171, "#cap-11"],
+          [65.171, 71.026, "#cap-12"],
+        ];
+
+        function active(step, at) {
+          for (let i = 1; i <= 4; i += 1) {
+            const bg = i < step ? "#0f9f8f" : i === step ? "#2563eb" : "#f6f1e8";
+            const color = i <= step ? "#ffffff" : "#171717";
+            tl.to(`#step-${i} .dot`, { backgroundColor: bg, color, duration: 0.22, ease: "power1.out" }, at);
+          }
+          tl.to("#rail-progress", { height: `${Math.min(100, step * 25)}%`, duration: 0.55, ease: "power2.out" }, at);
+        }
+
+        function show(scene, at) {
+          const fromIf = (selector, vars, time) => {
+            if (document.querySelector(selector)) tl.from(selector, vars, time);
+          };
+          tl.to(scene, { opacity: 1, duration: 0.55, ease: "power2.out" }, at);
+          fromIf(`${scene} .scene-title`, { y: 34, opacity: 0, duration: 0.58, ease: "power3.out" }, at + 0.1);
+          fromIf(`${scene} .scene-sub`, { y: 24, opacity: 0, duration: 0.48, ease: "power2.out" }, at + 0.26);
+          fromIf(`${scene} .board`, { y: 36, opacity: 0, duration: 0.6, ease: "expo.out" }, at + 0.36);
+          fromIf(`${scene} .relay-stage`, { y: 36, opacity: 0, duration: 0.6, ease: "expo.out" }, at + 0.36);
+          fromIf(`${scene} .relay-stamp`, { x: -24, opacity: 0, duration: 0.42, ease: "power3.out" }, at + 0.5);
+          fromIf(`${scene} .relay-word`, { scale: 0.72, rotation: -4, opacity: 0, stagger: 0.14, duration: 0.5, ease: "back.out(1.5)" }, at + 0.64);
+          fromIf(`${scene} .boot-screen`, { x: -40, opacity: 0, duration: 0.52, ease: "power3.out" }, at + 0.58);
+          fromIf(`${scene} .firmware-chip`, { scale: 0.72, rotation: 6, opacity: 0, duration: 0.56, ease: "back.out(1.4)" }, at + 0.88);
+          fromIf(`${scene} .device-row`, { x: 42, opacity: 0, stagger: 0.14, duration: 0.45, ease: "power2.out" }, at + 0.72);
+          fromIf(`${scene} .station`, { y: 30, opacity: 0, stagger: 0.13, duration: 0.48, ease: "power2.out" }, at + 0.64);
+          fromIf(`${scene} .payload`, { scale: 0.72, opacity: 0, duration: 0.22, ease: "power1.out" }, at + 0.8);
+          fromIf(`${scene} .jump-label`, { y: -16, opacity: 0, duration: 0.34, ease: "power2.out" }, at + 1.0);
+          fromIf(`${scene} .kernel-ring`, { scale: 0.82, opacity: 0, duration: 0.62, ease: "sine.out" }, at + 0.52);
+          fromIf(`${scene} .kernel-link`, { scaleX: 0, stagger: 0.08, duration: 0.34, ease: "power1.out" }, at + 0.72);
+          fromIf(`${scene} .kernel-core`, { scale: 0.68, opacity: 0, duration: 0.55, ease: "back.out(1.7)" }, at + 0.62);
+          fromIf(`${scene} .kernel-node`, { scale: 0.84, opacity: 0, stagger: 0.12, duration: 0.44, ease: "power2.out" }, at + 0.9);
+          fromIf(`${scene} .decision-root`, { y: -24, opacity: 0, duration: 0.42, ease: "expo.out" }, at + 0.52);
+          fromIf(`${scene} .decision-stem`, { scaleY: 0, duration: 0.32, ease: "power1.out" }, at + 0.86);
+          fromIf(`${scene} .decision-branch`, { scaleX: 0, duration: 0.42, ease: "power1.out" }, at + 1.08);
+          fromIf(`${scene} .box`, { y: 28, opacity: 0, stagger: 0.12, duration: 0.46, ease: "power2.out" }, at + 0.62);
+          fromIf(`${scene} .cue`, { y: 28, opacity: 0, stagger: 0.12, duration: 0.46, ease: "power2.out" }, at + 0.62);
+          fromIf(`${scene} .memory-strip`, { x: -46, opacity: 0, stagger: 0.16, duration: 0.5, ease: "power3.out" }, at + 0.62);
+          fromIf(`${scene} .arrow`, { scaleX: 0, stagger: 0.14, duration: 0.42, ease: "power2.out" }, at + 0.9);
+        }
+
+        function hide(scene, at) {
+          tl.to(scene, { opacity: 0, duration: 0.45, ease: "power2.inOut" }, at);
+        }
+
+        function caption(start, end, id) {
+          tl.to(id, { opacity: 1, y: -4, duration: 0.18, ease: "power2.out" }, start);
+          tl.to(id, { opacity: 0, y: 0, duration: 0.16, ease: "power2.in" }, Math.max(start + 0.35, end - 0.18));
+        }
+
+        function drawPath(selector, at, duration, ease = "power1.inOut") {
+          document.querySelectorAll(selector).forEach((path) => {
+            const len = path.getTotalLength();
+            gsap.set(path, { strokeDasharray: len, strokeDashoffset: len });
+            tl.to(path, { strokeDashoffset: 0, duration, ease }, at);
+          });
+        }
+
+        function pulseAlong(dot, path, at, duration, options = {}) {
+          tl.to(dot, { opacity: options.opacity || 1, duration: 0.16, ease: "power1.out" }, at);
+          tl.to(
+            dot,
+            {
+              motionPath: { path, align: path, alignOrigin: [0.5, 0.5] },
+              duration,
+              ease: options.ease || "power1.inOut",
+            },
+            at + 0.02,
+          );
+          tl.to(dot, { opacity: 0, duration: 0.2, ease: "power1.in" }, at + duration - 0.08);
+        }
+
+        active(1, 0);
+        show("#scene-overview", 0.2);
+        drawPath("#relay-path", 0.95, 1.35, "sine.inOut");
+        pulseAlong("#relay-signal", "#relay-path", 1.35, 4.6, { opacity: 0.9, ease: "sine.inOut" });
+        tl.to("#scene-overview .mark-sweep", { scaleX: 1, duration: 0.52, ease: "power2.out" }, 1.1);
+        tl.to("#baton", { x: 405, rotation: 8, duration: 1.2, ease: "power2.inOut" }, 2.1);
+        tl.to("#flash-1", { opacity: 1, scale: 1.45, duration: 0.18, ease: "power1.out" }, 3.05);
+        tl.to("#flash-1", { opacity: 0, scale: 2.1, duration: 0.35, ease: "power2.in" }, 3.23);
+        tl.to("#baton", { x: 810, rotation: -5, duration: 1.2, ease: "power2.inOut" }, 4.15);
+        tl.set("#flash-2", { x: 405 }, 4.9);
+        tl.to("#flash-2", { opacity: 1, scale: 1.45, duration: 0.18, ease: "power1.out" }, 5.05);
+        tl.to("#flash-2", { opacity: 0, scale: 2.1, duration: 0.35, ease: "power2.in" }, 5.23);
+        hide("#scene-overview", 8.15);
+
+        active(1, 8.1);
+        show("#scene-firmware", 8.45);
+        drawPath("#bus-path", 9.5, 1.15, "sine.inOut");
+        pulseAlong("#bus-pulse", "#bus-path", 11.0, 4.8, { opacity: 0.85, ease: "power1.inOut" });
+        tl.to(".terminal-cursor", { opacity: 0.15, duration: 0.42, repeat: 11, yoyo: true, ease: "steps(1)" }, 9.7);
+        tl.to("#scene-firmware .boot-screen", { boxShadow: "0 0 0 6px rgba(37, 99, 235, 0.14)", duration: 0.55, repeat: 2, yoyo: true, ease: "sine.inOut" }, 11.0);
+        tl.to("#scene-firmware .firmware-chip", { rotation: -4, duration: 1.8, repeat: 2, yoyo: true, ease: "sine.inOut" }, 10.2);
+        hide("#scene-firmware", 18.25);
+
+        active(2, 18.3);
+        show("#scene-loader", 18.75);
+        tl.to(".header", { opacity: 0.48, scale: 0.94, duration: 0.55, ease: "power1.out" }, 18.3);
+        tl.to(".rail", { opacity: 0.52, x: -18, scale: 0.96, duration: 0.55, ease: "power1.out" }, 18.3);
+        tl.to("#payload", { opacity: 1, duration: 0.2, ease: "power1.out" }, 22.95);
+        drawPath("#flow-active", 22.7, 7.5, "power1.inOut");
+        pulseAlong("#flow-pulse", "#flow-active", 23.1, 7.2, { opacity: 0.9, ease: "power1.inOut" });
+        tl.to("#payload", { x: 705, rotation: 8, duration: 7.2, ease: "power1.inOut" }, 23.1);
+        tl.to("#transfer-fill", { width: 705, duration: 7.2, ease: "power1.inOut" }, 23.1);
+        tl.to("#jump-label", { opacity: 1, y: 0, duration: 0.36, ease: "power2.out" }, 30.6);
+        hide("#scene-loader", 33.12);
+
+        active(3, 33.2);
+        show("#scene-kernel", 33.62);
+        drawPath("#scene-kernel .kernel-path", 34.7, 1.1, "power1.inOut");
+        pulseAlong("#kernel-pulse", "#kernel-path-1", 36.15, 1.1, { opacity: 0.8, ease: "sine.inOut" });
+        pulseAlong("#kernel-pulse", "#kernel-path-2", 37.35, 1.1, { opacity: 0.8, ease: "sine.inOut" });
+        pulseAlong("#kernel-pulse", "#kernel-path-3", 38.55, 1.1, { opacity: 0.8, ease: "sine.inOut" });
+        pulseAlong("#kernel-pulse", "#kernel-path-4", 39.75, 1.1, { opacity: 0.8, ease: "sine.inOut" });
+        tl.to("#scene-kernel .kernel-ring", { rotation: 360, duration: 8.2, ease: "none" }, 34.1);
+        tl.to("#scene-kernel .kernel-core", { scale: 1.06, duration: 0.75, repeat: 4, yoyo: true, ease: "sine.inOut" }, 35.2);
+        hide("#scene-kernel", 43.0);
+
+        active(4, 43.05);
+        show("#scene-exam", 43.35);
+        drawPath("#decision-path", 44.28, 0.95, "power2.out");
+        tl.to(".header", { opacity: 1, scale: 1, duration: 0.45, ease: "power1.out" }, 43.05);
+        tl.to(".rail", { opacity: 1, x: 0, scale: 1, duration: 0.45, ease: "power1.out" }, 43.05);
+        tl.to("#scene-exam .cue", { y: -10, duration: 0.42, stagger: 0.13, yoyo: true, repeat: 1, ease: "sine.inOut" }, 49.1);
+        hide("#scene-exam", 58.06);
+
+        active(4, 58.12);
+        show("#scene-final", 58.45);
+        tl.to("#scene-final .mark-sweep", { scaleX: 1, duration: 0.62, ease: "power2.out" }, 59.35);
+        tl.to(".header", { opacity: 0.36, scale: 0.94, duration: 0.45, ease: "power1.out" }, 58.2);
+        tl.to(".rail", { opacity: 0.38, x: -18, scale: 0.96, duration: 0.45, ease: "power1.out" }, 58.2);
+        tl.to("#scene-final .memory-strip em", { color: "#2563eb", duration: 0.42, stagger: 0.2, yoyo: true, repeat: 1, ease: "sine.inOut" }, 64.8);
+        tl.to("#memory-fill", { width: 1344, duration: 6.4, ease: "power1.inOut" }, 61.2);
+        tl.to("#scene-final", { opacity: 0, duration: 0.7, ease: "power2.inOut" }, 71.5);
+
+        captionTimes.forEach(([start, end, id]) => caption(start, end, id));
+        window.__timelines["main-video"] = tl;
+
+        const isLocalBrowserPreview = window.location.protocol === "file:" && !navigator.webdriver;
+        if (isLocalBrowserPreview) {
+          window.addEventListener("load", () => {
+            tl.play(0.65);
+          });
+        }
+      </script>
+    </div>
+  </body>
+</html>

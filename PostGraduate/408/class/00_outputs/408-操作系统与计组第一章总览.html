@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="light" style="--rec-label: '★ 推荐'">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>408 第一章：操作系统 x 计算机组成原理总览</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       TOKENS
+       ============================================================ */
+    :root {
+      --bg: #FAFAF7;
+      --surface: #FFFFFF;
+      --surface-2: #F5F5F0;
+      --surface-3: #EFEEE8;
+      --text: #1A1A1A;
+      --text-muted: #4A4A45;
+      --text-subtle: #6B6B66;
+      --accent: #D97757;
+      --accent-hover: #C56843;
+      --accent-soft: #FBEEE6;
+      --accent-border: #F0D5C4;
+      --accent-strong: #A85533;
+      --border: #E5E4DC;
+      --border-strong: #CDCDC4;
+      --code-bg: #F5F2EC;
+      --code-text: #2A2A2A;
+      --info: #2563EB;
+      --info-soft: #EFF6FF;
+      --info-border: #BFDBFE;
+      --warn: #B45309;
+      --warn-soft: #FFFBEB;
+      --warn-border: #FDE68A;
+      --danger: #B91C1C;
+      --danger-soft: #FEF2F2;
+      --danger-border: #FECACA;
+      --success: #047857;
+      --success-soft: #ECFDF5;
+      --success-border: #A7F3D0;
+      --decision: #6D28D9;
+      --decision-soft: #F5F3FF;
+      --decision-border: #DDD6FE;
+      --shadow-sm: 0 1px 2px rgba(20, 14, 8, 0.04);
+      --shadow: 0 1px 2px rgba(20, 14, 8, 0.04), 0 4px 12px rgba(20, 14, 8, 0.06);
+      --shadow-lg: 0 8px 24px rgba(20, 14, 8, 0.10);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans CJK JP', 'Noto Sans CJK KR', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+      --z-progress: 200;
+      --z-topbar: 100;
+      --z-drawer: 300;
+      --z-backdrop: 250;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1A1714;
+      --surface: #221E1A;
+      --surface-2: #2A2520;
+      --surface-3: #322C26;
+      --text: #F5F0E8;
+      --text-muted: #C8C0B6;
+      --text-subtle: #9A938A;
+      --accent: #E89572;
+      --accent-hover: #F2A87F;
+      --accent-soft: #3A2A22;
+      --accent-border: #5A3D2E;
+      --accent-strong: #F5B493;
+      --border: #2E2924;
+      --border-strong: #463F38;
+      --code-bg: #1E1B17;
+      --code-text: #E8E2D8;
+      --info: #93C5FD;
+      --info-soft: #1E2A3D;
+      --info-border: #2A4365;
+      --warn: #FBBF24;
+      --warn-soft: #332817;
+      --warn-border: #5C4520;
+      --danger: #FCA5A5;
+      --danger-soft: #3A1F1F;
+      --danger-border: #5C2A2A;
+      --success: #6EE7B7;
+      --success-soft: #1A3329;
+      --success-border: #1F5C45;
+      --decision: #C4B5FD;
+      --decision-soft: #2A1F40;
+      --decision-border: #4A3870;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    /* ============================================================
+       BASE
+       ============================================================ */
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    ::selection { background: var(--accent-soft); color: var(--accent-strong); }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute;
+      top: -100px; left: 8px;
+      padding: 10px 16px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      z-index: 1000;
+      transition: top 0.15s;
+    }
+    .skip-link:focus { top: 8px; }
+
+    /* SVG sprite container (hidden) */
+    .icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .icon { display: inline-block; flex-shrink: 0; vertical-align: middle; stroke: currentColor; fill: none; }
+
+    /* Scroll progress bar */
+    .scroll-progress {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      width: 0;
+      background: var(--accent);
+      z-index: var(--z-progress);
+      transition: width 0.05s linear;
+    }
+
+    /* ============================================================
+       TOPBAR
+       ============================================================ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: var(--z-topbar);
+      background: rgba(250, 250, 247, 0.85);
+      backdrop-filter: saturate(180%) blur(12px);
+      -webkit-backdrop-filter: saturate(180%) blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    [data-theme="dark"] .topbar { background: rgba(26, 23, 20, 0.85); }
+    .topbar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .brand-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+      animation: brand-pulse 2.8s ease-in-out infinite;
+    }
+    @keyframes brand-pulse {
+      0%, 100% { box-shadow: 0 0 0 4px var(--accent-soft); }
+      50%      { box-shadow: 0 0 0 7px transparent; }
+    }
+    .topbar-actions { display: flex; gap: 6px; align-items: center; }
+    .icon-btn {
+      width: 40px; height: 40px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+      padding: 0;
+    }
+    .icon-btn .icon { width: 18px; height: 18px; stroke-width: 2; }
+    .icon-btn[hidden] { display: none; }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    .layout {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 48px;
+      padding: 32px 24px 96px;
+    }
+    .content { min-width: 0; }
+
+    /* ============================================================
+       TOC (desktop + mobile drawer)
+       ============================================================ */
+    .toc {
+      position: sticky;
+      top: 80px;
+      align-self: start;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .toc::-webkit-scrollbar { width: 6px; }
+    .toc::-webkit-scrollbar-track { background: transparent; }
+    .toc::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+    .toc-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 12px 12px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-subtle);
+      margin: 0;
+    }
+    .toc-close { display: none; }
+    .toc-nav { display: flex; flex-direction: column; gap: 2px; }
+    .toc-nav a {
+      display: flex; align-items: center;
+      min-height: 36px;
+      padding: 8px 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-left: 2px solid transparent;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      transition: color 0.15s, background-color 0.15s, border-color 0.15s;
+      line-height: 1.4;
+    }
+    .toc-nav a.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: var(--accent-soft);
+      font-weight: 500;
+    }
+    .toc-nav a.lvl-3 { padding-left: 26px; font-size: 12.5px; }
+    .toc-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: var(--z-backdrop);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    /* ============================================================
+       DOC HEADER
+       ============================================================ */
+    .doc-header {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-eyebrow {
+      display: inline-flex; align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      border: 1px solid var(--accent-border);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+    }
+    .doc-title {
+      font-size: clamp(28px, 3vw + 16px, 40px);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+      color: var(--text);
+      text-wrap: balance;
+    }
+    .doc-subtitle {
+      font-size: clamp(15px, 0.6vw + 13px, 18px);
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin: 0 0 20px;
+      max-width: 75ch;
+      text-wrap: pretty;
+    }
+    .doc-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+    .doc-meta-item { display: inline-flex; align-items: center; gap: 6px; }
+    .doc-meta .icon { width: 14px; height: 14px; stroke-width: 2; }
+
+    /* ============================================================
+       CONTENT (typography)
+       ============================================================ */
+    .content h1, .content h2, .content h3, .content h4 {
+      color: var(--text);
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      scroll-margin-top: 80px;
+      text-wrap: balance;
+    }
+    .content h2 {
+      font-size: 26px;
+      font-weight: 600;
+      margin: 56px 0 16px;
+      padding-top: 8px;
+      position: relative;
+    }
+    .content h3 {
+      font-size: 19px;
+      font-weight: 600;
+      margin: 36px 0 12px;
+      position: relative;
+    }
+    .content h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 24px 0 8px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .content > p,
+    .content > ul,
+    .content > ol,
+    .content > blockquote { max-width: 75ch; }
+    .content p { margin: 0 0 16px; text-wrap: pretty; overflow-wrap: anywhere; }
+    .content a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-border); }
+    .content ul, .content ol { padding-left: 24px; margin: 0 0 16px; }
+    .content li { margin: 4px 0; }
+    .content strong { color: var(--text); font-weight: 600; }
+    .content em { color: var(--text-muted); }
+    .content hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+
+    /* Anchor links injected by JS on h2/h3 with id */
+    .anchor {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px;
+      margin-left: 6px;
+      color: var(--text-subtle);
+      opacity: 0;
+      transform: translateY(-1px);
+      transition: opacity 0.15s, color 0.15s;
+      border-bottom: none !important;
+      border-radius: var(--radius-sm);
+    }
+    .anchor .icon { width: 14px; height: 14px; stroke-width: 2; }
+
+    /* Images */
+    .content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin: 20px 0;
+      display: block;
+    }
+    .content figure { margin: 20px 0; }
+    .content figure img { margin: 0; }
+    .content figcaption {
+      font-size: 13px;
+      color: var(--text-subtle);
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    /* Task lists (- [ ] / - [x]) */
+    .content .task-list-item { list-style: none; margin-left: -22px; }
+    .content .task-list-item-checkbox {
+      margin-right: 8px;
+      vertical-align: -2px;
+      accent-color: var(--accent);
+    }
+
+    /* Footnotes */
+    .content .footnote-ref a,
+    .content sup a {
+      font-size: 0.75em;
+      vertical-align: super;
+      border-bottom: none;
+      padding: 0 2px;
+    }
+    .content .footnotes {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ============================================================
+       CODE
+       ============================================================ */
+    .content code {
+      font-family: var(--font-mono);
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      color: var(--code-text);
+      border: 1px solid var(--border);
+      overflow-wrap: anywhere;
+    }
+    .content pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      overflow-x: auto;
+      font-size: 13.5px;
+      line-height: 1.6;
+      margin: 16px 0;
+      position: relative;
+    }
+    .content pre code {
+      background: none; padding: 0; border: none;
+      color: var(--code-text);
+      font-size: inherit;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 32px; height: 32px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text-subtle);
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+      padding: 0;
+    }
+    .copy-btn .icon { width: 14px; height: 14px; stroke-width: 2; }
+    .copy-btn.copied { color: var(--success); border-color: var(--success-border); opacity: 1; }
+
+    /* ============================================================
+       TIMELINE / STEPS
+       ============================================================ */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 24px 0;
+      position: relative;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 19px;
+      top: 20px;
+      bottom: 20px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent-border), var(--border));
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 40px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 16px 4px;
+      position: relative;
+      border-radius: var(--radius);
+      transition: background-color 0.15s;
+    }
+    .step-num {
+      width: 40px; height: 40px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      border-radius: 50%;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      z-index: 1;
+      transition: background-color 0.15s, color 0.15s, transform 0.15s;
+    }
+    .step.done .step-num { background: var(--accent); color: #fff; }
+    .step-body { padding-top: 6px; min-width: 0; }
+    .step-body h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .step-body p { margin: 0 0 8px; color: var(--text-muted); font-size: 14.5px; max-width: 75ch; }
+    .step-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    /* ============================================================
+       CALLOUTS
+       ============================================================ */
+    .callout {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      border: 1px solid;
+      margin: 20px 0;
+      font-size: 14.5px;
+      line-height: 1.6;
+      max-width: 75ch;
+    }
+    .callout-icon { width: 20px; height: 20px; margin-top: 2px; stroke-width: 2; }
+    .callout-body { min-width: 0; }
+    .callout-title { font-weight: 600; margin: 0 0 4px; font-size: 14px; }
+    .callout-body p:last-child { margin-bottom: 0; }
+    .callout-body code { background: rgba(0,0,0,0.04); }
+    [data-theme="dark"] .callout-body code { background: rgba(255,255,255,0.06); }
+
+    .callout-info     { background: var(--info-soft);     border-color: var(--info-border);     color: var(--text); }
+    .callout-info     .callout-title, .callout-info     .callout-icon { color: var(--info); }
+    .callout-warn     { background: var(--warn-soft);     border-color: var(--warn-border);     color: var(--text); }
+    .callout-warn     .callout-title, .callout-warn     .callout-icon { color: var(--warn); }
+    .callout-danger   { background: var(--danger-soft);   border-color: var(--danger-border);   color: var(--text); }
+    .callout-danger   .callout-title, .callout-danger   .callout-icon { color: var(--danger); }
+    .callout-success  { background: var(--success-soft);  border-color: var(--success-border);  color: var(--text); }
+    .callout-success  .callout-title, .callout-success  .callout-icon { color: var(--success); }
+    .callout-decision { background: var(--decision-soft); border-color: var(--decision-border); color: var(--text); }
+    .callout-decision .callout-title, .callout-decision .callout-icon { color: var(--decision); }
+    .callout-tip      { background: var(--accent-soft);   border-color: var(--accent-border);   color: var(--text); }
+    .callout-tip      .callout-title, .callout-tip      .callout-icon { color: var(--accent-strong); }
+
+    /* ============================================================
+       KEY-POINT HIGHLIGHT
+       ============================================================ */
+    .highlight {
+      background: linear-gradient(135deg, var(--accent-soft), var(--surface-2));
+      border-left: 4px solid var(--accent);
+      padding: 18px 22px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 24px 0;
+      font-size: 16px;
+      line-height: 1.65;
+      max-width: 75ch;
+    }
+    .highlight-label {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-strong);
+      margin-bottom: 6px;
+    }
+
+    /* ============================================================
+       MERMAID
+       ============================================================ */
+    .diagram {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 24px 0;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+    }
+    .diagram-caption {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+      font-size: 13px;
+      color: var(--text-subtle);
+      text-align: center;
+    }
+    .mermaid { text-align: center; min-height: 80px; }
+    .mermaid svg { max-width: 100%; height: auto; }
+    .mermaid:not([data-processed]) {
+      opacity: 0.4;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-subtle);
+      white-space: pre-wrap;
+      text-align: left;
+    }
+
+    /* ============================================================
+       PROS / CONS
+       ============================================================ */
+    .proscons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    .proscons-col {
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      border: 1px solid;
+    }
+    .proscons-col h4 {
+      margin: 0 0 12px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .proscons-col ul { margin: 0; padding-left: 18px; }
+    .proscons-col li { margin: 6px 0; }
+    .pros { background: var(--success-soft); border-color: var(--success-border); }
+    .pros h4 { color: var(--success); }
+    .cons { background: var(--danger-soft); border-color: var(--danger-border); }
+    .cons h4 { color: var(--danger); }
+
+    /* ============================================================
+       COMPARISON CARDS
+       ============================================================ */
+    .compare {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 24px 0;
+    }
+    .compare-card {
+      padding: 18px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.18s, box-shadow 0.18s;
+      position: relative;
+    }
+    .compare-card.recommended { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .compare-card.recommended::before {
+      content: var(--rec-label, "★ Recommended");
+      position: absolute; top: -10px; right: 14px;
+      background: var(--accent); color: #fff;
+      padding: 2px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 600;
+    }
+    .compare-card h4 { margin: 0 0 8px; font-size: 15px; color: var(--text); text-transform: none; letter-spacing: normal; }
+    .compare-card p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+    /* ============================================================
+       COLLAPSIBLE
+       ============================================================ */
+    details.collapsible {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin: 16px 0;
+      background: var(--surface);
+      overflow: hidden;
+    }
+    details.collapsible[open] { box-shadow: var(--shadow-sm); }
+    details.collapsible > summary {
+      cursor: pointer;
+      padding: 14px 18px;
+      font-weight: 500;
+      color: var(--text);
+      list-style: none;
+      display: flex; align-items: center; gap: 10px;
+      user-select: none;
+      transition: background 0.15s;
+      min-height: 44px;
+    }
+    details.collapsible > summary::-webkit-details-marker { display: none; }
+    details.collapsible > summary::before {
+      content: "›";
+      display: inline-block;
+      transition: transform 0.18s;
+      color: var(--accent);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    details.collapsible[open] > summary::before { transform: rotate(90deg); }
+    .collapsible-body { padding: 4px 18px 18px; border-top: 1px solid var(--border); }
+    .collapsible-body > *:first-child { margin-top: 12px; }
+
+    /* ============================================================
+       TABLES (wrapped via .table-wrap or naturally responsive)
+       ============================================================ */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 20px 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      max-width: 100%;
+    }
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: var(--surface);
+      margin: 0;
+    }
+    /* Standalone tables (not inside .table-wrap) keep visual border */
+    .content > table {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 20px 0;
+      display: block;
+      overflow-x: auto;
+    }
+    .content th {
+      background: var(--surface-2);
+      color: var(--text);
+      font-weight: 600;
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .content td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+    .content tr:last-child td { border-bottom: none; }
+
+    /* ============================================================
+       BLOCKQUOTE
+       ============================================================ */
+    .content blockquote {
+      margin: 20px 0;
+      padding: 4px 20px;
+      border-left: 3px solid var(--accent-border);
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ============================================================
+       FOOTER
+       ============================================================ */
+    .doc-footer {
+      margin-top: 80px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-subtle);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .doc-footer a { color: var(--accent); text-decoration: none; }
+
+    /* ============================================================
+       FOCUS-VISIBLE (a11y)
+       ============================================================ */
+    *:focus { outline: none; }
+    *:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: var(--radius-sm);
+    }
+    .toc-nav a:focus-visible { outline-offset: -2px; }
+    .icon-btn:focus-visible { outline-offset: 2px; }
+    .anchor:focus-visible { opacity: 1; outline-offset: 2px; }
+    details.collapsible > summary:focus-visible { outline-offset: -2px; }
+
+    /* ============================================================
+       HOVER (only on hover-capable devices to avoid sticky-tap on mobile)
+       ============================================================ */
+    @media (hover: hover) {
+      .icon-btn:hover { color: var(--accent); border-color: var(--accent-border); background: var(--accent-soft); }
+      .toc-nav a:hover { color: var(--accent); background: var(--accent-soft); }
+      .content a:hover { color: var(--accent-hover); border-bottom-color: var(--accent); }
+      .compare-card:hover { border-color: var(--accent-border); box-shadow: var(--shadow); }
+      .compare-card.recommended:hover { border-color: var(--accent); }
+      .content tr:hover td { background: var(--surface-2); }
+      details.collapsible > summary:hover { background: var(--surface-2); }
+      .step:hover { background: var(--surface-2); }
+      .step:hover .step-num { transform: scale(1.05); }
+      .anchor:hover { color: var(--accent); }
+      .content h2:hover .anchor,
+      .content h3:hover .anchor { opacity: 1; }
+      .copy-btn:hover { color: var(--accent); border-color: var(--accent-border); }
+      .content pre:hover .copy-btn { opacity: 1; }
+    }
+    /* On touch devices, copy-btn is always visible at low opacity */
+    @media (hover: none) {
+      .copy-btn { opacity: 0.6; }
+      .anchor { opacity: 0.4; }
+    }
+
+    /* ============================================================
+       MOBILE (≤900px) — TOC becomes off-canvas drawer
+       ============================================================ */
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 20px 16px 80px;
+      }
+      .topbar-inner { padding: 8px 12px; }
+      .doc-header { margin-bottom: 28px; padding-bottom: 20px; }
+
+      .toc-mobile-trigger { display: inline-flex !important; }
+
+      .toc {
+        position: fixed;
+        top: 0; left: 0;
+        width: min(300px, 82vw);
+        height: 100dvh;
+        max-height: 100dvh;
+        background: var(--surface);
+        z-index: var(--z-drawer);
+        padding: 16px 8px 24px 16px;
+        box-shadow: var(--shadow-lg);
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
+      }
+      .toc-head { padding: 4px 4px 12px 8px; }
+      .toc-close {
+        display: inline-flex !important;
+        width: 36px; height: 36px;
+        align-items: center; justify-content: center;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+      }
+      .toc-close .icon { width: 18px; height: 18px; stroke-width: 2; }
+      body.toc-open .toc { transform: translateX(0); }
+      body.toc-open .toc-backdrop {
+        display: block;
+        opacity: 1;
+      }
+      .toc-backdrop {
+        display: block;
+        opacity: 0;
+        pointer-events: none;
+      }
+      body.toc-open .toc-backdrop { pointer-events: auto; }
+      body.toc-open { overflow: hidden; }
+    }
+    @media (min-width: 901px) {
+      .toc-mobile-trigger { display: none !important; }
+    }
+
+    /* ============================================================
+       REDUCED MOTION (a11y)
+       ============================================================ */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      html { scroll-behavior: auto; }
+      .brand-dot { animation: none; box-shadow: 0 0 0 4px var(--accent-soft); }
+    }
+
+    /* ============================================================
+       PRINT
+       ============================================================ */
+    @media print {
+      .topbar, .toc, .toc-backdrop, .icon-btn, .copy-btn, .anchor, .scroll-progress { display: none !important; }
+      .layout { grid-template-columns: 1fr; padding: 0; max-width: 100%; }
+      body { background: #fff; color: #000; }
+      a { color: #000; }
+      .content pre, .callout, .compare-card, .step, .diagram { break-inside: avoid; }
+      .doc-footer { break-before: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip link for keyboard users -->
+  <a href="#main" class="skip-link">跳到正文</a>
+
+  <!-- Scroll progress -->
+  <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+  <!-- SVG icon sprite (Lucide-style) -->
+  <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+    <symbol id="i-danger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></symbol>
+    <symbol id="i-success" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+    <symbol id="i-decision" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="i-tip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14a5 5 0 1 0-6.18 0 4 4 0 0 1 1.59 2h2.99a4 4 0 0 1 1.6-2Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  </svg>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <button class="icon-btn toc-mobile-trigger" id="toc-toggle" onclick="openToc()" aria-label="目录" title="目录">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-menu"/></svg>
+        </button>
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span>笔记</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="window.print()" title="打印 / 保存 PDF" aria-label="打印 / 保存 PDF">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-printer"/></svg>
+        </button>
+        <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="切换主题" aria-label="切换主题">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use id="theme-icon-use" href="#i-moon"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOC drawer backdrop (mobile) -->
+  <div class="toc-backdrop" onclick="closeToc()" aria-hidden="true"></div>
+
+  <div class="layout">
+    <aside class="toc" id="toc" aria-label="目录">
+      <div class="toc-head">
+        <p class="toc-title">目录</p>
+        <button class="toc-close" onclick="closeToc()" aria-label="关闭">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-x"/></svg>
+        </button>
+      </div>
+      <nav class="toc-nav" id="toc-nav">
+        <a href="#zong-mu-biao-yu-zhu-xian" class="lvl-2">总目标与主线</a>
+        <a href="#liang-men-ke-de-zong-zhi-shi-ti-xi" class="lvl-2">两门课的总知识体系</a>
+        <a href="#cao-zuo-xi-tong-di-yi-zhang-kao-dian" class="lvl-2">操作系统第一章考点</a>
+        <a href="#os-gai-nian-gong-neng-jie-kou" class="lvl-3">操作系统概念、功能与接口</a>
+        <a href="#os-si-da-te-zheng" class="lvl-3">操作系统四大特征</a>
+        <a href="#os-fa-zhan-fen-lei" class="lvl-3">发展与分类</a>
+        <a href="#os-yun-xing-ji-zhi" class="lvl-3">运行机制：内核、特权级、中断</a>
+        <a href="#os-xu-ni-ji-xi-tong-diao-yong" class="lvl-3">虚拟机、系统调用与体系结构</a>
+        <a href="#os-yin-dao" class="lvl-3">操作系统引导</a>
+        <a href="#ji-zu-di-yi-zhang-kao-dian" class="lvl-2">计组第一章考点</a>
+        <a href="#co-ying-jian-zu-cheng" class="lvl-3">硬件组成与冯诺依曼结构</a>
+        <a href="#co-zhu-cun-yun-suan-kong-zhi" class="lvl-3">主存、运算器、控制器</a>
+        <a href="#co-gong-zuo-guo-cheng" class="lvl-3">计算机工作过程</a>
+        <a href="#co-ruan-jian-isa-ceng-ci" class="lvl-3">软件、ISA 与层次结构</a>
+        <a href="#co-xing-neng-zhi-biao" class="lvl-3">性能指标与公式</a>
+        <a href="#liang-men-ke-lian-xi" class="lvl-2">两门课怎么联系起来</a>
+        <a href="#gao-pin-kao-dian" class="lvl-2">高频考点清单与易混辨析</a>
+        <a href="#os-zhu-xiao-jie-kao-dian" class="lvl-3">操作系统逐小节考点</a>
+        <a href="#co-zhu-xiao-jie-kao-dian" class="lvl-3">计组逐小节考点</a>
+        <a href="#yi-hun-dian" class="lvl-3">高频易混点</a>
+        <a href="#da-ti-mo-ban" class="lvl-3">第一章答题模板</a>
+        <a href="#shua-ti-you-xian-ji" class="lvl-3">刷题优先级</a>
+        <a href="#wang-dao-shua-ti-ji-hua" class="lvl-2">王道刷题计划</a>
+        <a href="#zhang-wo-biao-zhun" class="lvl-2">掌握标准与自测题</a>
+        <a href="#pei-tu-sao-miao-suo-yin" class="lvl-2">配图扫描索引</a>
+      </nav>
+    </aside>
+
+    <main class="content" id="main">
+      <header class="doc-header">
+        <span class="doc-eyebrow">NOTES</span>
+        <h1 class="doc-title">408 第一章：操作系统 x 计算机组成原理总览</h1>
+        <p class="doc-subtitle">基于《操作系统.md》《计算机组成原理.md》第一章及 79 张配图整理：考点、知识体系、两门课联系、王道刷题计划与掌握标准。</p>
+        <div class="doc-meta">
+          <span class="doc-meta-item">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-file"/></svg>
+            操作系统.md + 计算机组成原理.md
+          </span>
+          <span class="doc-meta-item">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-calendar"/></svg>
+            2026-05-28
+          </span>
+          <span class="doc-meta-item">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-clock"/></svg>
+            ~25 分钟阅读
+          </span>
+        </div>
+      </header>
+
+      <!-- CONTENT_START -->
+
+<h2 id="zong-mu-biao-yu-zhu-xian">总目标与主线</h2>
+<p>这两个第一章不要分开背。它们共同回答一个问题：<strong>一个程序为什么能从磁盘上的文件，变成 CPU 正在执行的一串机器指令，并且还能安全地访问内存、文件和设备？</strong></p>
+<div class="highlight">
+  <span class="highlight-label">要点</span>
+  <p>计组第一章负责解释“硬件怎样自动取指、译码、执行”；操作系统第一章负责解释“谁管理硬件、谁分配资源、谁处理系统调用和中断”。两门课的接口就是：<strong>中断、异常、陷入指令、特权级、系统调用、程序装入与运行上下文</strong>。</p>
+</div>
+<figure class="diagram">
+  <pre class="mermaid">
+flowchart LR
+  A[源代码] --> B[编译/汇编/链接]
+  B --> C[可执行文件]
+  C --> D[OS 装载]
+  D --> E[进程与地址空间]
+  E --> F[CPU 取指执行]
+  F --> G{需要资源?}
+  G -->|普通计算| F
+  G -->|文件/设备/进程/内存| H[系统调用]
+  H --> I[陷入内核态]
+  I --> J[OS 服务]
+  J --> K[返回用户态]
+  K --> F
+  </pre>
+  <figcaption class="diagram-caption">第一章总主线：计组解释 CPU 怎样跑，操作系统解释资源和安全边界怎样管。</figcaption>
+</figure>
+<table>
+  <thead><tr><th>今天学完要达到</th><th>具体表现</th></tr></thead>
+  <tbody>
+    <tr><td>能画图</td><td>能画出“源代码到进程运行”的总流程，并标出 CPU、内存、OS、I/O 的位置。</td></tr>
+    <tr><td>能区分</td><td>能区分程序/进程、用户态/内核态、系统调用/库函数、中断/异常/陷入、并发/并行。</td></tr>
+    <tr><td>能计算</td><td>能做计组第一章常见性能公式题：CPU 时间、CPI、主频、MIPS、吞吐量、响应时间。</td></tr>
+    <tr><td>能联系</td><td>看到系统调用、中断响应、程序装入、上下文切换时，能同时说出 OS 视角和硬件视角。</td></tr>
+  </tbody>
+</table>
+
+<h2 id="liang-men-ke-de-zong-zhi-shi-ti-xi">两门课的总知识体系</h2>
+<figure class="diagram">
+  <pre class="mermaid">
+flowchart TD
+  Root[程序运行总问题]
+  Root --> CO[计算机组成原理第一章]
+  Root --> OS[操作系统第一章]
+  CO --> CO1[硬件组成]
+  CO --> CO2[指令执行]
+  CO --> CO3[软件/ISA/层次]
+  CO --> CO4[性能指标]
+  OS --> OS1[OS 概念功能]
+  OS --> OS2[并发共享虚拟异步]
+  OS --> OS3[运行机制]
+  OS --> OS4[系统调用/中断]
+  OS --> OS5[体系结构/引导]
+  CO2 --> Link1[陷入/中断入口]
+  OS4 --> Link1
+  CO1 --> Link2[CPU/主存/I/O 资源]
+  OS1 --> Link2
+  CO4 --> Link3[性能与调度目标]
+  OS2 --> Link3
+  </pre>
+  <figcaption class="diagram-caption">两门课不是两堆概念，而是围绕同一个“程序如何运行”的问题，从硬件和管理两个视角展开。</figcaption>
+</figure>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>主线</th><th>计组负责</th><th>操作系统负责</th><th>交汇考点</th></tr></thead>
+  <tbody>
+    <tr><td>程序执行</td><td>PC、IR、MAR、MDR、CU、ALU；取指、分析、执行</td><td>装入程序、创建进程、分配资源、调度进程</td><td>程序、进程、指令周期、上下文</td></tr>
+    <tr><td>访问硬件</td><td>CPU 只能直接执行机器指令，数据通过主存和 I/O 通路传送</td><td>把处理机、存储器、文件、设备统一管理</td><td>系统调用、特权指令、设备管理</td></tr>
+    <tr><td>打断执行</td><td>指令结束后检测中断；根据中断向量转入口</td><td>中断处理程序由 OS 提供，借此调度和处理 I/O</td><td>外中断、内中断、trap、fault、abort</td></tr>
+    <tr><td>性能</td><td>主频、CPI、指令数、数据通路带宽、吞吐量</td><td>并发、多道、分时、异步，提高资源利用率和响应性</td><td>CPU 利用率、响应时间、吞吐量</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h2 id="cao-zuo-xi-tong-di-yi-zhang-kao-dian">操作系统第一章考点</h2>
+<p>王道操作系统第一章的核心不是让你记定义，而是让你理解：操作系统为什么必须存在，以及它如何在硬件之上形成一个“安全、有序、可共享”的运行环境。</p>
+
+<h3 id="os-gai-nian-gong-neng-jie-kou">操作系统概念、功能与接口</h3>
+<ul>
+  <li><strong>定义</strong>：操作系统是控制和管理整个计算机系统硬件与软件资源，合理组织调度计算机工作和资源分配，并向用户和其他软件提供接口与环境的系统软件。</li>
+  <li><strong>作为资源管理者</strong>：处理机管理、存储器管理、文件管理、设备管理。配图中 QQ/视频聊天例子说明：程序要运行，先要被装入内存，再由处理机处理，还可能申请摄像头等设备。</li>
+  <li><strong>向上层提供服务</strong>：图形用户界面、命令接口、程序接口。命令接口给用户用，程序接口给程序员通过代码调用，系统调用是程序接口的核心。</li>
+  <li><strong>命令接口</strong>：联机命令接口是交互式，一条命令一条命令执行；脱机命令接口是批处理，用户一次提交任务，系统批量执行。</li>
+  <li><strong>系统调用</strong>：应用程序请求 OS 内核服务的方式，常见请求包括设备、文件、进程、进程通信、内存管理。</li>
+  <li><strong>CPU 与外存</strong>：CPU 能直接访问的是内存；外存上的文件必须经过操作系统的文件系统和 I/O 管理间接访问。</li>
+</ul>
+<aside class="callout callout-warn">
+  <svg class="callout-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-warn"/></svg>
+  <div class="callout-body">
+    <p class="callout-title">易错点</p>
+    <p>库函数不等于系统调用。库函数可以只是普通用户态代码，也可以在底层封装系统调用；系统调用一定会请求内核服务，涉及资源分配或全局状态。</p>
+  </div>
+</aside>
+
+<h3 id="os-si-da-te-zheng">操作系统四大特征</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>特征</th><th>含义</th><th>必考区分</th><th>例子</th></tr></thead>
+  <tbody>
+    <tr><td>并发</td><td>多个事件在同一时间间隔内发生</td><td>宏观同时、微观交替；并行是同一时刻真正同时</td><td>单核 CPU 上多个程序轮流运行</td></tr>
+    <tr><td>共享</td><td>系统资源可供多个并发进程共同使用</td><td>互斥共享 vs 同时共享</td><td>摄像头通常互斥；磁盘文件可交替共享</td></tr>
+    <tr><td>虚拟</td><td>把一个物理实体变成多个逻辑实体，或把多个物理实体抽象成一个逻辑实体</td><td>时分复用、空分复用</td><td>一台 CPU 虚拟成多个处理机；内存抽象成连续地址空间</td></tr>
+    <tr><td>异步</td><td>进程走走停停，以不可预知速度推进</td><td>由资源有限、调度、中断、I/O 等造成</td><td>同一程序多次执行所需时间可能不同</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="highlight">
+  <span class="highlight-label">要点</span>
+  <p>并发和共享互为存在条件：没有并发，就谈不上多个进程同时需要资源；没有共享，就无法支撑多个进程并发推进。虚拟和异步是在并发共享基础上进一步表现出来的系统特征。</p>
+</div>
+
+<h3 id="os-fa-zhan-fen-lei">发展与分类</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>阶段/类型</th><th>核心思想</th><th>优点</th><th>缺点/考点</th></tr></thead>
+  <tbody>
+    <tr><td>手工操作阶段</td><td>用户人工装入程序、操作机器</td><td>系统简单</td><td>人机速度矛盾严重，CPU 等待人和慢速 I/O</td></tr>
+    <tr><td>单道批处理</td><td>引入脱机 I/O 和监督程序，一次运行一道作业</td><td>减少人工干预</td><td>内存中只有一道程序，CPU 等待 I/O 时仍浪费</td></tr>
+    <tr><td>多道批处理</td><td>内存同时放多道程序，交替运行</td><td>提高 CPU 与资源利用率，操作系统正式诞生</td><td>缺少交互性，用户不能及时干预作业</td></tr>
+    <tr><td>分时系统</td><td>以时间片轮流为多个用户服务</td><td>交互性强，响应较及时</td><td>不能优先处理紧急任务</td></tr>
+    <tr><td>实时系统</td><td>优先响应紧急任务</td><td>及时性、可靠性强</td><td>硬实时要求严格时限；软实时允许偶尔延迟</td></tr>
+    <tr><td>网络/分布式/个人机</td><td>网络资源共享、分布协同、个人使用</td><td>扩展应用场景</td><td>分布式强调多机协同完成同一任务</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="os-yun-xing-ji-zhi">运行机制：内核、特权级、中断</h3>
+<ul>
+  <li><strong>内核程序 vs 应用程序</strong>：内核程序是 OS 最核心部分，运行在内核态；应用程序运行在用户态。</li>
+  <li><strong>特权指令</strong>：会影响系统全局状态或他人资源的指令，只允许内核态执行，例如 I/O 指令、关中断、修改页表、修改状态寄存器等。</li>
+  <li><strong>非特权指令</strong>：普通运算、访管前的用户态计算等，应用程序可直接执行。</li>
+  <li><strong>用户态与内核态</strong>：CPU 通常通过 PSW 或状态寄存器中的标志位区分当前特权级。</li>
+  <li><strong>用户态到内核态</strong>：由中断、异常、陷入等事件触发，硬件自动完成状态转换并跳转到内核入口。</li>
+  <li><strong>内核态到用户态</strong>：OS 处理完事件后，恢复现场并修改状态标志，返回用户程序继续执行。</li>
+</ul>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>中断类别</th><th>别名</th><th>来源</th><th>同步性</th><th>例子</th><th>处理重点</th></tr></thead>
+  <tbody>
+    <tr><td>外中断</td><td>中断、异步中断</td><td>CPU 外部设备或时钟</td><td>与当前指令无关，异步</td><td>时钟中断、I/O 完成、键盘、网卡</td><td>通常在一条指令执行结束后检测</td></tr>
+    <tr><td>内中断</td><td>异常、同步中断</td><td>CPU 执行当前指令时产生</td><td>与当前指令有关，同步</td><td>除零、非法指令、缺页、系统调用</td><td>执行到相关指令或异常条件时发生</td></tr>
+    <tr><td>陷入 trap</td><td>访管/陷入指令</td><td>用户程序主动请求内核</td><td>同步</td><td>系统调用</td><td>用户态执行陷入指令后进入内核态</td></tr>
+    <tr><td>故障 fault</td><td>可恢复异常</td><td>执行中发现问题</td><td>同步</td><td>缺页故障</td><td>修复后可回到原指令继续执行</td></tr>
+    <tr><td>终止 abort</td><td>不可恢复异常</td><td>严重错误</td><td>同步</td><td>硬件故障、严重非法状态</td><td>通常终止进程或系统处理</td></tr>
+  </tbody>
+</table>
+</div>
+<figure class="diagram">
+  <pre class="mermaid">
+flowchart LR
+  A[当前指令执行] --> B{有事件?}
+  B -->|无| C[下一条指令]
+  B -->|外中断| D[保存断点]
+  B -->|内中断/异常| D
+  D --> E[查中断向量表]
+  E --> F[进入内核态]
+  F --> G[执行中断处理程序]
+  G --> H[恢复现场]
+  H --> I[返回用户态或调度其他进程]
+  </pre>
+  <figcaption class="diagram-caption">中断机制把“硬件打断”与“OS 处理策略”连接起来，是多任务和系统调用的底层入口。</figcaption>
+</figure>
+
+<h3 id="os-xu-ni-ji-xi-tong-diao-yong">虚拟机、系统调用与体系结构</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>主题</th><th>必须掌握</th><th>易错/补充</th></tr></thead>
+  <tbody>
+    <tr><td>第一类 VMM</td><td>虚拟机管理程序直接运行在硬件上</td><td>性能更好，典型如 VMware ESXi、Xen、裸机 Hyper-V</td></tr>
+    <tr><td>第二类 VMM</td><td>虚拟机管理程序运行在宿主操作系统之上</td><td>依赖 Host OS，典型如 VirtualBox、VMware Workstation</td></tr>
+    <tr><td>系统调用过程</td><td>传参、执行陷入指令、进入内核态、内核服务、返回用户态</td><td>陷入指令在用户态执行，系统调用处理程序在内核态执行</td></tr>
+    <tr><td>系统调用分类</td><td>设备管理、文件管理、进程控制、进程通信、内存管理</td><td>涉及资源分配和共享资源统一管理时通常要系统调用</td></tr>
+    <tr><td>大内核</td><td>主要功能模块都放内核态</td><td>性能高，但结构复杂、维护难</td></tr>
+    <tr><td>微内核</td><td>只把最基本机制放内核，策略尽量放用户态</td><td>结构清晰、可靠性好，但用户态/内核态切换多，性能可能下降；更适合分布式思想</td></tr>
+    <tr><td>分层/模块化/外核</td><td>体系结构组织方式</td><td>分层强调层次调用，模块化强调可加载与扩展，外核强调把资源保护与抽象交给上层库</td></tr>
+  </tbody>
+</table>
+</div>
+<aside class="callout callout-tip">
+  <svg class="callout-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tip"/></svg>
+  <div class="callout-body">
+    <p class="callout-title">记忆法</p>
+    <p>只要某条指令或操作会“影响别人、改变全局状态、直接碰硬件资源”，就应该想到内核态、特权指令或系统调用。</p>
+  </div>
+</aside>
+
+<h3 id="os-yin-dao">操作系统引导</h3>
+<div class="timeline">
+  <article class="step"><div class="step-num">1</div><div class="step-body"><h3>CPU 从 ROM 取第一条指令</h3><p>通电后 PC 指向 ROM/BIOS 固定入口，执行固化的引导程序。BIOS 会为后续自检和基础服务准备必要环境。</p><div class="step-tags"><span class="tag">计组：取指</span><span class="tag">OS：引导</span></div></div></article>
+  <article class="step"><div class="step-num">2</div><div class="step-body"><h3>POST 通电自检</h3><p>检查基本硬件是否可用，为加载后续引导程序做准备。</p></div></article>
+  <article class="step"><div class="step-num">3</div><div class="step-body"><h3>加载 MBR 或分区引导记录</h3><p>磁盘引导程序定位操作系统所在分区；PBR 找到用于引导操作系统的程序。</p></div></article>
+  <article class="step"><div class="step-num">4</div><div class="step-body"><h3>启动管理器加载内核</h3><p>先加载核心内核，再按需加载文件系统驱动、USB 驱动等可加载内核模块。</p></div></article>
+</div>
+
+<h2 id="ji-zu-di-yi-zhang-kao-dian">计组第一章考点</h2>
+<p>计组第一章的任务是建立硬件视角：计算机由哪些部件组成，指令如何被硬件自动执行，软件如何变成机器能识别的指令，以及如何评价性能。</p>
+
+<h3 id="co-ying-jian-zu-cheng">硬件组成与冯诺依曼结构</h3>
+<ul>
+  <li><strong>冯诺依曼机特点</strong>：五大部件；指令和数据同等地位存于存储器；指令和数据用二进制表示；指令由操作码和地址码组成；以运算器为中心。</li>
+  <li><strong>现代计算机结构</strong>：以存储器为中心，CPU 包括运算器和控制器；主机包括 CPU 和主存储器；I/O 设备包括输入设备和输出设备。</li>
+  <li><strong>软件/硬件逻辑等价</strong>：同一功能既可用软件实现，也可用硬件实现；硬件通常快但成本高，软件灵活但速度可能慢。</li>
+  <li><strong>按字节编址</strong>：一个地址编号对应 1 个字节。地址空间大小看地址个数，存储容量看一共能存多少数据。</li>
+  <li><strong>字长区别</strong>：机器字长看 CPU 一次能处理多少位；存储字长看主存一个存储单元多少位；指令字长看 ISA 设计，不一定等于机器字长。</li>
+</ul>
+<aside class="callout callout-warn">
+  <svg class="callout-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-warn"/></svg>
+  <div class="callout-body">
+    <p class="callout-title">易错点</p>
+    <p><code>MDR</code> 表示一次从内存读出或写入的数据位数，通常与存储字长相关；它不是“一个地址能存多少数据”的同义词。<code>MAR</code> 位数决定可寻址的存储单元数量。</p>
+  </div>
+</aside>
+
+<h3 id="co-zhu-cun-yun-suan-kong-zhi">主存、运算器、控制器</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>部件</th><th>作用</th><th>王道常考点</th></tr></thead>
+  <tbody>
+    <tr><td>MAR</td><td>地址寄存器，保存要访问的主存地址</td><td>MAR 位数决定最多可寻址单元数，如 n 位可寻址 2^n 个单元</td></tr>
+    <tr><td>MDR</td><td>数据寄存器，保存与主存交换的数据</td><td>MDR 位数通常等于存储字长</td></tr>
+    <tr><td>ACC</td><td>累加器，保存操作数或运算结果</td><td>加减乘除过程中常作为被加数、差、乘积高位等</td></tr>
+    <tr><td>MQ</td><td>乘商寄存器</td><td>乘除法中存放乘数、商等</td></tr>
+    <tr><td>X</td><td>通用寄存器/缓冲寄存器</td><td>暂存操作数，位宽要与 ALU 匹配</td></tr>
+    <tr><td>ALU</td><td>算术逻辑单元</td><td>执行算术运算和逻辑运算</td></tr>
+    <tr><td>PC</td><td>程序计数器，保存下一条指令地址</td><td>取指后通常自动加 1；分支/中断/调度会改变 PC</td></tr>
+    <tr><td>IR</td><td>指令寄存器，保存当前指令</td><td>操作码送 CU 分析，地址码用于形成操作数地址</td></tr>
+    <tr><td>CU</td><td>控制单元，分析指令并发出控制信号</td><td>控制取指、分析、执行各阶段的微操作</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3 id="co-gong-zuo-guo-cheng">计算机工作过程</h3>
+<p>配图从一段 C 代码开始，展示高级语言经过编译、汇编、链接形成可执行文件，装入主存后，CPU 根据 PC 指向的地址一条条取出机器指令并执行。</p>
+<figure class="diagram">
+  <pre class="mermaid">
+flowchart LR
+  PC[PC] -->|地址| MAR[MAR]
+  MAR -->|读主存| MEM[(主存)]
+  MEM -->|指令| MDR[MDR]
+  MDR --> IR[IR]
+  IR -->|操作码| CU[CU]
+  IR -->|地址码| MAR
+  CU -->|控制信号| ALU[ALU/寄存器]
+  ALU --> ACC[ACC/MQ/X]
+  CU -->|PC+1 或转移| PC
+  </pre>
+  <figcaption class="diagram-caption">典型取指与执行路径：PC 给地址，MAR/MDR 访存，IR 保存指令，CU 分析操作码并控制运算器执行。</figcaption>
+</figure>
+<ul>
+  <li><strong>取指阶段</strong>：<code>PC -> MAR</code>，主存读出指令到 <code>MDR</code>，再送入 <code>IR</code>，<code>PC</code> 通常自增。</li>
+  <li><strong>分析阶段</strong>：<code>OP(IR) -> CU</code>，CU 分析操作码，判断是什么指令。</li>
+  <li><strong>执行阶段</strong>：地址码可能送 <code>MAR</code> 取操作数，数据经 <code>MDR</code> 到寄存器或 ALU，执行后结果写回寄存器或主存。</li>
+  <li><strong>硬件自动性</strong>：取指、译码、执行由硬件控制器和时钟电路驱动，不需要 OS 指挥每一条指令。</li>
+  <li><strong>OS 的作用点</strong>：OS 通过修改 PC、寄存器上下文、页表和内存映射，决定下一轮 CPU 自动取到哪个进程的指令。</li>
+</ul>
+<div class="highlight">
+  <span class="highlight-label">要点</span>
+  <p>CPU 本身不理解“这是微信还是游戏”，它只按 PC 取指执行。所谓进程切换，本质是 OS 改变寄存器和内存上下文，让下一次取指落到另一个程序的代码上。</p>
+</div>
+
+<h3 id="co-ruan-jian-isa-ceng-ci">软件、ISA 与层次结构</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>概念</th><th>定义/作用</th><th>常考区分</th></tr></thead>
+  <tbody>
+    <tr><td>系统软件</td><td>保证系统高效正确运行的基础软件</td><td>操作系统、数据库管理系统、编译器、标准库、服务程序属于系统软件</td></tr>
+    <tr><td>应用软件</td><td>用户为解决具体问题编写的软件</td><td>办公、工程、统计、科学计算程序等</td></tr>
+    <tr><td>机器语言</td><td>二进制机器指令</td><td>计算机唯一能直接识别和执行的语言</td></tr>
+    <tr><td>汇编语言</td><td>用助记符表示机器指令</td><td>必须经汇编器翻译成机器语言</td></tr>
+    <tr><td>高级语言</td><td>C/C++/Java/Python 等</td><td>通常需编译或解释，不能被 CPU 直接执行</td></tr>
+    <tr><td>编译器</td><td>把高级语言翻译为汇编或目标代码</td><td>常见 C/C++ 编译流程会继续汇编和链接</td></tr>
+    <tr><td>解释器</td><td>按执行顺序逐句翻译并执行</td><td>Python、Shell 常作为例子</td></tr>
+    <tr><td>ISA</td><td>指令集体系结构，是软硬件接口</td><td>规定指令、编码、寄存器、寻址方式；x86、ARM、RISC-V 是典型 ISA</td></tr>
+  </tbody>
+</table>
+</div>
+<figure class="diagram">
+  <pre class="mermaid">
+flowchart TD
+  M4[高级语言机器 M4]
+  M3[汇编语言机器 M3]
+  M2[操作系统机器 M2]
+  M1[传统机器 M1]
+  M0[微程序机器 M0]
+  M4 -->|编译| M3
+  M3 -->|汇编| M1
+  M2 -->|广义指令/系统调用| M1
+  M1 -->|机器指令| M0
+  M0 -->|微指令| HW[硬件]
+  </pre>
+  <figcaption class="diagram-caption">计算机系统层次结构：下层是上层的基础，上层是下层功能的扩展。</figcaption>
+</figure>
+
+<h3 id="co-xing-neng-zhi-biao">性能指标与公式</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>指标</th><th>公式/含义</th><th>考点提醒</th></tr></thead>
+  <tbody>
+    <tr><td>CPU 时钟周期</td><td>一个时钟脉冲的时间</td><td>单位常用秒、微秒、纳秒；主频越高，周期越短</td></tr>
+    <tr><td>主频</td><td><code>主频 = 1 / CPU 时钟周期</code></td><td>单位 Hz，性能/速率类单位通常按 1000 进制</td></tr>
+    <tr><td>CPI</td><td>执行一条指令平均需要的时钟周期数</td><td>CPI 不是指令绝对固定属性，会受 Cache、流水线、分支预测等影响</td></tr>
+    <tr><td>CPU 执行时间</td><td><code>T = 指令条数 x CPI / 主频</code></td><td>408 常把三个因素：指令数、平均 CPI、主频，组合考比较题</td></tr>
+    <tr><td>IPS/MIPS</td><td>每秒执行多少条指令</td><td><code>IPS = 主频 / 平均 CPI</code>；MIPS 是百万条指令每秒</td></tr>
+    <tr><td>FLOPS</td><td>每秒浮点运算次数</td><td>K/M/G/T/P 等性能单位按 10^3 递进</td></tr>
+    <tr><td>数据通路带宽</td><td>数据总线一次能并行传输的信息位数</td><td>影响部件间一次传送的数据量</td></tr>
+    <tr><td>吞吐量</td><td>单位时间完成任务数量</td><td>常与响应时间形成权衡</td></tr>
+    <tr><td>响应时间</td><td>从发出请求到获得结果所需时间</td><td>包括 CPU 时间、等待时间、I/O 时间、系统开销等</td></tr>
+  </tbody>
+</table>
+</div>
+<aside class="callout callout-tip">
+  <svg class="callout-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tip"/></svg>
+  <div class="callout-body">
+    <p class="callout-title">单位规则</p>
+    <p>存储容量相关通常按 1024，即 2 的幂；速度、频率、带宽、运算次数等性能指标通常按 1000，即国际单位制。</p>
+  </div>
+</aside>
+
+<h2 id="liang-men-ke-lian-xi">两门课怎么联系起来</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>共同问题</th><th>计组视角</th><th>操作系统视角</th><th>考试怎么问</th></tr></thead>
+  <tbody>
+    <tr><td>系统调用为什么会切内核态</td><td>执行陷入指令产生内中断，CPU 改变状态并跳入口</td><td>内核接管请求，执行文件/设备/进程/内存服务</td><td>系统调用过程、trap 指令、用户态/核心态转换</td></tr>
+    <tr><td>中断为什么能实现多任务</td><td>硬件在指令周期边界响应中断，保存断点并查向量表</td><td>时钟中断进入 OS，OS 可进行调度和上下文切换</td><td>中断分类、中断响应时机、进程切换原因</td></tr>
+    <tr><td>CPU 为什么能切到另一个程序</td><td>CPU 只根据 PC 取指，寄存器决定当前上下文</td><td>OS 保存/恢复寄存器、PC、页表等上下文</td><td>程序与进程、PCB、上下文切换，虽然 PCB 在 OS 第二章更展开</td></tr>
+    <tr><td>为什么普通程序不能直接操作硬件</td><td>特权指令需要更高 CPU 特权级</td><td>OS 统一管理共享资源，防止冲突和破坏</td><td>特权指令、系统调用、资源管理者</td></tr>
+    <tr><td>程序如何从磁盘开始运行</td><td>CPU 从内存取指，不能直接执行磁盘文件</td><td>OS/引导程序把必要代码装入内存并建立运行环境</td><td>程序装入、OS 引导、CPU 取指</td></tr>
+  </tbody>
+</table>
+</div>
+<figure class="diagram">
+  <pre class="mermaid">
+sequenceDiagram
+  participant App as 用户程序
+  participant CPU as CPU硬件
+  participant OS as 操作系统内核
+  participant Dev as 设备/文件
+  App->>CPU: 执行普通机器指令
+  App->>CPU: 执行 trap/访管指令
+  CPU->>OS: 切换内核态并跳转入口
+  OS->>Dev: 统一管理资源请求
+  Dev-->>OS: 完成或等待中断
+  OS-->>CPU: 恢复现场/可能调度
+  CPU-->>App: 返回用户态继续执行
+  </pre>
+  <figcaption class="diagram-caption">系统调用把应用、CPU 特权级、OS 内核和设备管理串成一条线。</figcaption>
+</figure>
+
+
+<h2 id="gao-pin-kao-dian">高频考点清单与易混辨析</h2>
+<p>这一节专门面向王道选择题和第一轮复习。目标不是扩展知识，而是把第一章最容易出题、最容易混的边界压清楚。</p>
+<h3 id="os-zhu-xiao-jie-kao-dian">操作系统逐小节考点</h3>
+<div class="table-wrap"><table><thead><tr><th>小节</th><th>必背考点</th><th>王道常见问法</th><th>你要会说的话</th></tr></thead><tbody>
+<tr><td>OS 概念和功能</td><td>系统软件；管理软硬件资源；提供接口</td><td>OS 的目标/功能是什么？</td><td>OS 向下管理 CPU、内存、文件、设备，向上给用户和程序提供接口。</td></tr>
+<tr><td>OS 接口</td><td>命令接口、程序接口、GUI；系统调用属于程序接口</td><td>系统调用和命令接口区别？</td><td>命令接口给用户用，系统调用给程序通过代码请求内核服务。</td></tr>
+<tr><td>四大特征</td><td>并发、共享、虚拟、异步</td><td>并发和并行区别？共享方式有哪些？</td><td>并发是时间间隔内交替推进，并行是同一时刻真正同时执行。</td></tr>
+<tr><td>发展分类</td><td>手工、单道批、多道批、分时、实时、网络、分布式</td><td>哪种系统解决交互问题？哪种强调及时性？</td><td>多道批提高资源利用率，分时强调交互，实时强调及时和可靠。</td></tr>
+<tr><td>运行机制</td><td>内核/应用；特权/非特权；用户态/内核态</td><td>哪些指令必须在核心态执行？</td><td>影响全局状态、硬件资源或其他进程的操作必须交给内核。</td></tr>
+<tr><td>中断异常</td><td>外中断、内中断、trap、fault、abort；中断向量表</td><td>系统调用属于哪类中断？中断响应时机？</td><td>系统调用是 trap，属于内中断；外中断通常在指令结束后检测。</td></tr>
+<tr><td>系统调用</td><td>参数传递、陷入指令、内核服务、返回用户态</td><td>系统调用与库函数区别？</td><td>库函数可能封装系统调用；系统调用一定会进入内核请求 OS 服务。</td></tr>
+<tr><td>虚拟机</td><td>第一类 VMM、第二类 VMM、特权级</td><td>两类 VMM 区别？</td><td>第一类直接跑硬件上，第二类跑宿主 OS 上。</td></tr>
+<tr><td>体系结构</td><td>大内核、微内核、分层、模块化、外核</td><td>微内核优缺点？</td><td>微内核结构清晰可靠，但状态切换多，性能可能下降。</td></tr>
+<tr><td>OS 引导</td><td>ROM/BIOS、POST、MBR、PBR、启动管理器、内核</td><td>开机后 OS 如何被加载？</td><td>CPU 先从 ROM 取指，逐级找到并加载操作系统内核。</td></tr>
+</tbody></table></div>
+<h3 id="co-zhu-xiao-jie-kao-dian">计组逐小节考点</h3>
+<div class="table-wrap"><table><thead><tr><th>小节</th><th>必背考点</th><th>王道常见问法</th><th>你要会说的话</th></tr></thead><tbody>
+<tr><td>硬件基本组成</td><td>五大部件；现代计算机以存储器为中心</td><td>主机包括哪些？CPU 包括哪些？</td><td>CPU=运算器+控制器；主机=CPU+主存；I/O 设备在主机外。</td></tr>
+<tr><td>冯诺依曼结构</td><td>指令和数据同存储器；二进制；操作码+地址码</td><td>冯诺依曼机特点？</td><td>指令和数据形式上都是二进制，CPU 按阶段解释它们。</td></tr>
+<tr><td>主存结构</td><td>MAR、MDR、存储体、存储单元、存储字、存储字长</td><td>MAR/MDR 位数分别决定什么？</td><td>MAR 位数决定地址范围，MDR 位数决定一次交换的数据宽度。</td></tr>
+<tr><td>运算器</td><td>ACC、MQ、X、ALU</td><td>乘除法中 ACC/MQ 作用？</td><td>运算器负责数据加工，寄存器临时保存操作数和结果。</td></tr>
+<tr><td>控制器</td><td>PC、IR、CU；取指、分析、执行</td><td>PC 和 IR 的区别？</td><td>PC 保存下一条指令地址，IR 保存当前正在执行的指令。</td></tr>
+<tr><td>工作过程</td><td>PC-&gt;MAR-&gt;MDR-&gt;IR；OP(IR)-&gt;CU；Ad(IR)-&gt;MAR</td><td>一条指令如何执行？</td><td>先取指，再分析操作码，最后取操作数并执行。</td></tr>
+<tr><td>软件分类</td><td>系统软件、应用软件；DBMS 是系统软件</td><td>数据库管理系统是不是系统软件？</td><td>DBMS 是系统软件，数据库系统不是单纯一个软件。</td></tr>
+<tr><td>语言翻译</td><td>机器语言、汇编语言、高级语言；编译、汇编、解释</td><td>哪种语言 CPU 直接执行？</td><td>CPU 只能直接执行机器语言，汇编和高级语言都要翻译。</td></tr>
+<tr><td>ISA</td><td>指令、编码、寄存器、寻址方式</td><td>ISA 为什么是软硬件接口？</td><td>ISA 规定软件能使用哪些机器指令，也规定硬件必须实现什么。</td></tr>
+<tr><td>性能指标</td><td>主频、CPI、CPU 时间、IPS/MIPS、FLOPS、吞吐量、响应时间</td><td>主频高就一定快吗？</td><td>不一定，性能由指令数、CPI、主频共同决定。</td></tr>
+</tbody></table></div>
+<h3 id="yi-hun-dian">高频易混点</h3>
+<div class="table-wrap"><table><thead><tr><th>易混点</th><th>正确区分</th><th>快速判断</th></tr></thead><tbody>
+<tr><td>并发 vs 并行</td><td>并发是同一时间间隔内都在推进；并行是同一时刻同时执行</td><td>单核可并发，多核才可能真正并行。</td></tr>
+<tr><td>同步/异步 vs OS 异步性</td><td>同步/异步常说事件等待关系；OS 异步性说进程推进速度不可预知</td><td>看到“走走停停、不可预知”就是 OS 异步性。</td></tr>
+<tr><td>系统调用 vs 库函数</td><td>系统调用进入内核；库函数是语言/运行库函数</td><td><code>printf</code> 可能最终调 <code>write</code>，但 <code>printf</code> 本身不是系统调用。</td></tr>
+<tr><td>中断 vs 异常</td><td>外中断来自 CPU 外部；异常来自 CPU 执行指令内部</td><td>键盘/时钟/I/O 完成是外中断；除零/缺页/trap 是内中断。</td></tr>
+<tr><td>trap vs fault vs abort</td><td>trap 主动请求；fault 可修复；abort 严重不可恢复</td><td>系统调用 trap；缺页 fault；严重硬件故障 abort。</td></tr>
+<tr><td>用户态 vs 内核态</td><td>用户态不能执行特权指令；内核态可执行全部指令</td><td>会影响别人或全局状态的事，进内核。</td></tr>
+<tr><td>MAR vs MDR</td><td>MAR 存地址；MDR 存数据</td><td>地址范围看 MAR，数据宽度看 MDR。</td></tr>
+<tr><td>PC vs IR</td><td>PC 指下一条；IR 存当前条</td><td>取指后 PC 常自增，IR 用于当前指令译码。</td></tr>
+<tr><td>机器字长 vs 存储字长 vs 指令字长</td><td>机器字长看 CPU；存储字长看主存；指令字长看 ISA</td><td>三者不必相等。</td></tr>
+<tr><td>主频高 vs 性能高</td><td>主频只是因素之一</td><td>CPU 时间 = 指令数 x CPI / 主频。</td></tr>
+</tbody></table></div>
+<h3 id="da-ti-mo-ban">第一章答题模板</h3>
+<div class="table-wrap"><table><thead><tr><th>题型</th><th>答题模板</th></tr></thead><tbody>
+<tr><td>问 OS 作用</td><td>先答“管理资源”，再列处理机、存储器、文件、设备；再答“提供接口”，列命令接口、程序接口、GUI。</td></tr>
+<tr><td>问系统调用过程</td><td>用户程序传参 -&gt; 执行陷入指令 -&gt; CPU 切换到内核态 -&gt; OS 查表并执行服务例程 -&gt; 恢复现场返回用户态。</td></tr>
+<tr><td>问中断过程</td><td>事件发生 -&gt; 当前指令结束后检测或同步异常触发 -&gt; 保存断点/现场 -&gt; 查中断向量表 -&gt; 转入处理程序 -&gt; 恢复或调度。</td></tr>
+<tr><td>问指令执行过程</td><td>PC 给出地址 -&gt; MAR 访存 -&gt; MDR 取回指令 -&gt; IR 保存指令 -&gt; CU 分析操作码 -&gt; 执行并写回。</td></tr>
+<tr><td>问性能比较</td><td>不只看主频；用 CPU 时间公式比较：指令条数、平均 CPI、主频三者共同决定。</td></tr>
+</tbody></table></div>
+<h3 id="shua-ti-you-xian-ji">刷题优先级</h3>
+<div class="timeline">
+  <article class="step"><div class="step-num">1</div><div class="step-body"><h3>概念边界题</h3><p>系统调用/库函数、用户态/内核态、中断/异常、MAR/MDR、PC/IR。</p></div></article>
+  <article class="step"><div class="step-num">2</div><div class="step-body"><h3>流程顺序题</h3><p>系统调用过程、中断处理过程、CPU 指令执行过程、操作系统引导过程。</p></div></article>
+  <article class="step"><div class="step-num">3</div><div class="step-body"><h3>计算题</h3><p>CPU 执行时间、CPI、主频、MIPS、存储容量和地址范围。</p></div></article>
+  <article class="step"><div class="step-num">4</div><div class="step-body"><h3>错题复盘</h3><p>错题本不要只写答案，要写“为什么另外三个选项错”。第一章选择题很多就是概念边界陷阱。</p></div></article>
+</div>
+
+<h2 id="wang-dao-shua-ti-ji-hua">王道刷题计划</h2>
+<div class="timeline">
+  <article class="step"><div class="step-num">1</div><div class="step-body"><h3>第一轮：看完小节立刻刷选择</h3><p>操作系统第 1 章每看完一个小节刷对应选择题；计组第 1 章每看完硬件组成、工作过程、软件层次、性能指标后刷对应选择题。</p><div class="step-tags"><span class="tag">目标：对概念</span><span class="tag">不要先追速度</span></div></div></article>
+  <article class="step"><div class="step-num">2</div><div class="step-body"><h3>第二轮：按考点重刷错题</h3><p>把错题分到“定义混淆、过程顺序、公式计算、单位换算、两门课联系”五类。每类至少总结一句错因。</p></div></article>
+  <article class="step"><div class="step-num">3</div><div class="step-body"><h3>第三轮：闭卷画图和默写公式</h3><p>闭卷画程序运行流程、中断处理流程、系统调用流程、CPU 取指执行流程；默写 CPU 时间公式和性能单位规则。</p></div></article>
+  <article class="step"><div class="step-num">4</div><div class="step-body"><h3>第四轮：混刷两章题</h3><p>把 OS 第 1 章和计组第 1 章选择题混在一起做，训练“看到系统调用想到 trap，看到中断想到硬件入口和 OS 处理”的联想。</p></div></article>
+</div>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>科目</th><th>章节</th><th>刷题重点</th><th>建议题量</th><th>必须整理的错题</th></tr></thead>
+  <tbody>
+    <tr><td>操作系统</td><td>第 1 章 操作系统概述</td><td>OS 功能、接口、四大特征、发展分类、运行机制、中断异常、系统调用、体系结构、引导、虚拟机</td><td>选择题 30-50 道</td><td>并发/并行、共享方式、用户态/内核态、系统调用/库函数、中断分类</td></tr>
+    <tr><td>计算机组成原理</td><td>第 1 章 计算机系统概述</td><td>五大部件、冯诺依曼结构、MAR/MDR/PC/IR/CU、指令执行过程、语言翻译、层次结构、性能公式</td><td>选择题 30-50 道</td><td>MAR/MDR 位数、字长区分、CPI/主频/CPU 时间、机器语言/汇编/高级语言</td></tr>
+  </tbody>
+</table>
+</div>
+<aside class="callout callout-decision">
+  <svg class="callout-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-decision"/></svg>
+  <div class="callout-body">
+    <p class="callout-title">今日建议</p>
+    <p>如果今天只做一件事：先刷 OS 第 1 章运行机制/系统调用/中断，再刷计组第 1 章工作过程/性能指标。因为这两块最能把两门课连起来。</p>
+  </div>
+</aside>
+
+<h2 id="zhang-wo-biao-zhun">掌握标准与自测题</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>层级</th><th>掌握标准</th><th>检查方法</th></tr></thead>
+  <tbody>
+    <tr><td>合格</td><td>能说出 OS 定义、四大特征、五大硬件部件、CPU 基本工作流程</td><td>不看书复述 5 分钟</td></tr>
+    <tr><td>稳</td><td>能解释系统调用为什么要陷入内核态，中断为什么能让 OS 获得 CPU 控制权</td><td>画两张流程图：系统调用、中断处理</td></tr>
+    <tr><td>强</td><td>能把“程序运行”从源代码、编译、装入、进程、取指、系统调用、I/O 中断完整串起来</td><td>用 300 字写一遍，不许只列名词</td></tr>
+    <tr><td>应试</td><td>王道选择题正确率 80% 以上，性能公式题不因单位和公式混淆丢分</td><td>限时刷题并整理错题类型</td></tr>
+  </tbody>
+</table>
+</div>
+<details class="collapsible" open>
+  <summary>闭卷自测题</summary>
+  <div class="collapsible-body">
+    <ol>
+      <li>为什么说操作系统既是资源管理者，又是用户和硬件之间的接口？</li>
+      <li>并发和并行有什么区别？为什么单核也能并发？</li>
+      <li>互斥共享和同时共享各举一个例子。</li>
+      <li>系统调用、库函数、陷入指令三者是什么关系？</li>
+      <li>外中断和内中断分别由什么触发？系统调用属于哪一类？</li>
+      <li>用户态如何进入内核态？内核态如何返回用户态？</li>
+      <li>第一类 VMM 和第二类 VMM 的本质区别是什么？</li>
+      <li>CPU 通电后为什么能开始执行第一条指令？</li>
+      <li>MAR、MDR、PC、IR、CU 分别做什么？</li>
+      <li>一条指令从取指到执行，大致经过哪些寄存器和部件？</li>
+      <li>机器语言、汇编语言、高级语言哪个能被 CPU 直接执行？</li>
+      <li>ISA 为什么是软件和硬件之间的接口？</li>
+      <li>机器字长、存储字长、指令字长有什么区别？</li>
+      <li>写出 CPU 执行时间公式，并说明降低指令数、降低 CPI、提高主频分别依赖什么。</li>
+      <li>吞吐量和响应时间为什么可能互相矛盾？</li>
+    </ol>
+  </div>
+</details>
+
+<h2 id="pei-tu-sao-miao-suo-yin">配图扫描索引</h2>
+<p>本次共扫描第一章配图 79 张：操作系统 50 张，计算机组成原理 29 张。下面按图片顺序归并到考点，正文已吸收这些图片里的补充结论。</p>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>来源</th><th>图片编号</th><th>对应内容</th><th>已吸收的关键点</th></tr></thead>
+  <tbody>
+    <tr><td>操作系统</td><td>01-05</td><td>OS 概念、资源管理、接口、系统调用入口</td><td>OS 管理软硬件资源；处理机/存储器/文件/设备管理；命令接口和程序接口；系统调用面向程序。</td></tr>
+    <tr><td>操作系统</td><td>06-12</td><td>并发、共享、虚拟、异步</td><td>并发是宏观同时微观交替；共享分互斥和同时；虚拟依赖时分/空分；异步来自资源有限和调度。</td></tr>
+    <tr><td>操作系统</td><td>13-20</td><td>发展与分类</td><td>手工、单道批处理、多道批处理、分时、实时、网络、分布式、个人机的目标、优缺点和场景。</td></tr>
+    <tr><td>操作系统</td><td>21-32, 50</td><td>程序运行、内核/应用、特权指令、用户态/内核态、中断</td><td>陷入指令发起系统调用；中断让 OS 重新获得 CPU 控制权；中断向量表定位处理程序；trap/fault/abort 分类。</td></tr>
+    <tr><td>操作系统</td><td>33-42</td><td>虚拟机、系统调用和库函数</td><td>第一类/第二类 VMM；特权级 Ring；系统调用参数传递、陷入、内核服务、返回；系统调用分类。</td></tr>
+    <tr><td>操作系统</td><td>43-48</td><td>操作系统体系结构</td><td>大内核、微内核、分层、模块化、外核；机制和策略分离；微内核状态切换成本。</td></tr>
+    <tr><td>操作系统</td><td>49</td><td>操作系统引导</td><td>ROM/BIOS、POST、MBR、PBR、启动管理器、内核和可加载模块的分阶段加载。</td></tr>
+    <tr><td>计组</td><td>01-04</td><td>硬件基本组成、冯诺依曼和现代结构</td><td>早期以运算器为中心，现代以存储器为中心；CPU、主存、I/O、主机边界。</td></tr>
+    <tr><td>计组</td><td>05-07</td><td>主存、MAR、MDR、编址和字长</td><td>MAR 位数决定寻址范围；MDR 位数关联一次读写数据宽度；按字节编址；存储字长/机器字长/指令字长区别。</td></tr>
+    <tr><td>计组</td><td>08-09</td><td>运算器和控制器</td><td>ACC、MQ、X、ALU 分工；CU、IR、PC 分工；完成一条指令包括取指、分析、执行。</td></tr>
+    <tr><td>计组</td><td>10-16</td><td>计算机工作过程</td><td>高级语言装入主存后的机器指令形式；PC 指向指令；MAR/MDR/IR/CU/ALU 的执行路径。</td></tr>
+    <tr><td>计组</td><td>17-21</td><td>三级语言、ISA、层次结构、存储程序</td><td>机器语言唯一可直接执行；汇编和高级语言需翻译；ISA 是软硬件接口；下层是上层基础。</td></tr>
+    <tr><td>计组</td><td>22-29</td><td>性能指标</td><td>CPU 时间公式；CPI、主频、IPS/MIPS/FLOPS；吞吐量、响应时间、基准程序；三因素共同决定性能。</td></tr>
+  </tbody>
+</table>
+</div>
+
+      <!-- CONTENT_END -->
+
+      <footer class="doc-footer">
+        <span>Generated by <a href="#">md2html</a></span>
+        <span>来源：操作系统.md + 计算机组成原理.md</span>
+      </footer>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>
+    // ---------- Theme ----------
+    const STORAGE_KEY = "md2html-theme";
+    function currentTheme() { return document.documentElement.dataset.theme || "light"; }
+    function applyThemeIcon() {
+      const use = document.getElementById("theme-icon-use");
+      if (use) use.setAttribute("href", currentTheme() === "dark" ? "#i-sun" : "#i-moon");
+    }
+    (function restoreTheme() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) document.documentElement.dataset.theme = saved;
+    })();
+
+    // ---------- Mermaid ----------
+    const diagramSources = new Map();
+    function initMermaid() {
+      const isDark = currentTheme() === "dark";
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: isDark ? "dark" : "default",
+        themeVariables: {
+          primaryColor: isDark ? "#3A2A22" : "#FBEEE6",
+          primaryTextColor: isDark ? "#F5F0E8" : "#1A1A1A",
+          primaryBorderColor: isDark ? "#E89572" : "#D97757",
+          lineColor: isDark ? "#9A938A" : "#6B6B66",
+          secondaryColor: isDark ? "#2A2520" : "#F5F5F0",
+          tertiaryColor: isDark ? "#221E1A" : "#FFFFFF",
+          fontFamily: "Inter, system-ui, sans-serif",
+        },
+      });
+    }
+    async function renderMermaid() {
+      initMermaid();
+      const els = document.querySelectorAll(".mermaid");
+      els.forEach(el => {
+        if (!diagramSources.has(el)) diagramSources.set(el, el.textContent.trim());
+        el.textContent = diagramSources.get(el);
+        el.removeAttribute("data-processed");
+      });
+      try { await mermaid.run({ nodes: els }); } catch (e) { console.error(e); }
+    }
+    function toggleTheme() {
+      const next = currentTheme() === "light" ? "dark" : "light";
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem(STORAGE_KEY, next);
+      applyThemeIcon();
+      renderMermaid();
+    }
+
+    // ---------- TOC drawer (mobile) ----------
+    function openToc()  { document.body.classList.add("toc-open"); }
+    function closeToc() { document.body.classList.remove("toc-open"); }
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && document.body.classList.contains("toc-open")) closeToc();
+    });
+
+    // ---------- TOC scrollspy ----------
+    function setupTocSpy() {
+      const links = document.querySelectorAll("#toc-nav a[href^='#']");
+      if (!links.length) {
+        const toc = document.getElementById("toc");
+        if (toc) toc.style.display = "none";
+        return;
+      }
+      const map = new Map();
+      links.forEach(a => {
+        const id = a.getAttribute("href").slice(1);
+        const el = document.getElementById(id);
+        if (el) map.set(el, a);
+        a.addEventListener("click", () => {
+          if (window.matchMedia("(max-width: 900px)").matches) closeToc();
+        });
+      });
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+          const link = map.get(en.target);
+          if (!link) return;
+          if (en.isIntersecting) {
+            links.forEach(l => l.classList.remove("active"));
+            link.classList.add("active");
+          }
+        });
+      }, { rootMargin: "-80px 0px -70% 0px", threshold: 0 });
+      map.forEach((_, el) => obs.observe(el));
+    }
+
+    // ---------- Anchor links on h2/h3 ----------
+    function injectAnchors() {
+      document.querySelectorAll(".content h2[id], .content h3[id]").forEach(h => {
+        if (h.querySelector(".anchor")) return;
+        const a = document.createElement("a");
+        a.className = "anchor";
+        a.href = "#" + h.id;
+        a.setAttribute("aria-label", "Permalink");
+        a.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-link"/></svg>';
+        h.appendChild(a);
+      });
+    }
+
+    // ---------- Copy-to-clipboard on <pre> ----------
+    function injectCopyButtons() {
+      document.querySelectorAll(".content pre").forEach(pre => {
+        if (pre.classList.contains("mermaid")) return;
+        if (pre.querySelector(".copy-btn")) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "copy-btn";
+        btn.setAttribute("aria-label", "Copy code");
+        btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>';
+        btn.addEventListener("click", async () => {
+          const code = pre.querySelector("code")?.textContent ?? pre.textContent;
+          try {
+            await navigator.clipboard.writeText(code);
+            btn.classList.add("copied");
+            btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-check"/></svg>';
+            setTimeout(() => {
+              btn.classList.remove("copied");
+              btn.innerHTML = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-copy"/></svg>';
+            }, 1500);
+          } catch (e) { console.error(e); }
+        });
+        pre.appendChild(btn);
+      });
+    }
+
+    // ---------- Scroll progress ----------
+    function setupScrollProgress() {
+      const bar = document.getElementById("scroll-progress");
+      if (!bar) return;
+      const onScroll = () => {
+        const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const p = h > 0 ? (document.documentElement.scrollTop / h * 100) : 0;
+        bar.style.width = p + "%";
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
+
+    // ---------- Boot ----------
+    document.addEventListener("DOMContentLoaded", () => {
+      applyThemeIcon();
+      injectAnchors();
+      injectCopyButtons();
+      renderMermaid();
+      setupTocSpy();
+      setupScrollProgress();
+    });
+  </script>
+</body>
+</html>

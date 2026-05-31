@@ -1,0 +1,1532 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>408 OS Boot · Light + Iconify</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MotionPathPlugin.min.js"></script>
+    <script src="assets/icons/icon-map.js"></script>
+    <style>
+      :root {
+        --bg: #f7f3e9;
+        --bg-2: #fffaf0;
+        --ink: #1a1a1a;
+        --ink-soft: rgba(26, 26, 26, 0.66);
+        --ink-faint: rgba(26, 26, 26, 0.38);
+        --blue: #2563eb;
+        --teal: #0f9f8f;
+        --amber: #f59e0b;
+        --rose: #e11d48;
+        --line: rgba(26, 26, 26, 0.14);
+        --line-strong: rgba(26, 26, 26, 0.28);
+        --paper: #ffffff;
+        --paper-warm: #fffdf7;
+        --shadow-card: 0 18px 42px rgba(26,26,26,0.08), inset 0 1px 0 rgba(255,255,255,0.82);
+        --shadow-lift: 0 28px 70px rgba(26,26,26,0.14), inset 0 1px 0 rgba(255,255,255,0.88);
+        --sans: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+        --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Menlo", "Consolas", monospace;
+      }
+
+      html, body {
+        margin: 0; padding: 0;
+        width: 1920px; height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #main-video {
+        position: relative;
+        width: 1920px; height: 1080px;
+        overflow: hidden;
+        background:
+          linear-gradient(135deg, rgba(255,255,255,0.60), transparent 34%),
+          radial-gradient(circle at 12% 8%, rgba(37, 99, 235, 0.07), transparent 30%),
+          radial-gradient(circle at 88% 92%, rgba(245, 158, 11, 0.09), transparent 30%),
+          linear-gradient(180deg, var(--bg-2), var(--bg)),
+          var(--bg);
+      }
+
+      /* subtle paper-grain dots, not a grid (so it doesn't feel like a PPT chart) */
+      .paper-noise {
+        position: absolute; inset: 0;
+        background-image:
+          linear-gradient(rgba(26,26,26,0.028) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(26,26,26,0.026) 1px, transparent 1px),
+          radial-gradient(rgba(26,26,26,0.035) 1px, transparent 1px);
+        background-size: 120px 120px, 120px 120px, 26px 26px;
+        background-position: -1px -1px, -1px -1px, 0 0;
+        opacity: 0.58;
+        mask-image: radial-gradient(ellipse at 50% 50%, black 28%, transparent 82%);
+        -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 28%, transparent 82%);
+        pointer-events: none;
+      }
+      .paper-noise::after {
+        content: "";
+        position: absolute;
+        inset: 34px;
+        border: 1px solid rgba(26,26,26,0.07);
+        border-radius: 14px;
+      }
+
+      .scene::before {
+        content: "";
+        position: absolute;
+        left: 88px; right: 88px;
+        top: 78px; bottom: 160px;
+        border-radius: 18px;
+        background:
+          linear-gradient(135deg, rgba(255,255,255,0.44), rgba(255,255,255,0.08)),
+          radial-gradient(circle at 92% 10%, rgba(37,99,235,0.045), transparent 26%),
+          radial-gradient(circle at 8% 90%, rgba(15,159,143,0.045), transparent 28%);
+        border: 1px solid rgba(26,26,26,0.055);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        padding: 96px 120px 200px;
+        box-sizing: border-box;
+        opacity: 0;
+      }
+
+      /* badge + footer intentionally hidden per user feedback — keep markup for future reuse */
+      .badge { display: none; }
+      .footer-line { display: none; }
+
+      /* ─── atmospheric SVG layer (fluent-emoji illustrations) ─── */
+      .scene-atmosphere {
+        position: absolute;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0;          /* GSAP fades in via autoAlpha */
+        /* stacked drop-shadows give the 3D fluent-emoji a real "floats above paper" feel */
+        filter:
+          drop-shadow(0 4px 6px rgba(26, 26, 26, 0.10))
+          drop-shadow(0 16px 24px rgba(26, 26, 26, 0.14))
+          drop-shadow(0 40px 60px rgba(26, 26, 26, 0.10));
+      }
+      .scene-atmosphere svg,
+      .scene-atmosphere iconify-icon {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      /* Smaller + corner-safe positions so they don't collide with scene content */
+      .scene-atmosphere.a-tr { right: 140px; top: 96px;     width: 150px; height: 150px; }
+      .scene-atmosphere.a-tl { left: 140px;  top: 96px;     width: 150px; height: 150px; }
+      .scene-atmosphere.a-br { right: 140px; bottom: 158px; width: 170px; height: 170px; }
+      .scene-atmosphere.a-bl { left: 140px;  bottom: 158px; width: 170px; height: 170px; }
+      .scene-atmosphere.a-tr-lg { right: 140px; top: 96px;  width: 180px; height: 180px; }
+      .scene-atmosphere.a-tr-sm { right: 104px; top: 112px; width: 112px; height: 112px; }
+
+      /* normal-flow text needs position: relative to honor z-index */
+      .scene > .kicker,
+      .scene > .title,
+      .scene > .sub {
+        position: relative;
+        z-index: 1;
+      }
+      /* absolute-positioned layout containers already have position; only set z-index */
+      .scene > .relay-stage,
+      .scene > .fw-layout,
+      .scene > .bl-layout,
+      .scene > .kn-layout,
+      .scene > .ex-layout,
+      .scene > .mem-layout {
+        z-index: 1;
+      }
+
+      .kicker {
+        font-family: var(--mono);
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.24em;
+        color: var(--blue);
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .kicker iconify-icon {
+        color: var(--blue);
+        font-size: 28px;
+      }
+
+      .title {
+        margin: 28px 0 0;
+        max-width: 1500px;
+        font-size: 92px;
+        line-height: 1.06;
+        font-weight: 900;
+        letter-spacing: -0.012em;
+        color: var(--ink);
+      }
+      .title .hl {
+        position: relative;
+        display: inline-block;
+        white-space: nowrap;
+      }
+      .title .hl::after {
+        content: "";
+        position: absolute;
+        left: -6px; right: -6px;
+        bottom: 10px;
+        height: 20px;
+        background: linear-gradient(90deg, rgba(245, 158, 11, 0.35), rgba(225, 29, 72, 0.25));
+        z-index: -1;
+        border-radius: 2px;
+      }
+      .title em { font-style: normal; color: var(--amber); }
+      .title .blue { color: var(--blue); }
+      .title .teal { color: var(--teal); }
+
+      .sub {
+        margin: 28px 0 0;
+        max-width: 1200px;
+        font-size: 30px;
+        line-height: 1.46;
+        color: var(--ink-soft);
+        font-weight: 500;
+      }
+      .sub em {
+        font-style: normal;
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .sub .arrow {
+        margin: 0 12px;
+        color: var(--amber);
+        font-weight: 700;
+      }
+
+      /* caption strip — z-index above transition cards so it always stays readable */
+      .caption {
+        position: absolute;
+        z-index: 20;
+        left: 240px; right: 240px;
+        bottom: 60px;
+        min-height: 76px;
+        display: flex; align-items: center; justify-content: center;
+        padding: 14px 36px;
+        box-sizing: border-box;
+        font-size: 30px; line-height: 1.32;
+        color: var(--ink);
+        text-align: center;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,240,0.96));
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        box-shadow: var(--shadow-card);
+        opacity: 0;
+        font-weight: 600;
+      }
+      .caption strong { color: var(--amber); font-weight: 800; }
+      .caption .blue { color: var(--blue); font-weight: 800; }
+      .caption .teal { color: var(--teal); font-weight: 800; }
+
+      /* ─── SCENE 1 · RELAY ─── */
+      .relay-stage {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 250px;
+        height: 320px;
+        display: grid;
+        grid-template-columns: 1fr 80px 1fr 80px 1fr;
+        align-items: center;
+      }
+      .relay-station {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+      }
+      .relay-disc {
+        width: 200px; height: 200px;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 32% 24%, rgba(255,255,255,0.98), rgba(255,255,255,0.76) 42%, rgba(255,250,240,0.96)),
+          var(--paper);
+        border: 2px solid var(--line-strong);
+        display: grid; place-items: center;
+        box-shadow: var(--shadow-lift);
+      }
+      .relay-disc iconify-icon { font-size: 120px; }
+      .relay-station[data-c="blue"]  .relay-disc { border-color: var(--blue);  color: var(--blue); }
+      .relay-station[data-c="teal"]  .relay-disc { border-color: var(--teal);  color: var(--teal); }
+      .relay-station[data-c="amber"] .relay-disc { border-color: var(--amber); color: var(--amber); }
+      .relay-label {
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+      }
+      .relay-station[data-c="blue"]  .relay-label { color: var(--blue); }
+      .relay-station[data-c="teal"]  .relay-label { color: var(--teal); }
+      .relay-station[data-c="amber"] .relay-label { color: var(--amber); }
+      .relay-sub {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.18em;
+        color: var(--ink-faint);
+      }
+      .relay-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ink-faint);
+      }
+      .relay-arrow iconify-icon { font-size: 56px; }
+
+      /* ─── SCENE 2 · FIRMWARE TERMINAL HYBRID ─── */
+      .fw-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 220px;
+        height: 500px;
+        display: grid;
+        grid-template-columns: 1fr 740px;
+        gap: 60px;
+      }
+      .terminal {
+        position: relative;
+        background:
+          linear-gradient(180deg, rgba(255,255,255,0.05), transparent 18%),
+          #0c1117;
+        border-radius: 8px;
+        border: 1px solid #283143;
+        padding: 56px 38px 36px;
+        box-sizing: border-box;
+        box-shadow: 0 30px 70px rgba(26,26,26,0.22);
+      }
+      .terminal::before {
+        content: "";
+        position: absolute;
+        left: 18px; top: 18px;
+        width: 16px; height: 16px;
+        border-radius: 50%;
+        background: #ff5f56;
+        box-shadow:
+          24px 0 0 #ffbd2e,
+          48px 0 0 #27c93f;
+      }
+      .terminal::after {
+        content: "FIRMWARE · UEFI";
+        position: absolute;
+        right: 22px; top: 18px;
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.22em;
+        color: rgba(255, 255, 255, 0.34);
+      }
+      .term-line {
+        font-family: var(--mono);
+        font-size: 24px;
+        line-height: 1.7;
+        color: #67ffb2;
+        opacity: 0;
+        white-space: nowrap;
+      }
+      .term-line .ok    { color: var(--amber); margin-left: 12px; }
+      .term-line .blue  { color: #6db4ff; }
+      .term-cursor {
+        display: inline-block;
+        width: 12px; height: 26px;
+        margin-left: 8px;
+        vertical-align: -4px;
+        background: #67ffb2;
+        opacity: 0.85;
+      }
+
+      .fw-side {
+        display: grid;
+        grid-template-rows: 220px 1fr;
+        gap: 30px;
+      }
+      .fw-chip {
+        position: relative;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,240,0.94));
+        border-radius: 8px;
+        border: 1px solid var(--line-strong);
+        display: grid; place-items: center;
+        box-shadow: var(--shadow-card);
+      }
+      .fw-chip iconify-icon {
+        font-size: 140px;
+        color: var(--amber);
+      }
+      .fw-chip-pulse {
+        position: absolute;
+        inset: -2px;
+        border-radius: 8px;
+        border: 2px solid var(--amber);
+        opacity: 0;
+      }
+
+      .fw-tasks {
+        display: grid;
+        grid-template-rows: repeat(4, 1fr);
+        gap: 12px;
+      }
+      .fw-task {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 0 22px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,240,0.94));
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        height: 100%;
+      }
+      .fw-task .icon {
+        font-size: 32px;
+        color: var(--ink-faint);
+        flex-shrink: 0;
+      }
+      .fw-task.lit {
+        background: linear-gradient(90deg, rgba(245,158,11,0.16), rgba(255,255,255,0.88) 68%);
+        border-color: var(--amber);
+        color: var(--ink);
+        box-shadow: 0 10px 28px rgba(245,158,11,0.12);
+      }
+      .fw-task.lit .icon { color: var(--amber); }
+
+      /* ─── SCENE 3 · BOOTLOADER TRANSFER ─── */
+      .bl-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 230px;
+        height: 480px;
+      }
+      .bl-row {
+        position: absolute;
+        left: 0; right: 0;
+        top: 30px;
+        height: 320px;
+        display: grid;
+        grid-template-columns: 1fr 100px 1fr 100px 1fr;
+        align-items: center;
+      }
+      .bl-station {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 22px;
+        position: relative;
+      }
+      .bl-icon-box {
+        width: 220px; height: 200px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,240,0.94));
+        border-radius: 8px;
+        border: 2px solid var(--line-strong);
+        display: grid; place-items: center;
+        box-shadow: var(--shadow-card);
+      }
+      .bl-icon-box iconify-icon { font-size: 120px; }
+      .bl-station[data-c="blue"]  .bl-icon-box { border-color: var(--blue);  color: var(--blue); }
+      .bl-station[data-c="teal"]  .bl-icon-box { border-color: var(--teal);  color: var(--teal); }
+      .bl-station[data-c="amber"] .bl-icon-box { border-color: var(--amber); color: var(--amber); }
+      .bl-station .label {
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+      }
+      .bl-station[data-c="blue"]  .label { color: var(--blue); }
+      .bl-station[data-c="teal"]  .label { color: var(--teal); }
+      .bl-station[data-c="amber"] .label { color: var(--amber); }
+      .bl-station .meta {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.16em;
+        color: var(--ink-faint);
+      }
+      .bl-bridge {
+        position: relative;
+        display: flex; align-items: center; justify-content: center;
+        color: var(--ink-faint);
+      }
+      .bl-bridge iconify-icon { font-size: 60px; }
+
+      .bl-verb {
+        position: absolute;
+        top: -36px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.22em;
+        color: var(--amber);
+        font-weight: 700;
+        white-space: nowrap;
+        text-transform: uppercase;
+      }
+
+      .bl-payload {
+        position: absolute;
+        left: 10%;
+        top: 110px;
+        width: 110px; height: 60px;
+        background: var(--ink);
+        color: var(--bg-2);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: var(--mono);
+        font-size: 18px;
+        font-weight: 800;
+        box-shadow: 0 12px 30px rgba(26,26,26,0.35);
+        opacity: 0;
+        z-index: 5;
+      }
+      .bl-payload iconify-icon { font-size: 22px; }
+
+      /* ─── SCENE 4 · KERNEL HUB ─── */
+      .kn-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 200px;
+        height: 540px;
+      }
+      .kn-hub {
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 260px; height: 260px;
+        margin-left: -130px; margin-top: -130px;
+        border-radius: 50%;
+        background:
+          radial-gradient(circle at 36% 28%, #ffd772 0%, var(--amber) 34%, #d97706 100%);
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 60px rgba(245, 158, 11, 0.35);
+        z-index: 2;
+        color: white;
+      }
+      .kn-hub iconify-icon { font-size: 130px; }
+      .kn-hub-label {
+        position: absolute;
+        bottom: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        color: rgba(255,255,255,0.96);
+        text-shadow: 0 2px 12px rgba(120,72,0,0.35);
+      }
+      .kn-ring {
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 380px; height: 380px;
+        margin-left: -190px; margin-top: -190px;
+        border-radius: 50%;
+        border: 1px dashed rgba(245, 158, 11, 0.4);
+        box-shadow: 0 0 0 72px rgba(245,158,11,0.035);
+      }
+      .kn-node {
+        position: absolute;
+        width: 320px;
+        padding: 24px 28px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,240,0.94));
+        border-radius: 8px;
+        border: 1px solid var(--line-strong);
+        box-shadow: var(--shadow-card);
+        display: grid;
+        grid-template-columns: 60px 1fr;
+        gap: 20px;
+        align-items: center;
+      }
+      .kn-node iconify-icon { font-size: 52px; }
+      .kn-node b {
+        display: block;
+        font-size: 30px;
+        font-weight: 900;
+        margin-bottom: 4px;
+      }
+      .kn-node span {
+        display: block;
+        font-size: 20px;
+        line-height: 1.36;
+        color: var(--ink-soft);
+        font-weight: 500;
+      }
+      .kn-node.n1 { left: 0;   top: 20px;     border-top: 3px solid var(--blue);  }
+      .kn-node.n2 { right: 0;  top: 20px;     border-top: 3px solid var(--teal);  }
+      .kn-node.n3 { left: 0;   bottom: 20px;  border-top: 3px solid var(--rose);  }
+      .kn-node.n4 { right: 0;  bottom: 20px;  border-top: 3px solid var(--ink);  }
+      .kn-node.n1 iconify-icon, .kn-node.n1 b { color: var(--blue); }
+      .kn-node.n2 iconify-icon, .kn-node.n2 b { color: var(--teal); }
+      .kn-node.n3 iconify-icon, .kn-node.n3 b { color: var(--rose); }
+      .kn-node.n4 iconify-icon, .kn-node.n4 b { color: var(--ink); }
+
+      /* ─── SCENE 5 · DECISION TREE ─── */
+      .ex-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 200px;
+        height: 540px;
+      }
+      .ex-root {
+        position: absolute;
+        left: 50%; top: 0;
+        margin-left: -260px;
+        width: 520px;
+        padding: 22px 28px;
+        background: var(--ink);
+        color: var(--bg-2);
+        border-radius: 8px;
+        text-align: center;
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        box-shadow: 0 22px 54px rgba(26,26,26,0.28);
+      }
+      .ex-root iconify-icon { font-size: 36px; color: var(--amber); }
+
+      .ex-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        overflow: visible;
+      }
+      .ex-edge {
+        fill: none;
+        stroke: var(--line-strong);
+        stroke-width: 3;
+        stroke-linecap: round;
+      }
+
+      .ex-bucket {
+        position: absolute;
+        top: 240px;
+        width: 30%;
+        padding: 28px 26px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,240,0.94));
+        border-radius: 8px;
+        border: 2px solid var(--line-strong);
+        box-sizing: border-box;
+        display: grid;
+        grid-template-rows: 80px 1fr 56px;
+        gap: 16px;
+        box-shadow: var(--shadow-card);
+      }
+      .ex-bucket .head {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .ex-bucket .head iconify-icon { font-size: 56px; }
+      .ex-bucket .head .name {
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+      }
+      .ex-bucket .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-content: start;
+      }
+      .ex-bucket .chips span {
+        font-size: 22px;
+        font-weight: 700;
+        padding: 8px 14px;
+        border-radius: 4px;
+        background: rgba(26,26,26,0.04);
+        border: 1px solid var(--line);
+        color: var(--ink);
+        opacity: 0;
+      }
+      .ex-bucket .out {
+        font-size: 20px;
+        font-family: var(--mono);
+        letter-spacing: 0.2em;
+        color: var(--ink-faint);
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+        text-transform: uppercase;
+      }
+      .ex-bucket.b1 { left: 0;   border-top: 4px solid var(--blue);  }
+      .ex-bucket.b2 { left: 35%; border-top: 4px solid var(--teal);  }
+      .ex-bucket.b3 { right: 0;  border-top: 4px solid var(--amber); }
+      .ex-bucket.b1 .head .name, .ex-bucket.b1 .head iconify-icon, .ex-bucket.b1 .out { color: var(--blue); }
+      .ex-bucket.b2 .head .name, .ex-bucket.b2 .head iconify-icon, .ex-bucket.b2 .out { color: var(--teal); }
+      .ex-bucket.b3 .head .name, .ex-bucket.b3 .head iconify-icon, .ex-bucket.b3 .out { color: var(--amber); }
+
+      /* ─── SCENE 6 · RECAP MEMORY STRIPS ─── */
+      .mem-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 200px;
+        height: 460px;
+        display: grid;
+        grid-template-rows: 1fr 50px;
+        gap: 28px;
+      }
+      .mem-strips {
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        gap: 16px;
+      }
+      .mem-strip {
+        display: grid;
+        grid-template-columns: 100px 1fr auto;
+        align-items: center;
+        gap: 32px;
+        padding: 0 36px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,250,240,0.94));
+        border-radius: 8px;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-card);
+      }
+      .mem-strip iconify-icon { font-size: 60px; justify-self: center; }
+      .mem-strip .phrase {
+        font-size: 42px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+      }
+      .mem-strip .phrase .who { color: var(--ink); margin-right: 32px; }
+      .mem-strip .why {
+        font-family: var(--mono);
+        font-size: 20px;
+        letter-spacing: 0.16em;
+        color: var(--ink-faint);
+        text-transform: uppercase;
+      }
+      .mem-strip.s1 { border-left: 6px solid var(--blue);  }
+      .mem-strip.s2 { border-left: 6px solid var(--teal);  }
+      .mem-strip.s3 { border-left: 6px solid var(--amber); }
+      .mem-strip.s1 iconify-icon, .mem-strip.s1 .phrase .do { color: var(--blue); }
+      .mem-strip.s2 iconify-icon, .mem-strip.s2 .phrase .do { color: var(--teal); }
+      .mem-strip.s3 iconify-icon, .mem-strip.s3 .phrase .do { color: var(--amber); }
+
+      /* ─── Kinetic-Typography transition cards (layout-patterns §1) ─── */
+      .transition-card {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        text-align: center;
+        background:
+          radial-gradient(circle at 50% 38%, rgba(255,255,255,0.96), rgba(255,255,255,0.86) 55%, rgba(247,243,233,0.78)),
+          linear-gradient(135deg, var(--paper-warm), var(--bg));
+        opacity: 0;
+        visibility: hidden;
+      }
+      .tc-svg {
+        width: 280px; height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        filter:
+          drop-shadow(0 6px 10px rgba(26,26,26,0.10))
+          drop-shadow(0 20px 32px rgba(26,26,26,0.14))
+          drop-shadow(0 48px 70px rgba(26,26,26,0.10));
+      }
+      .tc-svg iconify-icon,
+      .tc-svg svg {
+        width: 100% !important;
+        height: 100% !important;
+        display: block;
+      }
+      .tc-step {
+        font-family: var(--mono);
+        font-size: 30px;
+        letter-spacing: 0.34em;
+        color: var(--ink-faint);
+        text-transform: uppercase;
+        margin-top: 14px;
+      }
+      .tc-title {
+        font-size: 200px;
+        font-weight: 900;
+        line-height: 0.96;
+        letter-spacing: 0.04em;
+        margin: -8px 0 0;
+      }
+      .tc-tag {
+        font-family: var(--mono);
+        font-size: 26px;
+        letter-spacing: 0.28em;
+        color: var(--ink-soft);
+        text-transform: uppercase;
+        margin-top: 6px;
+      }
+      .tc-rule {
+        width: 96px; height: 4px;
+        border-radius: 999px;
+        margin-top: 18px;
+      }
+      .transition-card[data-stage="firmware"] .tc-title { color: var(--blue); }
+      .transition-card[data-stage="firmware"] .tc-rule  { background: var(--blue); }
+      .transition-card[data-stage="loader"]   .tc-title { color: var(--teal); }
+      .transition-card[data-stage="loader"]   .tc-rule  { background: var(--teal); }
+      .transition-card[data-stage="kernel"]   .tc-title { color: var(--amber); }
+      .transition-card[data-stage="kernel"]   .tc-rule  { background: var(--amber); }
+      .transition-card[data-stage="exam"]     .tc-title { color: var(--rose); }
+      .transition-card[data-stage="exam"]     .tc-rule  { background: var(--rose); }
+
+      /* ─── Editorial Magazine Spread (cross-flow layout, hero photo + serif/sans mix) ─── */
+      .editorial-card {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        background:
+          radial-gradient(circle at 88% 12%, rgba(245,158,11,0.08), transparent 36%),
+          linear-gradient(135deg, var(--paper-warm) 0%, var(--bg-2) 60%, var(--bg) 100%);
+        padding: 88px 120px 100px;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        gap: 80px;
+        opacity: 0;
+        visibility: hidden;
+      }
+      .ec-text {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .ec-cat {
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.34em;
+        color: var(--ink-faint);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .ec-num {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.28em;
+        color: var(--blue);
+        text-transform: uppercase;
+        margin-bottom: 36px;
+      }
+      .ec-title-zh {
+        font-size: 168px;
+        font-weight: 900;
+        line-height: 0.98;
+        letter-spacing: 0.02em;
+        margin: 0 0 28px;
+        color: var(--ink);
+      }
+      .ec-title-zh em {
+        font-style: italic;
+        font-family: Georgia, "Times New Roman", "Songti SC", serif;
+        font-weight: 400;
+        color: var(--amber);
+        margin: 0 6px;
+      }
+      .ec-title-en {
+        font-style: italic;
+        font-family: Georgia, "Times New Roman", serif;
+        font-weight: 400;
+        color: var(--blue);
+        font-size: 110px;
+        letter-spacing: 0.01em;
+      }
+      .ec-meta {
+        font-size: 26px;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        font-weight: 500;
+        margin: 24px 0 0;
+        max-width: 540px;
+      }
+      .ec-meta em {
+        font-style: normal;
+        color: var(--ink);
+        font-weight: 700;
+        border-bottom: 1px dashed rgba(26,26,26,0.34);
+      }
+      .ec-footer {
+        margin-top: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.24em;
+        color: var(--ink-faint);
+        text-transform: uppercase;
+        border-top: 1px solid var(--line-strong);
+        padding-top: 22px;
+      }
+      .ec-footer b {
+        color: var(--blue);
+        font-weight: 700;
+      }
+
+      .ec-photo-col {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-top: 40px;
+      }
+      .ec-photo-frame {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow:
+          0 6px 12px rgba(26,26,26,0.10),
+          0 24px 48px rgba(26,26,26,0.16),
+          0 48px 80px rgba(26,26,26,0.10);
+      }
+      .ec-photo {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      .ec-photo-overlay {
+        position: absolute; inset: 0;
+        background:
+          linear-gradient(180deg, transparent 60%, rgba(26,26,26,0.45));
+      }
+      .ec-photo-stamp {
+        position: absolute;
+        left: 28px; top: 24px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.92);
+        border-radius: 2px;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.24em;
+        color: var(--ink);
+        text-transform: uppercase;
+        box-shadow: 0 6px 14px rgba(26,26,26,0.14);
+      }
+      .ec-photo-stamp b {
+        color: var(--rose);
+        font-weight: 700;
+        margin-right: 8px;
+      }
+      .ec-photo-tag {
+        position: absolute;
+        right: 28px; bottom: 24px;
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.24em;
+        color: rgba(255,255,255,0.92);
+        text-transform: uppercase;
+      }
+      .ec-photo-caption {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.16em;
+        color: var(--ink-soft);
+        text-transform: uppercase;
+      }
+      .ec-photo-caption b {
+        color: var(--ink);
+        margin-right: 10px;
+      }
+
+      .mem-rail {
+        position: relative;
+        height: 12px;
+        background: rgba(26,26,26,0.08);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .mem-fill {
+        position: absolute;
+        left: 0; top: 0;
+        width: 0; height: 100%;
+        background: linear-gradient(90deg, var(--blue), var(--teal), var(--amber));
+        border-radius: 999px;
+      }
+
+      /* footer */
+      .footer-line {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 22px;
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.22em;
+        color: var(--ink-faint);
+        text-transform: uppercase;
+      }
+      .footer-line .l b { color: var(--blue); margin-right: 14px; font-weight: 800; }
+
+      .scene, .scene-atmosphere, .relay-station, .relay-disc, .terminal, .fw-chip, .fw-task,
+      .bl-payload, .bl-station, .bl-icon-box, .kn-hub, .kn-ring, .kn-node, .ex-bucket, .mem-strip, .caption {
+        will-change: transform, opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main-video" data-composition-id="main-video" data-width="1920" data-height="1080" data-start="0" data-duration="77">
+      <div class="paper-noise"></div>
+      <audio id="narration" src="assets/narration.mp3" data-start="0" data-duration="71.2" data-track-index="5" data-volume="1"></audio>
+      <!-- editorial outro extends visual past narration to 77s -->
+
+
+      <!-- ─── SCENE 1 · RELAY ─── -->
+      <section id="scene-1" class="scene">
+        <div class="scene-atmosphere a-tr-lg"><iconify-icon icon="fluent-emoji:rocket"></iconify-icon></div>
+        <div class="badge"><b>408</b>OS · CH.01 · BOOT</div>
+        <div class="kicker"><iconify-icon icon="ph:flag-checkered-bold"></iconify-icon>EXPLAINER 01 · 三棒接力</div>
+        <h1 class="title">按下电源时，<br><span class="hl">操作系统还没开始运行</span></h1>
+        <p class="sub">先动的是<em>固件</em>和<em>引导程序</em>——一棒一棒把 CPU 交到<em>内核</em>手里。</p>
+        <div class="relay-stage">
+          <div class="relay-station" data-c="blue">
+            <div class="relay-disc"><iconify-icon icon="ph:lightning-duotone"></iconify-icon></div>
+            <div class="relay-label">固件</div>
+            <div class="relay-sub">BIOS / UEFI</div>
+          </div>
+          <div class="relay-arrow"><iconify-icon icon="ph:arrow-right-bold"></iconify-icon></div>
+          <div class="relay-station" data-c="teal">
+            <div class="relay-disc"><iconify-icon icon="ph:package-duotone"></iconify-icon></div>
+            <div class="relay-label">引导</div>
+            <div class="relay-sub">BOOTLOADER</div>
+          </div>
+          <div class="relay-arrow"><iconify-icon icon="ph:arrow-right-bold"></iconify-icon></div>
+          <div class="relay-station" data-c="amber">
+            <div class="relay-disc"><iconify-icon icon="ph:cpu-duotone"></iconify-icon></div>
+            <div class="relay-label">内核</div>
+            <div class="relay-sub">OS KERNEL</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 2 · FIRMWARE ─── -->
+      <section id="scene-2" class="scene">
+        <div class="scene-atmosphere a-tr"><iconify-icon icon="fluent-emoji:high-voltage"></iconify-icon></div>
+        <div class="badge"><b>408</b>STAGE 01 · FIRMWARE</div>
+        <div class="kicker"><iconify-icon icon="ph:terminal-window-duotone"></iconify-icon>STEP 01 · 固件先启动</div>
+        <h1 class="title">BIOS / UEFI 让硬件进入<br><span class="hl">「可启动」状态</span></h1>
+        <div class="fw-layout">
+          <div class="terminal">
+            <div class="term-line" id="tl-1">&gt; CPU_RESET_VECTOR<span class="ok">[fetch]</span></div>
+            <div class="term-line" id="tl-2">&gt; init memory &amp; chipset<span class="ok">[OK]</span></div>
+            <div class="term-line" id="tl-3">&gt; scan boot order: <span class="blue">USB → SSD → NET</span></div>
+            <div class="term-line" id="tl-4">&gt; EFI disk found<span class="ok">[handoff]</span><span class="term-cursor"></span></div>
+          </div>
+          <div class="fw-side">
+            <div class="fw-chip">
+              <iconify-icon icon="ph:circuitry-duotone"></iconify-icon>
+              <div class="fw-chip-pulse" id="fw-chip-pulse"></div>
+            </div>
+            <div class="fw-tasks">
+              <div class="fw-task" data-i="1"><iconify-icon class="icon" icon="ph:circle-dashed"></iconify-icon>CPU 从复位地址取第一条指令</div>
+              <div class="fw-task" data-i="2"><iconify-icon class="icon" icon="ph:circle-dashed"></iconify-icon>初始化内存、主板与基础 I/O</div>
+              <div class="fw-task" data-i="3"><iconify-icon class="icon" icon="ph:circle-dashed"></iconify-icon>按启动顺序查找可启动介质</div>
+              <div class="fw-task" data-i="4"><iconify-icon class="icon" icon="ph:circle-dashed"></iconify-icon>把控制权交给引导程序</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 3 · BOOTLOADER TRANSFER ─── -->
+      <section id="scene-3" class="scene">
+        <div class="scene-atmosphere a-tr"><iconify-icon icon="fluent-emoji:floppy-disk"></iconify-icon></div>
+        <div class="badge"><b>408</b>STAGE 02 · BOOTLOADER</div>
+        <div class="kicker"><iconify-icon icon="ph:package-duotone"></iconify-icon>STEP 02 · 引导程序接力</div>
+        <h1 class="title">Bootloader 把<span class="hl">内核搬进内存</span></h1>
+        <div class="bl-layout">
+          <div class="bl-row">
+            <div class="bl-station" data-c="blue">
+              <div class="bl-verb">01 · LOCATE</div>
+              <div class="bl-icon-box"><iconify-icon icon="ph:hard-drive-duotone"></iconify-icon></div>
+              <div class="label">DISK</div>
+              <div class="meta">内核映像 · 启动配置</div>
+            </div>
+            <div class="bl-bridge"><iconify-icon icon="ph:caret-right-bold"></iconify-icon></div>
+            <div class="bl-station" data-c="teal">
+              <div class="bl-verb">02 · LOAD</div>
+              <div class="bl-icon-box"><iconify-icon icon="ph:memory-duotone"></iconify-icon></div>
+              <div class="label">RAM</div>
+              <div class="meta">装入约定位置</div>
+            </div>
+            <div class="bl-bridge"><iconify-icon icon="ph:caret-right-bold"></iconify-icon></div>
+            <div class="bl-station" data-c="amber">
+              <div class="bl-verb">03 · JUMP</div>
+              <div class="bl-icon-box"><iconify-icon icon="ph:cpu-duotone"></iconify-icon></div>
+              <div class="label">CPU</div>
+              <div class="meta">跳到内核入口</div>
+            </div>
+          </div>
+          <div class="bl-payload" id="bl-payload">
+            <iconify-icon icon="ph:cube-duotone"></iconify-icon>kernel
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 4 · KERNEL HUB ─── -->
+      <section id="scene-4" class="scene">
+        <div class="scene-atmosphere a-tr"><iconify-icon icon="fluent-emoji:control-knobs"></iconify-icon></div>
+        <div class="badge"><b>408</b>STAGE 03 · KERNEL</div>
+        <div class="kicker"><iconify-icon icon="ph:cpu-duotone"></iconify-icon>STEP 03 · 内核接管</div>
+        <h1 class="title">内核运行起来，<br>才建立<span class="hl">真正的 OS 环境</span></h1>
+        <div class="kn-layout">
+          <div class="kn-ring"></div>
+          <div class="kn-hub">
+            <iconify-icon icon="ph:atom-duotone"></iconify-icon>
+            <div class="kn-hub-label">内核</div>
+          </div>
+          <div class="kn-node n1">
+            <iconify-icon icon="ph:bell-ringing-duotone"></iconify-icon>
+            <div><b>中断</b><span>建立中断向量与异常处理。</span></div>
+          </div>
+          <div class="kn-node n2">
+            <iconify-icon icon="ph:database-duotone"></iconify-icon>
+            <div><b>内存</b><span>建立页表，管虚拟地址空间。</span></div>
+          </div>
+          <div class="kn-node n3">
+            <iconify-icon icon="ph:list-checks-duotone"></iconify-icon>
+            <div><b>进程</b><span>创建首个系统进程。</span></div>
+          </div>
+          <div class="kn-node n4">
+            <iconify-icon icon="ph:plug-duotone"></iconify-icon>
+            <div><b>设备</b><span>加载驱动，统一 I/O 框架。</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 5 · DECISION TREE ─── -->
+      <section id="scene-5" class="scene">
+        <div class="scene-atmosphere a-tr"><iconify-icon icon="fluent-emoji:thinking-face"></iconify-icon></div>
+        <div class="badge"><b>408</b>EXAM · KEYWORD MAP</div>
+        <div class="kicker"><iconify-icon icon="ph:flow-arrow-duotone"></iconify-icon>408 判题速记 · 关键词分流</div>
+        <h1 class="title">看到关键词，先判断这是<span class="hl">第几棒</span></h1>
+        <div class="ex-layout">
+          <div class="ex-root"><iconify-icon icon="ph:question-duotone"></iconify-icon>题干动作属于谁？</div>
+          <svg class="ex-svg" viewBox="0 0 1680 540" preserveAspectRatio="none" aria-hidden="true">
+            <path id="ex-edge-stem" class="ex-edge" d="M 840 70 V 150" />
+            <path id="ex-edge-bar"  class="ex-edge" d="M 252 150 H 1428" />
+            <path id="ex-edge-l"   class="ex-edge" d="M 252 150 V 240" />
+            <path id="ex-edge-m"   class="ex-edge" d="M 840 150 V 240" />
+            <path id="ex-edge-r"   class="ex-edge" d="M 1428 150 V 240" />
+          </svg>
+          <div class="ex-bucket b1">
+            <div class="head"><iconify-icon icon="ph:lightning-duotone"></iconify-icon><span class="name">固件</span></div>
+            <div class="chips">
+              <span>上电</span><span>自检</span><span>启动项</span><span>POST</span><span>复位</span>
+            </div>
+            <div class="out">BIOS / UEFI</div>
+          </div>
+          <div class="ex-bucket b2">
+            <div class="head"><iconify-icon icon="ph:package-duotone"></iconify-icon><span class="name">引导</span></div>
+            <div class="chips">
+              <span>加载内核</span><span>跳转入口</span><span>装入</span><span>bootloader</span><span>启动参数</span>
+            </div>
+            <div class="out">BOOTLOADER</div>
+          </div>
+          <div class="ex-bucket b3">
+            <div class="head"><iconify-icon icon="ph:cpu-duotone"></iconify-icon><span class="name">内核</span></div>
+            <div class="chips">
+              <span>中断</span><span>页表</span><span>进程</span><span>设备</span><span>系统调用</span>
+            </div>
+            <div class="out">OS KERNEL</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 6 · MEMORY RECAP ─── -->
+      <section id="scene-6" class="scene">
+        <div class="scene-atmosphere a-tr-sm"><iconify-icon icon="fluent-emoji:bullseye"></iconify-icon></div>
+        <div class="badge"><b>408</b>MEMORY FRAME · RECAP</div>
+        <div class="kicker"><iconify-icon icon="ph:brain-duotone"></iconify-icon>一句话记住 · 最小知识闭环</div>
+        <h1 class="title"><span class="hl">固件找入口，引导搬内核，内核管全局</span></h1>
+        <div class="mem-layout">
+          <div class="mem-strips">
+            <div class="mem-strip s1">
+              <iconify-icon icon="ph:lightning-duotone"></iconify-icon>
+              <div class="phrase"><span class="who">固件</span><span class="do">找入口</span></div>
+              <div class="why">POWER-ON FIRST</div>
+            </div>
+            <div class="mem-strip s2">
+              <iconify-icon icon="ph:package-duotone"></iconify-icon>
+              <div class="phrase"><span class="who">引导</span><span class="do">搬内核</span></div>
+              <div class="why">DISK → RAM</div>
+            </div>
+            <div class="mem-strip s3">
+              <iconify-icon icon="ph:cpu-duotone"></iconify-icon>
+              <div class="phrase"><span class="who">内核</span><span class="do">管全局</span></div>
+              <div class="why">OS TAKES OVER</div>
+            </div>
+          </div>
+          <div class="mem-rail">
+            <div class="mem-fill" id="mem-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-line">
+        <div class="l"><b>LISOUND · 408</b>OPERATING SYSTEMS · CH.01</div>
+        <div class="r">EP.01 — BOOT PROCESS</div>
+      </div>
+
+      <!-- ─── CAPTIONS ─── -->
+      <!-- ─── Kinetic-Typography transition cards (overlay between content scenes) ─── -->
+      <div id="trans-1" class="transition-card" data-stage="firmware">
+        <div class="tc-svg"><iconify-icon icon="fluent-emoji:robot"></iconify-icon></div>
+        <div class="tc-step">STAGE · 01</div>
+        <div class="tc-title">固件</div>
+        <div class="tc-rule"></div>
+        <div class="tc-tag">BIOS / UEFI</div>
+      </div>
+      <div id="trans-2" class="transition-card" data-stage="loader">
+        <div class="tc-svg"><iconify-icon icon="fluent-emoji:package"></iconify-icon></div>
+        <div class="tc-step">STAGE · 02</div>
+        <div class="tc-title">引导</div>
+        <div class="tc-rule"></div>
+        <div class="tc-tag">BOOTLOADER</div>
+      </div>
+      <div id="trans-3" class="transition-card" data-stage="kernel">
+        <div class="tc-svg"><iconify-icon icon="fluent-emoji:brain"></iconify-icon></div>
+        <div class="tc-step">STAGE · 03</div>
+        <div class="tc-title">内核</div>
+        <div class="tc-rule"></div>
+        <div class="tc-tag">OS KERNEL</div>
+      </div>
+      <div id="trans-4" class="transition-card" data-stage="exam">
+        <div class="tc-svg"><iconify-icon icon="fluent-emoji:nerd-face"></iconify-icon></div>
+        <div class="tc-step">408 · EXAM</div>
+        <div class="tc-title">速记</div>
+        <div class="tc-rule"></div>
+        <div class="tc-tag">KEYWORD MAP</div>
+      </div>
+
+      <!-- ─── Editorial magazine spread (outro, picsum hero photo + cross-flow text grid) ─── -->
+      <div id="trans-editorial" class="editorial-card">
+        <div class="ec-text">
+          <div class="ec-cat">M01 · COVER · 启动现场</div>
+          <div class="ec-num">VOL. 01 — 2026 · CH.01</div>
+          <h1 class="ec-title-zh">第 <em>0</em> 秒，<br>看见 <span class="ec-title-en">boot</span></h1>
+          <p class="ec-meta">71 秒 · <em>一次完整接力</em><br>固件找入口 · 引导搬内核 · 内核管全局</p>
+          <div class="ec-footer">
+            <span><b>P. 01</b> · FIELD JOURNAL</span>
+            <span>LISOUND · 408 OS</span>
+          </div>
+        </div>
+        <div class="ec-photo-col">
+          <div class="ec-photo-frame">
+            <img src="assets/images/picsum-tech1.jpg" class="ec-photo" alt="" />
+            <div class="ec-photo-overlay"></div>
+            <div class="ec-photo-stamp"><b>FIG. 01</b>启动现场</div>
+            <div class="ec-photo-tag">SHUTTER · 1/250s</div>
+          </div>
+          <div class="ec-photo-caption"><b>序章 ·</b>静默, 温暖, 第 0 秒</div>
+        </div>
+      </div>
+
+      <div id="cap-1"  class="caption">计算机启动，可以看成一场<strong>三棒接力</strong>。</div>
+      <div id="cap-2"  class="caption">第一棒是固件，也就是 <strong>BIOS 或 UEFI</strong>。</div>
+      <div id="cap-3"  class="caption">CPU 从固定入口取指，初始化内存和基础设备，再按顺序找可启动磁盘。</div>
+      <div id="cap-4"  class="caption">第二棒是引导程序，也叫 <strong>bootloader</strong>。</div>
+      <div id="cap-5"  class="caption">它只做三件事——<strong>找内核、装入内存、跳转入口</strong>。</div>
+      <div id="cap-6"  class="caption">第三棒才轮到 <span class="blue">内核</span>。</div>
+      <div id="cap-7"  class="caption">内核运行后，建立<strong>中断 · 内存 · 进程 · 设备</strong>四套子系统。</div>
+      <div id="cap-8"  class="caption">做 408 题时，<strong>不要把这三层混在一起</strong>。</div>
+      <div id="cap-9"  class="caption">看到 <span class="blue">上电、自检、启动项</span> → 想到固件。</div>
+      <div id="cap-10" class="caption">看到 <strong>加载内核、跳转入口</strong> → 想到引导程序。</div>
+      <div id="cap-11" class="caption">看到 <span class="blue">中断、页表、进程、设备</span> → 内核接管。</div>
+      <div id="cap-12" class="caption">一句话记忆：<strong>固件找入口，引导搬内核，内核管全局</strong>。</div>
+
+      <script>
+        // ── Step 1: inline all <iconify-icon> as actual <svg> (no runtime CDN fetch) ──
+        (function inlineIcons() {
+          const map = window.__icons || {};
+          document.querySelectorAll('iconify-icon').forEach((el) => {
+            const name = el.getAttribute('icon');
+            const svgMarkup = map[name];
+            if (!svgMarkup) { console.warn('icon missing in __icons:', name); return; }
+            const tmp = document.createElement('span');
+            tmp.innerHTML = svgMarkup;
+            const svgEl = tmp.firstElementChild;
+            if (!svgEl) return;
+            // copy class attribute so existing CSS selectors that match by .class still apply
+            const cls = el.getAttribute('class') || '';
+            if (cls) svgEl.setAttribute('class', cls);
+            // sizing: explicit width attribute wins, else inherit font-size for 1em
+            const widthAttr = el.getAttribute('width');
+            if (widthAttr) {
+              svgEl.setAttribute('width', widthAttr);
+              svgEl.setAttribute('height', el.getAttribute('height') || widthAttr);
+            } else {
+              const fs = getComputedStyle(el).fontSize;
+              if (fs) svgEl.style.fontSize = fs;
+            }
+            svgEl.style.display = 'inline-block';
+            svgEl.style.verticalAlign = '-0.125em';
+            el.replaceWith(svgEl);
+          });
+        })();
+
+        // ── Step 2: GSAP timeline (skill-compliant: defaults + labels + autoAlpha) ──
+        gsap.registerPlugin(MotionPathPlugin);
+        gsap.defaults({ overwrite: "auto" });
+        window.__timelines = window.__timelines || {};
+
+        const tl = gsap.timeline({
+          paused: true,
+          defaults: { duration: 0.55, ease: "power3.out" },
+        });
+
+        // scene-start labels lock the timeline to narration.srt cues
+        tl.addLabel("s1", 0.15)
+          .addLabel("s2", 8.4)
+          .addLabel("s3", 18.6)
+          .addLabel("s4", 33.5)
+          .addLabel("s5", 43.3)
+          .addLabel("s6", 65.1);
+
+        // caption [start, end, selector] — verbatim from narration.srt
+        const captionTimes = [
+          [0.10,  3.85, "#cap-1"],  [3.80,  8.32, "#cap-2"],
+          [8.32, 18.51, "#cap-3"],  [18.51, 22.16, "#cap-4"],
+          [22.16, 33.39, "#cap-5"], [33.39, 35.83, "#cap-6"],
+          [35.83, 43.18, "#cap-7"], [43.18, 48.14, "#cap-8"],
+          [48.14, 52.83, "#cap-9"], [52.83, 58.32, "#cap-10"],
+          [58.32, 65.17, "#cap-11"],[65.17, 71.03, "#cap-12"],
+        ];
+
+        const has    = (s) => !!document.querySelector(s);
+        const fromIf = (s, v, at) => { if (has(s)) tl.from(s, v, at); };
+        const toIf   = (s, v, at) => { if (has(s)) tl.to(s, v, at); };
+
+        function showScene(label, sceneId) {
+          tl.to(sceneId, { autoAlpha: 1, duration: 0.42, ease: "power2.out" }, label);
+          fromIf(`${sceneId} .kicker`, { yPercent: 24, autoAlpha: 0, duration: 0.5 }, `${label}+=0.08`);
+          fromIf(`${sceneId} .title`,  { yPercent: 14, autoAlpha: 0, duration: 0.72, ease: "back.out(1.08)" }, `${label}+=0.20`);
+          fromIf(`${sceneId} .sub`,    { yPercent: 22, autoAlpha: 0, duration: 0.48 }, `${label}+=0.55`);
+        }
+        function hideScene(at, sceneId) {
+          tl.to(sceneId, { autoAlpha: 0, duration: 0.5, ease: "power2.inOut" }, at);
+        }
+        function caption(start, end, id) {
+          tl.to(id, { autoAlpha: 1, y: -4, duration: 0.22, ease: "power2.out" }, start);
+          tl.to(id, { autoAlpha: 0, y: 0,  duration: 0.20, ease: "power2.in"  }, Math.max(start + 0.4, end - 0.2));
+        }
+        function drawPath(sel, at, dur) {
+          document.querySelectorAll(sel).forEach((p) => {
+            try {
+              const len = p.getTotalLength();
+              gsap.set(p, { strokeDasharray: len, strokeDashoffset: len });
+              tl.to(p, { strokeDashoffset: 0, duration: dur, ease: "power1.inOut" }, at);
+            } catch (e) {}
+          });
+        }
+
+        // helper: kinetic-typography transition card overlaying scene boundaries (2.0s total)
+        // follows gsap-core (autoAlpha + transform aliases) + layout-patterns §1
+        function transitionCard(id, at) {
+          if (!has(id)) return;
+          // Card container fade-in (longer for readability)
+          tl.fromTo(id,
+            { autoAlpha: 0, scale: 0.94 },
+            { autoAlpha: 1, scale: 1, duration: 0.45, ease: "power3.out" }, at);
+          // Inner elements staggered kinetic entrance
+          tl.from(`${id} .tc-svg`,   { yPercent: 12, scale: 0.7, rotation: -8, autoAlpha: 0, duration: 0.55, ease: "back.out(1.7)" }, at + 0.05);
+          tl.from(`${id} .tc-step`,  { y: 16, autoAlpha: 0, duration: 0.40, ease: "power3.out" }, at + 0.30);
+          tl.from(`${id} .tc-title`, { yPercent: 10, autoAlpha: 0, duration: 0.55, ease: "back.out(1.2)" }, at + 0.42);
+          tl.from(`${id} .tc-rule`,  { scaleX: 0, autoAlpha: 0, duration: 0.36, ease: "power2.out" }, at + 0.62);
+          tl.from(`${id} .tc-tag`,   { y: 12, autoAlpha: 0, duration: 0.34, ease: "power3.out" }, at + 0.72);
+          // Subtle SVG breathing during hold (gsap-performance Ken Burns)
+          tl.to(`${id} .tc-svg`, { scale: 1.06, rotation: 3, duration: 1.1, ease: "sine.inOut" }, at + 0.6);
+          // Hold ~1.0s, then exit
+          tl.to(id, { autoAlpha: 0, scale: 1.05, duration: 0.5, ease: "power2.in" }, at + 1.5);
+        }
+
+        // helper: atmospheric SVG entrance + slow drift (gsap-core autoAlpha + transform aliases)
+        function atmosphere(sceneId, label, holdSeconds) {
+          if (!has(`${sceneId} .scene-atmosphere`)) return;
+          tl.fromTo(`${sceneId} .scene-atmosphere`,
+            { autoAlpha: 0, scale: 0.82, rotation: -5, y: 8 },
+            { autoAlpha: 0.68, scale: 1, rotation: 0, y: 0, duration: 1.35, ease: "back.out(1.18)" },
+            `${label}+=0.3`);
+          // Ken Burns drift through the rest of the scene (gsap-performance pattern: pure transform)
+          tl.to(`${sceneId} .scene-atmosphere`,
+            { scale: 1.05, rotation: 1.6, x: -10, y: 8, duration: Math.max(2, holdSeconds - 1.4), ease: "none" },
+            `${label}+=1.7`);
+        }
+
+        // ─── SCENE 1 · relay (0.15 → 7.9) ───
+        showScene("s1", "#scene-1");
+        atmosphere("#scene-1", "s1", 7.5);
+        fromIf("#scene-1 .relay-station", { yPercent: 22, scale: 0.84, autoAlpha: 0, stagger: 0.3, duration: 0.7, ease: "back.out(1.5)" }, "s1+=0.85");
+        fromIf("#scene-1 .relay-arrow",   { scale: 0, autoAlpha: 0, stagger: 0.3, duration: 0.5, ease: "back.out(1.5)" }, "s1+=1.35");
+        tl.to('#scene-1 .relay-station[data-c="blue"]  .relay-disc', { scale: 1.06, boxShadow: "0 0 0 12px rgba(37,99,235,0.18)",  duration: 0.46, repeat: 1, yoyo: true, ease: "sine.inOut" }, "s1+=2.25");
+        tl.to('#scene-1 .relay-station[data-c="teal"]  .relay-disc', { scale: 1.06, boxShadow: "0 0 0 12px rgba(15,159,143,0.18)", duration: 0.46, repeat: 1, yoyo: true, ease: "sine.inOut" }, "s1+=4.25");
+        tl.to('#scene-1 .relay-station[data-c="amber"] .relay-disc', { scale: 1.06, boxShadow: "0 0 0 12px rgba(245,158,11,0.18)", duration: 0.46, repeat: 1, yoyo: true, ease: "sine.inOut" }, "s1+=6.05");
+        hideScene(7.9, "#scene-1");
+
+        // ─── SCENE 2 · firmware terminal hybrid (8.4 → 18.2) ───
+        showScene("s2", "#scene-2");
+        atmosphere("#scene-2", "s2", 9.8);
+        ["#tl-1","#tl-2","#tl-3","#tl-4"].forEach((id, i) => {
+          tl.to(id, { autoAlpha: 1, duration: 0.35, ease: "power1.out" }, `s2+=${0.6 + i * 0.85}`);
+        });
+        tl.to(".term-cursor", { autoAlpha: 0.15, duration: 0.42, repeat: 13, yoyo: true, ease: "steps(1)" }, "s2+=4.1");
+        fromIf("#scene-2 .fw-chip", { scale: 0.7, autoAlpha: 0, duration: 0.6, ease: "back.out(1.5)" }, "s2+=1.0");
+        tl.fromTo("#fw-chip-pulse", { autoAlpha: 0.6, scale: 1 }, { autoAlpha: 0, scale: 1.18, duration: 1.4, repeat: 3, ease: "sine.out" }, "s2+=1.6");
+        [".fw-task[data-i='1']", ".fw-task[data-i='2']", ".fw-task[data-i='3']", ".fw-task[data-i='4']"].forEach((sel, i) => {
+          tl.from(sel, { x: -28, autoAlpha: 0, duration: 0.45, ease: "power3.out" }, `s2+=${1.0 + i * 0.45}`);
+          tl.add(() => { document.querySelectorAll(sel).forEach((n) => n.classList.add('lit')); }, `s2+=${2.8 + i * 1.5}`);
+          tl.to(sel, { x: 8, duration: 0.22, repeat: 1, yoyo: true, ease: "sine.inOut" }, `s2+=${2.82 + i * 1.5}`);
+        });
+        hideScene(18.2, "#scene-2");
+
+        // ─── SCENE 3 · bootloader transfer (18.6 → 33.1) ───
+        showScene("s3", "#scene-3");
+        atmosphere("#scene-3", "s3", 14.5);
+        fromIf("#scene-3 .bl-station", { yPercent: 18, autoAlpha: 0, stagger: 0.18, duration: 0.55, ease: "power3.out" }, "s3+=1.0");
+        fromIf("#scene-3 .bl-verb",    { y: -20, autoAlpha: 0, stagger: 0.18, duration: 0.5, ease: "power2.out" }, "s3+=1.4");
+        fromIf("#scene-3 .bl-bridge",  { scale: 0, autoAlpha: 0, stagger: 0.18, duration: 0.5, ease: "back.out(1.5)" }, "s3+=1.8");
+        // payload travels DISK → RAM → CPU using transform x, not layout left/top.
+        tl.set("#bl-payload", { x: 0, autoAlpha: 0 }, "s3+=4.0");
+        tl.to("#bl-payload",  { autoAlpha: 1, duration: 0.25, ease: "power1.out" }, "s3+=4.1");
+        tl.to("#bl-payload",  { x: 588, duration: 4.4, ease: "power1.inOut" }, "s3+=4.4");
+        tl.to("#bl-payload",  { x: 1210, duration: 4.4, ease: "power1.inOut" }, "s3+=9.0");
+        tl.to('#scene-3 .bl-station[data-c="blue"]  .bl-icon-box', { boxShadow: "0 24px 60px rgba(37,99,235,0.30)",  duration: 0.4 }, "s3+=4.2");
+        tl.to('#scene-3 .bl-station[data-c="teal"]  .bl-icon-box', { boxShadow: "0 24px 60px rgba(15,159,143,0.30)", duration: 0.4 }, "s3+=8.3");
+        tl.to('#scene-3 .bl-station[data-c="amber"] .bl-icon-box', { boxShadow: "0 24px 60px rgba(245,158,11,0.30)", duration: 0.4 }, "s3+=12.8");
+        tl.to("#bl-payload", { autoAlpha: 0, duration: 0.3, ease: "power1.in" }, "s3+=13.5");
+        hideScene(33.1, "#scene-3");
+
+        // ─── SCENE 4 · kernel hub (33.5 → 43.0) ───
+        showScene("s4", "#scene-4");
+        atmosphere("#scene-4", "s4", 9.5);
+        fromIf("#scene-4 .kn-hub",  { scale: 0.62, autoAlpha: 0, duration: 0.7, ease: "back.out(1.6)" }, "s4+=0.5");
+        fromIf("#scene-4 .kn-ring", { scale: 0.7,  autoAlpha: 0, duration: 0.7, ease: "sine.out" },     "s4+=0.7");
+        fromIf("#scene-4 .kn-node", { scale: 0.84, autoAlpha: 0, stagger: 0.16, duration: 0.55, ease: "back.out(1.3)" }, "s4+=1.5");
+        tl.to("#scene-4 .kn-ring", { rotation: 360, duration: 8.0, ease: "none", transformOrigin: "50% 50%" }, "s4+=1.1");
+        tl.to("#scene-4 .kn-hub",  { scale: 1.05, duration: 0.85, repeat: 3, yoyo: true, ease: "sine.inOut" }, "s4+=2.5");
+        toIf("#scene-4 .kn-node", { y: -6, duration: 0.7, stagger: { each: 0.11, repeat: 3, yoyo: true }, ease: "sine.inOut" }, "s4+=3.0");
+        hideScene(43.0, "#scene-4");
+
+        // ─── SCENE 5 · decision tree (43.3 → 65.0) ───
+        showScene("s5", "#scene-5");
+        atmosphere("#scene-5", "s5", 21.5);
+        fromIf("#scene-5 .ex-root", { y: -30, autoAlpha: 0, duration: 0.55, ease: "back.out(1.4)" }, "s5+=0.5");
+        drawPath("#ex-edge-stem", 44.4, 0.45);
+        drawPath("#ex-edge-bar",  44.85, 0.7);
+        drawPath("#ex-edge-l",    45.55, 0.3);
+        drawPath("#ex-edge-m",    45.55, 0.3);
+        drawPath("#ex-edge-r",    45.55, 0.3);
+        fromIf("#scene-5 .ex-bucket", { yPercent: 14, autoAlpha: 0, stagger: 0.12, duration: 0.55, ease: "power3.out" }, "s5+=2.7");
+
+        // chip reveal waves tied to caption 9/10/11
+        tl.fromTo("#scene-5 .ex-bucket.b1 .chips span", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: 0.08, duration: 0.35, ease: "power2.out" }, 48.3);
+        tl.to("#scene-5 .ex-bucket.b1", { boxShadow: "0 24px 60px rgba(37,99,235,0.3)",  duration: 0.45 }, 48.4);
+        tl.to("#scene-5 .ex-bucket.b1", { boxShadow: "0 16px 36px rgba(26,26,26,0.06)",  duration: 0.5  }, 52.7);
+        tl.fromTo("#scene-5 .ex-bucket.b2 .chips span", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: 0.08, duration: 0.35, ease: "power2.out" }, 53.0);
+        tl.to("#scene-5 .ex-bucket.b2", { boxShadow: "0 24px 60px rgba(15,159,143,0.3)", duration: 0.45 }, 53.1);
+        tl.to("#scene-5 .ex-bucket.b2", { boxShadow: "0 16px 36px rgba(26,26,26,0.06)",  duration: 0.5  }, 58.2);
+        tl.fromTo("#scene-5 .ex-bucket.b3 .chips span", { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, stagger: 0.08, duration: 0.35, ease: "power2.out" }, 58.5);
+        tl.to("#scene-5 .ex-bucket.b3", { boxShadow: "0 24px 60px rgba(245,158,11,0.3)", duration: 0.45 }, 58.6);
+        tl.to("#scene-5 .ex-bucket.b3", { boxShadow: "0 16px 36px rgba(26,26,26,0.06)",  duration: 0.5  }, 64.6);
+        hideScene(65.0, "#scene-5");
+
+        // ─── SCENE 6 · recap memory strips (65.1 → 71.7) ───
+        showScene("s6", "#scene-6");
+        atmosphere("#scene-6", "s6", 6.5);
+        fromIf("#scene-6 .mem-strip", { xPercent: -10, autoAlpha: 0, stagger: 0.18, duration: 0.55, ease: "power3.out" }, "s6+=0.9");
+        tl.to("#scene-6 .mem-strip.s1 .do", { textShadow: "0 0 18px rgba(37,99,235,0.6)",  duration: 0.5, repeat: 1, yoyo: true, ease: "sine.inOut" }, "s6+=2.3");
+        tl.to("#scene-6 .mem-strip.s2 .do", { textShadow: "0 0 18px rgba(15,159,143,0.6)", duration: 0.5, repeat: 1, yoyo: true, ease: "sine.inOut" }, "s6+=2.9");
+        tl.to("#scene-6 .mem-strip.s3 .do", { textShadow: "0 0 18px rgba(245,158,11,0.6)", duration: 0.5, repeat: 1, yoyo: true, ease: "sine.inOut" }, "s6+=3.5");
+        tl.to("#mem-fill", { width: "100%", duration: 4.6, ease: "power1.inOut" }, "s6+=1.5");
+        tl.to("#scene-6", { autoAlpha: 0, duration: 0.8, ease: "power2.inOut" }, 71.7);
+
+        // ─── transition cards at scene boundaries (overlay 2.0s, caption stays above) ───
+        transitionCard("#trans-1", 7.0);   // firmware  · spans 7.0 → 9.0 over scene 1→2 boundary
+        transitionCard("#trans-2", 17.4);  // loader    · spans 17.4 → 19.4 over scene 2→3 boundary
+        transitionCard("#trans-3", 32.2);  // kernel    · spans 32.2 → 34.2 over scene 3→4 boundary
+        transitionCard("#trans-4", 42.0);  // exam      · spans 42.0 → 44.0 over scene 4→5 boundary
+
+        // ─── editorial magazine spread outro (72.0 → 77.0, 5s hero photo + cross-flow text) ───
+        (function editorialOutro() {
+          const id = "#trans-editorial";
+          if (!has(id)) return;
+          // container fade-in
+          tl.fromTo(id,
+            { autoAlpha: 0, scale: 0.97 },
+            { autoAlpha: 1, scale: 1, duration: 0.7, ease: "power2.out" }, 72.0);
+          // left-column text staggered (editorial reveal: kicker → number → title → meta → footer)
+          tl.from(`${id} .ec-cat`,      { xPercent: -8, autoAlpha: 0, duration: 0.5, ease: "power3.out" }, 72.2);
+          tl.from(`${id} .ec-num`,      { xPercent: -8, autoAlpha: 0, duration: 0.5, ease: "power3.out" }, 72.32);
+          tl.from(`${id} .ec-title-zh`, { yPercent: 6, autoAlpha: 0, duration: 0.85, ease: "back.out(1.15)" }, 72.5);
+          tl.from(`${id} .ec-meta`,     { yPercent: 12, autoAlpha: 0, duration: 0.6, ease: "power3.out" }, 73.05);
+          tl.from(`${id} .ec-footer`,   { yPercent: 20, autoAlpha: 0, duration: 0.5, ease: "power3.out" }, 73.35);
+          // right-column photo: Ken Burns entrance (scale 1.08 → 1) per gsap-performance
+          tl.fromTo(`${id} .ec-photo-frame`,
+            { autoAlpha: 0, xPercent: 4, scale: 1.04 },
+            { autoAlpha: 1, xPercent: 0, scale: 1, duration: 0.95, ease: "power3.out" }, 72.35);
+          tl.fromTo(`${id} .ec-photo`,
+            { scale: 1.12 },
+            { scale: 1, duration: 4.6, ease: "none" }, 72.35);
+          // photo overlays (stamp + tag + caption)
+          tl.from(`${id} .ec-photo-stamp`,   { y: -12, autoAlpha: 0, duration: 0.45, ease: "back.out(1.4)" }, 73.2);
+          tl.from(`${id} .ec-photo-tag`,     { y: 12, autoAlpha: 0, duration: 0.45, ease: "power3.out" }, 73.45);
+          tl.from(`${id} .ec-photo-caption`, { y: 10, autoAlpha: 0, duration: 0.45, ease: "power3.out" }, 73.65);
+          // gentle hold; fade out at the very end
+          tl.to(id, { autoAlpha: 0, duration: 0.7, ease: "power2.in" }, 76.3);
+        })();
+
+        captionTimes.forEach(([s, e, id]) => caption(s, e, id));
+
+        window.__timelines["main-video"] = tl;
+
+        // local file:// preview auto-plays; HyperFrames driver controls seeking otherwise.
+        const isLocalBrowserPreview = window.location.protocol === "file:" && !navigator.webdriver;
+        // Auto-scale the 1920x1080 design to fit the browser viewport for preview.
+        // HyperFrames render path is untouched (this only runs when isLocalBrowserPreview).
+        function fitToViewport() {
+          const main = document.getElementById('main-video');
+          if (!main) return;
+          const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+          if (scale < 1) {
+            main.style.transform = `scale(${scale})`;
+            main.style.transformOrigin = 'top left';
+            // sit the scaled canvas centered in viewport
+            main.style.position = 'absolute';
+            main.style.left = ((window.innerWidth  - 1920 * scale) / 2) + 'px';
+            main.style.top  = ((window.innerHeight - 1080 * scale) / 2) + 'px';
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+          } else {
+            main.style.transform = '';
+            main.style.position = '';
+            main.style.left = '';
+            main.style.top  = '';
+          }
+        }
+        if (isLocalBrowserPreview) {
+          window.addEventListener("load", () => {
+            fitToViewport();
+            tl.play(0);
+          });
+          window.addEventListener("resize", fitToViewport);
+        }
+      </script>
+    </div>
+  </body>
+</html>

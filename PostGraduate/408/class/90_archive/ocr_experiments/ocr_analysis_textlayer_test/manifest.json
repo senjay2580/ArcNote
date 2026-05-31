@@ -1,0 +1,22 @@
+{
+  "script_version": "2026-05-29.2",
+  "created_at_epoch": 1779985738,
+  "inputs": [
+    "D:\\Desktop\\ArcNote\\PostGraduate\\答题卡\\计算机408历年真题\\2009-2023计算机408统考真题\\2021年计算机408统考真题. .pdf"
+  ],
+  "output": "D:\\Desktop\\ArcNote\\PostGraduate\\408\\class\\ocr_analysis_textlayer_test",
+  "pdf_count": 1,
+  "ocr_engine": "easyocr",
+  "ocr_requested": "auto",
+  "ocr_policy": "weak",
+  "gpu_requested": "auto",
+  "gpu_available": true,
+  "lang_hint": "en",
+  "min_cjk": 30,
+  "min_chars": 80,
+  "scale": 1.4,
+  "easyocr_batch_size": 4,
+  "resume_enabled": true,
+  "force": false,
+  "wall_seconds": 3.188
+}

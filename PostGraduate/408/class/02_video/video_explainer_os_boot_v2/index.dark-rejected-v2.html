@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>408 OS Boot Explainer · Dark v2</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/MotionPathPlugin.min.js"></script>
+    <style>
+      :root {
+        --bg: #0b0f17;
+        --bg-2: #131a27;
+        --ink: #f7f1e8;
+        --ink-soft: rgba(247, 241, 232, 0.78);
+        --ink-faint: rgba(247, 241, 232, 0.42);
+        --teal: #17bebb;
+        --gold: #f2c94c;
+        --orange: #ff6b4a;
+        --rose: #ef4d72;
+        --green-crt: #67ffb2;
+        --hairline: rgba(247, 241, 232, 0.12);
+        --hairline-strong: rgba(247, 241, 232, 0.22);
+        --panel: rgba(247, 241, 232, 0.05);
+        --sans: ui-sans-serif, system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+        --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "Menlo", "Consolas", monospace;
+      }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #main-video {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 14% 10%, rgba(23, 190, 187, 0.20), transparent 32%),
+          radial-gradient(circle at 86% 80%, rgba(255, 107, 74, 0.16), transparent 30%),
+          radial-gradient(circle at 80% 18%, rgba(242, 201, 76, 0.08), transparent 26%),
+          linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 55%, var(--bg) 100%);
+      }
+
+      .grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(247, 241, 232, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(247, 241, 232, 0.04) 1px, transparent 1px);
+        background-size: 80px 80px;
+        mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 78%);
+        -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 78%);
+      }
+
+      .vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse at center, transparent 56%, rgba(0, 0, 0, 0.5) 100%);
+        pointer-events: none;
+      }
+
+      .scene {
+        position: absolute;
+        inset: 0;
+        padding: 96px 120px 200px;
+        box-sizing: border-box;
+        opacity: 0;
+      }
+
+      .kicker {
+        font-family: var(--mono);
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        color: var(--teal);
+        text-transform: uppercase;
+      }
+
+      .kicker .dot {
+        display: inline-block;
+        width: 9px; height: 9px;
+        border-radius: 999px;
+        background: var(--teal);
+        margin: 0 14px 4px 0;
+        vertical-align: middle;
+      }
+
+      .badge {
+        position: absolute;
+        right: 120px; top: 96px;
+        font-family: var(--mono);
+        font-size: 20px;
+        letter-spacing: 0.18em;
+        color: var(--ink-faint);
+        padding: 10px 16px;
+        border: 1px solid var(--hairline);
+        border-radius: 4px;
+        background: rgba(11, 15, 23, 0.6);
+      }
+      .badge b {
+        color: var(--gold);
+        font-weight: 700;
+        margin-right: 10px;
+      }
+
+      .title {
+        margin: 30px 0 0;
+        max-width: 1500px;
+        font-size: 88px;
+        line-height: 1.08;
+        font-weight: 900;
+        letter-spacing: -0.01em;
+      }
+
+      .title .hl {
+        position: relative;
+        display: inline-block;
+        white-space: nowrap;
+      }
+
+      /* highlight underline — static (no GSAP on pseudo-elements) */
+      .title .hl::after {
+        content: "";
+        position: absolute;
+        left: -6px;
+        right: -6px;
+        bottom: 8px;
+        height: 20px;
+        background: linear-gradient(90deg, rgba(242, 201, 76, 0.55), rgba(255, 107, 74, 0.55));
+        z-index: -1;
+        border-radius: 2px;
+      }
+
+      .sub {
+        margin: 30px 0 0;
+        max-width: 1180px;
+        font-size: 32px;
+        line-height: 1.46;
+        color: var(--ink-soft);
+        font-weight: 500;
+      }
+      .sub em {
+        font-style: normal;
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .sub .arrow {
+        margin: 0 14px;
+        color: var(--gold);
+        font-family: var(--mono);
+        font-weight: 700;
+      }
+
+      /* ─── caption strip ─── */
+      .caption {
+        position: absolute;
+        left: 240px;
+        right: 240px;
+        bottom: 60px;
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 36px;
+        box-sizing: border-box;
+        font-size: 30px;
+        line-height: 1.32;
+        color: var(--ink);
+        text-align: center;
+        background: rgba(11, 15, 23, 0.76);
+        border: 1px solid var(--hairline);
+        border-radius: 6px;
+        backdrop-filter: blur(8px);
+        opacity: 0;
+        font-weight: 600;
+      }
+      .caption strong { color: var(--gold); font-weight: 800; }
+      .caption .teal { color: var(--teal); font-weight: 800; }
+      .caption .orange { color: var(--orange); font-weight: 800; }
+
+      /* ─── SCENE 1 · RELAY ARENA ─── */
+      .relay-stage {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 240px;
+        height: 360px;
+      }
+
+      .relay-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: visible;
+      }
+
+      .relay-path {
+        fill: none;
+        stroke: var(--hairline-strong);
+        stroke-width: 3;
+        stroke-dasharray: 12 14;
+      }
+
+      .relay-baton-svg {
+        fill: var(--gold);
+        opacity: 0;
+        filter: drop-shadow(0 0 14px rgba(242, 201, 76, 0.85));
+      }
+
+      .relay-node {
+        position: absolute;
+        top: 100px;
+        width: 240px; height: 240px;
+        border-radius: 50%;
+        border: 2px solid var(--hairline-strong);
+        background: rgba(11, 15, 23, 0.78);
+        display: grid;
+        grid-template-rows: 56px 92px 50px;
+        align-items: center;
+        justify-items: center;
+        text-align: center;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+      }
+      .relay-node .i {
+        font-family: var(--mono);
+        font-size: 20px;
+        letter-spacing: 0.18em;
+        color: var(--ink-faint);
+        align-self: end;
+      }
+      .relay-node strong {
+        font-size: 64px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        line-height: 1;
+      }
+      .relay-node em {
+        font-style: normal;
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.14em;
+        color: var(--ink-faint);
+        align-self: start;
+      }
+      .relay-node[data-stage="firmware"] { left: 60px; border-color: rgba(23, 190, 187, 0.55); }
+      .relay-node[data-stage="firmware"] strong { color: var(--teal); }
+      .relay-node[data-stage="loader"]   { left: 50%; margin-left: -120px; border-color: rgba(242, 201, 76, 0.55); }
+      .relay-node[data-stage="loader"] strong   { color: var(--gold); }
+      .relay-node[data-stage="kernel"]   { right: 60px; border-color: rgba(255, 107, 74, 0.55); }
+      .relay-node[data-stage="kernel"] strong   { color: var(--orange); }
+
+      /* ─── SCENE 2 · TERMINAL HYBRID ─── */
+      .fw-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 230px;
+        height: 480px;
+        display: grid;
+        grid-template-columns: 1fr 800px;
+        gap: 80px;
+      }
+
+      .terminal {
+        position: relative;
+        border-radius: 8px;
+        background: #06090d;
+        border: 1px solid var(--hairline-strong);
+        padding: 64px 44px 44px;
+        box-sizing: border-box;
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(103, 255, 178, 0.05);
+        overflow: hidden;
+      }
+
+      .terminal::before {
+        content: "● ● ●";
+        position: absolute;
+        left: 22px; top: 16px;
+        color: rgba(247, 241, 232, 0.28);
+        font-size: 16px;
+        letter-spacing: 8px;
+      }
+
+      .terminal::after {
+        content: "FIRMWARE · UEFI@RUN";
+        position: absolute;
+        right: 22px; top: 14px;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.18em;
+        color: var(--ink-faint);
+      }
+
+      .term-line {
+        font-family: var(--mono);
+        font-size: 26px;
+        line-height: 1.65;
+        color: var(--green-crt);
+        opacity: 0;
+        white-space: nowrap;
+      }
+      .term-line .ok { color: var(--gold); margin-left: 14px; }
+      .term-line .glow { color: var(--teal); }
+
+      .term-cursor {
+        display: inline-block;
+        width: 14px; height: 28px;
+        margin-left: 10px;
+        vertical-align: -5px;
+        background: var(--green-crt);
+        opacity: 0.85;
+      }
+
+      .term-scanline {
+        position: absolute;
+        left: 0; right: 0; top: 0;
+        height: 100%;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 3px,
+          rgba(103, 255, 178, 0.025) 3px,
+          rgba(103, 255, 178, 0.025) 4px
+        );
+        pointer-events: none;
+      }
+
+      .fw-side {
+        position: relative;
+        display: grid;
+        grid-template-rows: 180px 1fr;
+        gap: 36px;
+      }
+
+      .fw-chip-stage {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .fw-chip {
+        position: relative;
+        width: 220px; height: 120px;
+        background: linear-gradient(180deg, #2a1b08 0%, #4a2e0d 100%);
+        border: 2px solid var(--gold);
+        border-radius: 6px;
+        display: grid;
+        place-items: center;
+        font-family: var(--mono);
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        color: var(--gold);
+        box-shadow: 0 0 32px rgba(242, 201, 76, 0.35);
+      }
+
+      .fw-chip::before,
+      .fw-chip::after {
+        content: "";
+        position: absolute;
+        left: -36px; right: -36px;
+        height: 2px;
+        background: repeating-linear-gradient(90deg, var(--gold) 0 14px, transparent 14px 26px);
+        opacity: 0.66;
+      }
+      .fw-chip::before { top: 24px; }
+      .fw-chip::after  { bottom: 24px; }
+
+      .fw-chip-pulse {
+        position: absolute;
+        inset: -20px;
+        border-radius: 8px;
+        border: 2px solid var(--gold);
+        opacity: 0;
+      }
+
+      .fw-tasks {
+        display: grid;
+        grid-template-rows: repeat(4, 1fr);
+        gap: 14px;
+      }
+
+      .fw-task {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        padding: 0 24px;
+        border: 1px solid var(--hairline);
+        border-radius: 6px;
+        background: rgba(247, 241, 232, 0.04);
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        height: 100%;
+      }
+      .fw-task .n {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.18em;
+        color: var(--ink-faint);
+        min-width: 38px;
+      }
+      .fw-task.lit {
+        background: rgba(242, 201, 76, 0.08);
+        border-color: rgba(242, 201, 76, 0.55);
+        color: var(--ink);
+      }
+      .fw-task.lit .n { color: var(--gold); }
+
+      /* ─── SCENE 3 · TRANSFER MAP ─── */
+      .bl-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 230px;
+        height: 480px;
+      }
+
+      .bl-verbs {
+        position: absolute;
+        left: 0; right: 0;
+        top: 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        text-align: center;
+      }
+
+      .bl-verb {
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.22em;
+        color: var(--ink-faint);
+      }
+      .bl-verb b {
+        display: block;
+        font-family: var(--sans);
+        font-size: 56px;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        margin-top: 12px;
+      }
+      .bl-verb.v1 b { color: var(--teal); }
+      .bl-verb.v2 b { color: var(--gold); }
+      .bl-verb.v3 b { color: var(--orange); }
+
+      .bl-track {
+        position: absolute;
+        left: 0; right: 0;
+        top: 200px;
+        height: 80px;
+      }
+
+      .bl-rail {
+        position: absolute;
+        left: 80px; right: 80px;
+        top: 38px;
+        height: 4px;
+        background: var(--hairline-strong);
+        border-radius: 999px;
+      }
+
+      .bl-fill {
+        position: absolute;
+        left: 80px;
+        top: 36px;
+        width: 0;
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--teal), var(--gold), var(--orange));
+        box-shadow: 0 0 22px rgba(242, 201, 76, 0.55);
+      }
+
+      .bl-payload {
+        position: absolute;
+        top: 16px;
+        left: 80px;
+        width: 96px; height: 48px;
+        margin-left: -48px;
+        border-radius: 4px;
+        background: var(--ink);
+        color: var(--bg);
+        font-family: var(--mono);
+        font-size: 18px;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 28px rgba(247, 241, 232, 0.55);
+        opacity: 0;
+      }
+
+      .bl-stops {
+        position: absolute;
+        left: 0; right: 0;
+        bottom: 0;
+        height: 200px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .bl-stop {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .bl-stop .box {
+        width: 200px; height: 140px;
+        border-radius: 8px;
+        background: rgba(11, 15, 23, 0.86);
+        border: 2px solid var(--hairline-strong);
+        display: grid;
+        grid-template-rows: 38px 1fr;
+        place-items: center;
+        padding: 14px 16px 18px;
+        box-sizing: border-box;
+      }
+      .bl-stop .l {
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.22em;
+        color: var(--ink-faint);
+        align-self: start;
+      }
+      .bl-stop .v {
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-align: center;
+        line-height: 1.18;
+      }
+      .bl-stop[data-kind="disk"] .box { border-color: rgba(23, 190, 187, 0.55); }
+      .bl-stop[data-kind="disk"] .v   { color: var(--teal); }
+      .bl-stop[data-kind="ram"]  .box { border-color: rgba(242, 201, 76, 0.55); }
+      .bl-stop[data-kind="ram"]  .v   { color: var(--gold); }
+      .bl-stop[data-kind="cpu"]  .box { border-color: rgba(255, 107, 74, 0.55); }
+      .bl-stop[data-kind="cpu"]  .v   { color: var(--orange); }
+
+      /* ─── SCENE 4 · KERNEL HUB ─── */
+      .kn-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 200px;
+        height: 540px;
+      }
+
+      .kn-hub {
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 280px; height: 280px;
+        margin-left: -140px; margin-top: -140px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--orange) 0%, #d6431e 100%);
+        display: grid;
+        place-items: center;
+        font-size: 60px;
+        font-weight: 900;
+        color: var(--bg);
+        letter-spacing: 0.04em;
+        box-shadow: 0 0 56px rgba(255, 107, 74, 0.45);
+        z-index: 2;
+      }
+
+      .kn-ring {
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 380px; height: 380px;
+        margin-left: -190px; margin-top: -190px;
+        border-radius: 50%;
+        border: 1px dashed rgba(255, 107, 74, 0.4);
+      }
+
+      .kn-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        overflow: visible;
+      }
+
+      .kn-line {
+        fill: none;
+        stroke: rgba(247, 241, 232, 0.2);
+        stroke-width: 2;
+        stroke-dasharray: 6 8;
+      }
+
+      .kn-node {
+        position: absolute;
+        width: 300px;
+        padding: 24px 28px;
+        border-radius: 6px;
+        background: rgba(11, 15, 23, 0.86);
+        border: 1px solid var(--hairline-strong);
+        box-sizing: border-box;
+      }
+      .kn-node .n {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.18em;
+        color: var(--ink-faint);
+        margin-bottom: 10px;
+      }
+      .kn-node b {
+        display: block;
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 8px;
+        letter-spacing: 0.02em;
+      }
+      .kn-node span {
+        display: block;
+        font-size: 20px;
+        line-height: 1.36;
+        color: var(--ink-soft);
+        font-weight: 500;
+      }
+      .kn-node.n1 { left: 20px;  top: 30px;    border-color: rgba(242, 201, 76, 0.55); }
+      .kn-node.n2 { right: 20px; top: 30px;    border-color: rgba(23, 190, 187, 0.55); }
+      .kn-node.n3 { left: 20px;  bottom: 30px; border-color: rgba(239, 77, 114, 0.55); }
+      .kn-node.n4 { right: 20px; bottom: 30px; border-color: rgba(247, 241, 232, 0.55); }
+      .kn-node.n1 b { color: var(--gold); }
+      .kn-node.n2 b { color: var(--teal); }
+      .kn-node.n3 b { color: var(--rose); }
+      .kn-node.n4 b { color: var(--ink); }
+
+      /* ─── SCENE 5 · DECISION TREE ─── */
+      .ex-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 230px;
+        height: 510px;
+      }
+
+      .ex-root {
+        position: absolute;
+        left: 50%; top: 0;
+        margin-left: -240px;
+        width: 480px;
+        padding: 22px 28px;
+        border-radius: 6px;
+        background: var(--ink);
+        color: var(--bg);
+        text-align: center;
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+      }
+
+      .ex-svg {
+        position: absolute;
+        inset: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        overflow: visible;
+      }
+
+      .ex-edge {
+        fill: none;
+        stroke: var(--hairline-strong);
+        stroke-width: 3;
+        stroke-linecap: round;
+      }
+
+      .ex-bucket {
+        position: absolute;
+        top: 230px;
+        width: 30%;
+        padding: 28px 26px 26px;
+        border-radius: 8px;
+        background: rgba(11, 15, 23, 0.86);
+        border: 2px solid var(--hairline-strong);
+        box-sizing: border-box;
+        display: grid;
+        grid-template-rows: 32px 1fr 56px;
+        gap: 16px;
+      }
+      .ex-bucket .from {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.2em;
+        color: var(--ink-faint);
+      }
+      .ex-bucket .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 12px;
+        align-content: start;
+      }
+      .ex-bucket .chips span {
+        font-size: 24px;
+        font-weight: 800;
+        padding: 8px 14px;
+        border-radius: 4px;
+        background: rgba(247, 241, 232, 0.08);
+        border: 1px solid var(--hairline);
+        color: var(--ink);
+        opacity: 0;
+      }
+      .ex-bucket .out {
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        padding-top: 14px;
+        border-top: 1px solid var(--hairline);
+      }
+      .ex-bucket .out::before {
+        content: "→ ";
+        font-family: var(--mono);
+        font-weight: 600;
+        color: var(--ink-faint);
+        margin-right: 8px;
+      }
+
+      .ex-bucket.b1 { left: 0;     border-color: rgba(23, 190, 187, 0.55); }
+      .ex-bucket.b2 { left: 35%;   border-color: rgba(242, 201, 76, 0.55); }
+      .ex-bucket.b3 { right: 0;    border-color: rgba(255, 107, 74, 0.55); }
+      .ex-bucket.b1 .from, .ex-bucket.b1 .out { color: var(--teal); }
+      .ex-bucket.b2 .from, .ex-bucket.b2 .out { color: var(--gold); }
+      .ex-bucket.b3 .from, .ex-bucket.b3 .out { color: var(--orange); }
+
+      /* ─── SCENE 6 · MEMORY STRIPS ─── */
+      .mem-layout {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 220px;
+        height: 380px;
+        display: grid;
+        grid-template-rows: 1fr 60px;
+        gap: 38px;
+      }
+
+      .mem-strips {
+        display: grid;
+        grid-template-rows: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .mem-strip {
+        display: flex;
+        align-items: center;
+        padding: 0 38px;
+        border-radius: 6px;
+        border: 1px solid var(--hairline-strong);
+        background: rgba(11, 15, 23, 0.7);
+        font-size: 42px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        gap: 38px;
+      }
+      .mem-strip .n {
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.22em;
+        color: var(--ink-faint);
+        font-weight: 700;
+      }
+      .mem-strip .who { color: var(--ink); min-width: 200px; }
+      .mem-strip .do  { font-weight: 900; }
+      .mem-strip .why {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 22px;
+        letter-spacing: 0.16em;
+        color: var(--ink-faint);
+        font-weight: 600;
+      }
+      .mem-strip.s1 .do { color: var(--teal); }
+      .mem-strip.s2 .do { color: var(--gold); }
+      .mem-strip.s3 .do { color: var(--orange); }
+
+      .mem-rail {
+        position: relative;
+        height: 14px;
+        background: var(--hairline);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+      .mem-fill {
+        position: absolute;
+        left: 0; top: 0;
+        width: 0; height: 100%;
+        background: linear-gradient(90deg, var(--teal), var(--gold), var(--orange));
+        box-shadow: 0 0 22px rgba(242, 201, 76, 0.4);
+        border-radius: 999px;
+      }
+
+      /* footer */
+      .footer-line {
+        position: absolute;
+        left: 120px; right: 120px;
+        bottom: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--mono);
+        font-size: 16px;
+        letter-spacing: 0.22em;
+        color: var(--ink-faint);
+        text-transform: uppercase;
+      }
+      .footer-line .l b { color: var(--teal); margin-right: 14px; font-weight: 700; }
+
+      .scene, .relay-node, .fw-task, .terminal, .fw-chip,
+      .bl-stop, .kn-node, .ex-bucket, .mem-strip, .caption {
+        will-change: transform, opacity;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main-video" data-composition-id="main-video" data-width="1920" data-height="1080" data-start="0" data-duration="73">
+      <div class="grid"></div>
+      <div class="vignette"></div>
+      <audio id="narration" src="assets/narration.mp3" data-start="0" data-duration="71.2" data-track-index="5" data-volume="1"></audio>
+
+      <!-- ─── SCENE 1 · HERO RELAY ─── -->
+      <section id="scene-1" class="scene">
+        <div class="badge"><b>408</b>OS · CH.01 · BOOT</div>
+        <div class="kicker"><span class="dot"></span>EXPLAINER 01 · 三棒接力</div>
+        <h1 class="title">按下电源时，<br><span class="hl">操作系统还没开始运行</span></h1>
+        <p class="sub">先动起来的是<em>固件</em>和<em>引导程序</em>——它们像一场接力赛，把 CPU 一棒一棒交到<em>内核</em>手里。</p>
+        <div class="relay-stage">
+          <svg class="relay-svg" viewBox="0 0 1680 360" preserveAspectRatio="none" aria-hidden="true">
+            <path id="relay-path" class="relay-path"
+              d="M 180 220 C 380 130, 580 130, 840 220 S 1300 310, 1500 220" />
+            <circle id="relay-baton" class="relay-baton-svg" r="14" cx="180" cy="220" />
+          </svg>
+          <div class="relay-node" data-stage="firmware">
+            <span class="i">STAGE · 01</span>
+            <strong>固件</strong>
+            <em>BIOS / UEFI</em>
+          </div>
+          <div class="relay-node" data-stage="loader">
+            <span class="i">STAGE · 02</span>
+            <strong>引导</strong>
+            <em>BOOTLOADER</em>
+          </div>
+          <div class="relay-node" data-stage="kernel">
+            <span class="i">STAGE · 03</span>
+            <strong>内核</strong>
+            <em>OS KERNEL</em>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 2 · FIRMWARE TERMINAL HYBRID ─── -->
+      <section id="scene-2" class="scene">
+        <div class="badge"><b>408</b>STAGE 01 · FIRMWARE</div>
+        <div class="kicker"><span class="dot"></span>STEP 01 · 固件先启动</div>
+        <h1 class="title">BIOS / UEFI 让硬件进入<br><span class="hl">「可启动」状态</span></h1>
+        <div class="fw-layout">
+          <div class="terminal">
+            <div class="term-scanline"></div>
+            <div class="term-line" id="tl-1">&gt; CPU_RESET_VECTOR <span class="ok">[fetch]</span></div>
+            <div class="term-line" id="tl-2">&gt; init memory &amp; chipset <span class="ok">[OK]</span></div>
+            <div class="term-line" id="tl-3">&gt; scan boot order: <span class="glow">USB → SSD → NET</span></div>
+            <div class="term-line" id="tl-4">&gt; EFI disk found <span class="ok">[handoff]</span><span class="term-cursor"></span></div>
+          </div>
+          <div class="fw-side">
+            <div class="fw-chip-stage">
+              <div class="fw-chip">FIRMWARE
+                <div class="fw-chip-pulse" id="fw-chip-pulse"></div>
+              </div>
+            </div>
+            <div class="fw-tasks">
+              <div class="fw-task" data-i="1"><span class="n">01</span>CPU 从复位地址取第一条指令</div>
+              <div class="fw-task" data-i="2"><span class="n">02</span>初始化内存、主板与基础 I/O</div>
+              <div class="fw-task" data-i="3"><span class="n">03</span>按启动顺序查找可启动介质</div>
+              <div class="fw-task" data-i="4"><span class="n">04</span>把控制权交给引导程序</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 3 · BOOTLOADER TRANSFER MAP ─── -->
+      <section id="scene-3" class="scene">
+        <div class="badge"><b>408</b>STAGE 02 · BOOTLOADER</div>
+        <div class="kicker"><span class="dot"></span>STEP 02 · 引导程序接力</div>
+        <h1 class="title">Bootloader 把<span class="hl">内核搬进内存</span></h1>
+        <p class="sub">三件事：在磁盘找到内核 <span class="arrow">→</span> 装入 RAM 约定位置 <span class="arrow">→</span> 跳转到入口地址。</p>
+        <div class="bl-layout">
+          <div class="bl-verbs">
+            <div class="bl-verb v1">01 · LOCATE<b>定位</b></div>
+            <div class="bl-verb v2">02 · LOAD<b>加载</b></div>
+            <div class="bl-verb v3">03 · JUMP<b>跳转</b></div>
+          </div>
+          <div class="bl-track">
+            <div class="bl-rail"></div>
+            <div class="bl-fill" id="bl-fill"></div>
+            <div class="bl-payload" id="bl-payload">kernel</div>
+          </div>
+          <div class="bl-stops">
+            <div class="bl-stop" data-kind="disk">
+              <div class="box"><span class="l">DISK</span><span class="v">内核映像<br>启动配置</span></div>
+            </div>
+            <div class="bl-stop" data-kind="ram">
+              <div class="box"><span class="l">RAM</span><span class="v">装入约定位置<br>准备启动参数</span></div>
+            </div>
+            <div class="bl-stop" data-kind="cpu">
+              <div class="box"><span class="l">CPU</span><span class="v">跳到入口<br>交出控制权</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 4 · KERNEL HUB ─── -->
+      <section id="scene-4" class="scene">
+        <div class="badge"><b>408</b>STAGE 03 · KERNEL</div>
+        <div class="kicker"><span class="dot"></span>STEP 03 · 内核接管</div>
+        <h1 class="title">内核运行起来，<br>才开始建立<span class="hl">真正的 OS 环境</span></h1>
+        <div class="kn-layout">
+          <svg class="kn-svg" viewBox="0 0 1680 540" preserveAspectRatio="none" aria-hidden="true">
+            <path id="kn-p1" class="kn-line" d="M 840 270 C 620 220, 480 180, 320 120" />
+            <path id="kn-p2" class="kn-line" d="M 840 270 C 1060 220, 1200 180, 1360 120" />
+            <path id="kn-p3" class="kn-line" d="M 840 270 C 620 320, 480 360, 320 420" />
+            <path id="kn-p4" class="kn-line" d="M 840 270 C 1060 320, 1200 360, 1360 420" />
+          </svg>
+          <div class="kn-ring"></div>
+          <div class="kn-hub">内核</div>
+          <div class="kn-node n1"><div class="n">01 · INTERRUPT</div><b>中断</b><span>建立中断向量与异常处理，CPU 才能响应外部事件。</span></div>
+          <div class="kn-node n2"><div class="n">02 · MEMORY</div><b>内存</b><span>建立页表，管理物理内存与虚拟地址空间。</span></div>
+          <div class="kn-node n3"><div class="n">03 · PROCESS</div><b>进程</b><span>创建第一个系统进程，用户态从此开始运行。</span></div>
+          <div class="kn-node n4"><div class="n">04 · DEVICE</div><b>设备</b><span>加载驱动，把外设接入统一的 I/O 框架。</span></div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 5 · DECISION TREE CLASSIFIER ─── -->
+      <section id="scene-5" class="scene">
+        <div class="badge"><b>408</b>EXAM · KEYWORD MAP</div>
+        <div class="kicker"><span class="dot"></span>408 判题速记 · 关键词分流</div>
+        <h1 class="title">看到关键词，先判断这是<span class="hl">第几棒</span></h1>
+        <div class="ex-layout">
+          <div class="ex-root">题干动作属于谁？</div>
+          <svg class="ex-svg" viewBox="0 0 1680 510" preserveAspectRatio="none" aria-hidden="true">
+            <!-- stem down + 3-way branches -->
+            <path id="ex-edge-stem" class="ex-edge" d="M 840 70 V 140" />
+            <path id="ex-edge-bar"  class="ex-edge" d="M 252 140 H 1428" />
+            <path id="ex-edge-l"   class="ex-edge" d="M 252 140 V 220" />
+            <path id="ex-edge-m"   class="ex-edge" d="M 840 140 V 220" />
+            <path id="ex-edge-r"   class="ex-edge" d="M 1428 140 V 220" />
+          </svg>
+          <div class="ex-bucket b1">
+            <div class="from">题干出现 ↓</div>
+            <div class="chips">
+              <span>上电</span><span>自检</span><span>启动项</span><span>POST</span><span>复位</span>
+            </div>
+            <div class="out">固件 · BIOS / UEFI</div>
+          </div>
+          <div class="ex-bucket b2">
+            <div class="from">题干出现 ↓</div>
+            <div class="chips">
+              <span>加载内核</span><span>跳转入口</span><span>装入</span><span>bootloader</span><span>启动参数</span>
+            </div>
+            <div class="out">引导程序</div>
+          </div>
+          <div class="ex-bucket b3">
+            <div class="from">题干出现 ↓</div>
+            <div class="chips">
+              <span>中断</span><span>页表</span><span>进程</span><span>设备</span><span>系统调用</span>
+            </div>
+            <div class="out">内核 · OS</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── SCENE 6 · MEMORY STRIPS RECAP ─── -->
+      <section id="scene-6" class="scene">
+        <div class="badge"><b>408</b>MEMORY FRAME · RECAP</div>
+        <div class="kicker"><span class="dot"></span>一句话记住 · 最小知识闭环</div>
+        <h1 class="title"><span class="hl">固件找入口，引导搬内核，内核管全局</span></h1>
+        <div class="mem-layout">
+          <div class="mem-strips">
+            <div class="mem-strip s1"><span class="n">01</span><span class="who">固件</span><span class="do">找入口</span><span class="why">上电后先跑</span></div>
+            <div class="mem-strip s2"><span class="n">02</span><span class="who">引导</span><span class="do">搬内核</span><span class="why">磁盘 → 内存</span></div>
+            <div class="mem-strip s3"><span class="n">03</span><span class="who">内核</span><span class="do">管全局</span><span class="why">OS 正式接管</span></div>
+          </div>
+          <div class="mem-rail">
+            <div class="mem-fill" id="mem-fill"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer-line">
+        <div class="l"><b>LISOUND · 408</b>OPERATING SYSTEMS · CH.01</div>
+        <div class="r">EP.01 — BOOT PROCESS</div>
+      </div>
+
+      <!-- ─── CAPTIONS (matched to narration.srt) ─── -->
+      <div id="cap-1"  class="caption">计算机启动，可以看成一场<strong>三棒接力</strong>。</div>
+      <div id="cap-2"  class="caption">第一棒是固件，也就是 <strong>BIOS 或 UEFI</strong>。</div>
+      <div id="cap-3"  class="caption">它先让 CPU 从固定入口开始执行，初始化内存和基础设备，再按启动顺序找可启动磁盘。</div>
+      <div id="cap-4"  class="caption">第二棒是引导程序，也叫 <strong>bootloader</strong>。</div>
+      <div id="cap-5"  class="caption">它不管进程、不管文件系统全局——只<strong>找内核、装入内存、跳转入口</strong>。</div>
+      <div id="cap-6"  class="caption">第三棒才轮到 <span class="orange">内核</span>。</div>
+      <div id="cap-7"  class="caption">内核运行后，建立<strong>中断 · 内存 · 进程 · 设备</strong>四套子系统。</div>
+      <div id="cap-8"  class="caption">做 408 题时，<strong>不要把这三层混在一起</strong>。</div>
+      <div id="cap-9"  class="caption">看到 <span class="teal">上电、自检、启动项</span> → 想到固件。</div>
+      <div id="cap-10" class="caption">看到 <strong>加载内核、跳转入口</strong> → 想到引导程序。</div>
+      <div id="cap-11" class="caption">看到 <span class="orange">中断、页表、进程、设备</span> → 内核接管。</div>
+      <div id="cap-12" class="caption">一句话记忆：<strong>固件找入口，引导搬内核，内核管全局</strong>。</div>
+
+      <script>
+        gsap.registerPlugin(MotionPathPlugin);
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        const captionTimes = [
+          [0.10,  3.85, "#cap-1"],
+          [3.80,  8.32, "#cap-2"],
+          [8.32, 18.51, "#cap-3"],
+          [18.51, 22.16, "#cap-4"],
+          [22.16, 33.39, "#cap-5"],
+          [33.39, 35.83, "#cap-6"],
+          [35.83, 43.18, "#cap-7"],
+          [43.18, 48.14, "#cap-8"],
+          [48.14, 52.83, "#cap-9"],
+          [52.83, 58.32, "#cap-10"],
+          [58.32, 65.17, "#cap-11"],
+          [65.17, 71.03, "#cap-12"],
+        ];
+
+        const has = (sel) => !!document.querySelector(sel);
+        const fromIf = (sel, vars, at) => { if (has(sel)) tl.from(sel, vars, at); };
+        const toIf   = (sel, vars, at) => { if (has(sel)) tl.to(sel, vars, at); };
+
+        function showScene(id, at) {
+          tl.to(id, { opacity: 1, duration: 0.55, ease: "power2.out" }, at);
+          fromIf(`${id} .badge`,  { x: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, at + 0.08);
+          fromIf(`${id} .kicker`, { y: 26, opacity: 0, duration: 0.5, ease: "power3.out" }, at + 0.14);
+          fromIf(`${id} .title`,  { y: 48, opacity: 0, duration: 0.72, ease: "back.out(1.2)" }, at + 0.26);
+          fromIf(`${id} .sub`,    { y: 26, opacity: 0, duration: 0.55, ease: "power3.out" }, at + 0.6);
+        }
+
+        function hideScene(id, at) {
+          tl.to(id, { opacity: 0, duration: 0.5, ease: "power2.inOut" }, at);
+        }
+
+        function caption(start, end, id) {
+          tl.to(id, { opacity: 1, y: -4, duration: 0.22, ease: "power2.out" }, start);
+          tl.to(id, { opacity: 0, y: 0,  duration: 0.20, ease: "power2.in"  }, Math.max(start + 0.4, end - 0.2));
+        }
+
+        function drawPath(selector, at, duration, ease = "power1.inOut") {
+          document.querySelectorAll(selector).forEach((p) => {
+            try {
+              const len = p.getTotalLength();
+              gsap.set(p, { strokeDasharray: len, strokeDashoffset: len });
+              tl.to(p, { strokeDashoffset: 0, duration, ease }, at);
+            } catch (e) {}
+          });
+        }
+
+        // ─── SCENE 1 · HERO RELAY (0.10 → 8.0) ───
+        showScene("#scene-1", 0.15);
+        drawPath("#relay-path", 0.85, 1.3, "sine.inOut");
+        fromIf("#scene-1 .relay-node", { y: 50, scale: 0.84, opacity: 0, stagger: 0.2, duration: 0.65, ease: "back.out(1.4)" }, 1.0);
+        // baton travels along the path
+        tl.to("#relay-baton", { opacity: 1, duration: 0.2, ease: "power1.out" }, 2.4);
+        tl.to("#relay-baton", {
+          motionPath: { path: "#relay-path", align: "#relay-path", alignOrigin: [0.5, 0.5] },
+          duration: 4.6,
+          ease: "sine.inOut"
+        }, 2.5);
+        tl.to("#relay-baton", { opacity: 0, duration: 0.3, ease: "power1.in" }, 7.0);
+        // breathing pulses on each baton word
+        tl.to('#scene-1 .relay-node[data-stage="firmware"] strong', { textShadow: "0 0 22px rgba(23,190,187,0.7)", duration: 0.55, repeat: 1, yoyo: true, ease: "sine.inOut" }, 2.8);
+        tl.to('#scene-1 .relay-node[data-stage="loader"] strong',   { textShadow: "0 0 22px rgba(242,201,76,0.7)", duration: 0.55, repeat: 1, yoyo: true, ease: "sine.inOut" }, 4.3);
+        tl.to('#scene-1 .relay-node[data-stage="kernel"] strong',   { textShadow: "0 0 22px rgba(255,107,74,0.7)", duration: 0.55, repeat: 1, yoyo: true, ease: "sine.inOut" }, 5.9);
+        hideScene("#scene-1", 8.0);
+
+        // ─── SCENE 2 · FIRMWARE TERMINAL (8.4 → 18.2) ───
+        showScene("#scene-2", 8.4);
+        // terminal lines type on, one by one
+        const termLines = ["#tl-1", "#tl-2", "#tl-3", "#tl-4"];
+        termLines.forEach((id, i) => {
+          tl.to(id, { opacity: 1, duration: 0.35, ease: "power1.out" }, 9.1 + i * 0.9);
+        });
+        // cursor blink
+        tl.to(".term-cursor", { opacity: 0.15, duration: 0.42, repeat: 13, yoyo: true, ease: "steps(1)" }, 12.4);
+        // chip enters + pulse
+        fromIf("#scene-2 .fw-chip", { scale: 0.7, opacity: 0, duration: 0.6, ease: "back.out(1.5)" }, 9.4);
+        tl.fromTo("#fw-chip-pulse", { opacity: 0.6, scale: 1 }, { opacity: 0, scale: 1.4, duration: 1.4, repeat: 3, ease: "sine.out" }, 10.0);
+        // task items light up sequentially
+        const fwTasks = [".fw-task[data-i='1']", ".fw-task[data-i='2']", ".fw-task[data-i='3']", ".fw-task[data-i='4']"];
+        fwTasks.forEach((sel, i) => {
+          tl.from(sel, { x: 50, opacity: 0, duration: 0.45, ease: "power3.out" }, 9.6 + i * 0.4);
+          tl.to(sel, { className: "+=lit", duration: 0.25 }, 11.0 + i * 1.5);
+        });
+        hideScene("#scene-2", 18.2);
+
+        // ─── SCENE 3 · TRANSFER MAP (18.6 → 33.1) ───
+        showScene("#scene-3", 18.6);
+        fromIf("#scene-3 .bl-verb", { y: 30, opacity: 0, stagger: 0.18, duration: 0.5, ease: "power2.out" }, 19.4);
+        fromIf("#scene-3 .bl-stop", { y: 40, opacity: 0, stagger: 0.2, duration: 0.55, ease: "power3.out" }, 19.8);
+        // payload journey: starts at DISK (left), passes RAM, ends at CPU
+        tl.set("#bl-payload", { left: "10%", opacity: 0 }, 22.6);
+        tl.to("#bl-payload",  { opacity: 1, duration: 0.25, ease: "power1.out" }, 22.7);
+        tl.to("#bl-payload",  { left: "50%", duration: 4.4, ease: "power1.inOut" }, 23.0);
+        tl.to("#bl-payload",  { left: "90%", duration: 4.4, ease: "power1.inOut" }, 27.6);
+        tl.to("#bl-fill",     { width: "calc(100% - 160px)", duration: 8.8, ease: "power1.inOut" }, 23.0);
+        // stop highlights at each pass
+        tl.to("#scene-3 .bl-stop[data-kind='disk'] .box", { boxShadow: "0 0 32px rgba(23,190,187,0.45)", duration: 0.4 }, 22.8);
+        tl.to("#scene-3 .bl-stop[data-kind='ram']  .box", { boxShadow: "0 0 32px rgba(242,201,76,0.45)", duration: 0.4 }, 27.0);
+        tl.to("#scene-3 .bl-stop[data-kind='cpu']  .box", { boxShadow: "0 0 32px rgba(255,107,74,0.45)", duration: 0.4 }, 31.4);
+        tl.to("#bl-payload",  { opacity: 0, duration: 0.3, ease: "power1.in" }, 32.0);
+        hideScene("#scene-3", 33.1);
+
+        // ─── SCENE 4 · KERNEL HUB (33.5 → 43.0) ───
+        showScene("#scene-4", 33.5);
+        fromIf("#scene-4 .kn-hub",  { scale: 0.62, opacity: 0, duration: 0.65, ease: "back.out(1.6)" }, 34.0);
+        fromIf("#scene-4 .kn-ring", { scale: 0.72, opacity: 0, duration: 0.7, ease: "sine.out" }, 34.2);
+        drawPath("#scene-4 .kn-line", 34.7, 0.85, "power1.out");
+        fromIf("#scene-4 .kn-node", { scale: 0.82, opacity: 0, stagger: 0.16, duration: 0.55, ease: "back.out(1.3)" }, 35.4);
+        tl.to("#scene-4 .kn-ring", { rotation: 360, duration: 8.0, ease: "none", transformOrigin: "50% 50%" }, 34.6);
+        tl.to("#scene-4 .kn-hub", { scale: 1.05, duration: 0.85, repeat: 3, yoyo: true, ease: "sine.inOut" }, 36.0);
+        hideScene("#scene-4", 43.0);
+
+        // ─── SCENE 5 · DECISION TREE (43.3 → 65.0) ───
+        showScene("#scene-5", 43.3);
+        fromIf("#scene-5 .ex-root", { y: -30, opacity: 0, duration: 0.55, ease: "back.out(1.4)" }, 43.8);
+        // draw tree edges progressively
+        drawPath("#ex-edge-stem", 44.4, 0.45, "power2.out");
+        drawPath("#ex-edge-bar",  44.85, 0.7,  "power2.out");
+        drawPath("#ex-edge-l",    45.55, 0.3,  "power1.out");
+        drawPath("#ex-edge-m",    45.55, 0.3,  "power1.out");
+        drawPath("#ex-edge-r",    45.55, 0.3,  "power1.out");
+        // buckets enter together
+        fromIf("#scene-5 .ex-bucket", { y: 40, opacity: 0, stagger: 0.12, duration: 0.55, ease: "power3.out" }, 46.0);
+        // keyword chips appear in waves matched to caps 9/10/11
+        // cap-9 (48.14-52.83) → bucket b1 chips light
+        tl.to("#scene-5 .ex-bucket.b1 .chips span", { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }, 48.3);
+        tl.fromTo("#scene-5 .ex-bucket.b1 .chips span", { y: 14 }, { y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }, 48.3);
+        tl.to("#scene-5 .ex-bucket.b1", { borderColor: "rgba(23,190,187,1)", boxShadow: "0 20px 60px rgba(23,190,187,0.3)", duration: 0.45 }, 48.4);
+        tl.to("#scene-5 .ex-bucket.b1", { borderColor: "rgba(23,190,187,0.55)", boxShadow: "0 0 0 transparent", duration: 0.5 }, 52.7);
+        // cap-10 → bucket b2
+        tl.to("#scene-5 .ex-bucket.b2 .chips span", { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }, 53.0);
+        tl.fromTo("#scene-5 .ex-bucket.b2 .chips span", { y: 14 }, { y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }, 53.0);
+        tl.to("#scene-5 .ex-bucket.b2", { borderColor: "rgba(242,201,76,1)", boxShadow: "0 20px 60px rgba(242,201,76,0.3)", duration: 0.45 }, 53.1);
+        tl.to("#scene-5 .ex-bucket.b2", { borderColor: "rgba(242,201,76,0.55)", boxShadow: "0 0 0 transparent", duration: 0.5 }, 58.2);
+        // cap-11 → bucket b3
+        tl.to("#scene-5 .ex-bucket.b3 .chips span", { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }, 58.5);
+        tl.fromTo("#scene-5 .ex-bucket.b3 .chips span", { y: 14 }, { y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" }, 58.5);
+        tl.to("#scene-5 .ex-bucket.b3", { borderColor: "rgba(255,107,74,1)", boxShadow: "0 20px 60px rgba(255,107,74,0.3)", duration: 0.45 }, 58.6);
+        tl.to("#scene-5 .ex-bucket.b3", { borderColor: "rgba(255,107,74,0.55)", boxShadow: "0 0 0 transparent", duration: 0.5 }, 64.6);
+        hideScene("#scene-5", 65.0);
+
+        // ─── SCENE 6 · MEMORY STRIPS (65.1 → 72.5) ───
+        showScene("#scene-6", 65.1);
+        fromIf("#scene-6 .mem-strip", { x: -80, opacity: 0, stagger: 0.18, duration: 0.55, ease: "power3.out" }, 66.0);
+        tl.to("#scene-6 .mem-strip.s1 .do", { textShadow: "0 0 24px rgba(23,190,187,0.7)", duration: 0.5, repeat: 1, yoyo: true, ease: "sine.inOut" }, 67.4);
+        tl.to("#scene-6 .mem-strip.s2 .do", { textShadow: "0 0 24px rgba(242,201,76,0.7)", duration: 0.5, repeat: 1, yoyo: true, ease: "sine.inOut" }, 68.0);
+        tl.to("#scene-6 .mem-strip.s3 .do", { textShadow: "0 0 24px rgba(255,107,74,0.7)", duration: 0.5, repeat: 1, yoyo: true, ease: "sine.inOut" }, 68.6);
+        tl.to("#mem-fill", { width: "100%", duration: 4.6, ease: "power1.inOut" }, 66.6);
+        tl.to("#scene-6", { opacity: 0, duration: 0.8, ease: "power2.inOut" }, 71.7);
+
+        captionTimes.forEach(([s, e, id]) => caption(s, e, id));
+
+        window.__timelines["main-video"] = tl;
+
+        const isLocalBrowserPreview =
+          window.location.protocol === "file:" && !navigator.webdriver;
+        if (isLocalBrowserPreview) {
+          window.addEventListener("load", () => { tl.play(0); });
+        }
+      </script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "script_version": "2026-05-29.5",
+  "created_at_epoch": 1779986369,
+  "inputs": [
+    "D:\\Desktop\\ArcNote\\PostGraduate\\408\\TextBook\\book\\27王道《操作系统》高清带书签.pdf"
+  ],
+  "output": "D:\\Desktop\\ArcNote\\PostGraduate\\408\\class\\ocr_analysis_recursive_test",
+  "pdf_count": 1,
+  "ocr_engine": "easyocr",
+  "ocr_requested": "auto",
+  "ocr_policy": "weak",
+  "cache_schema_version": "2",
+  "cache_scope": "{\"easyocr_batch_size\":4,\"engine\":\"easyocr\",\"lang_hint\":\"zh\",\"min_chars\":80,\"min_cjk\":30,\"min_output_chars\":20,\"ocr_policy\":\"weak\",\"scale\":1.4,\"schema\":\"2\"}",
+  "gpu_requested": "auto",
+  "gpu_available": null,
+  "lang_hint": "zh",
+  "min_cjk": 30,
+  "min_chars": 80,
+  "min_output_chars": 20,
+  "scale": 1.4,
+  "easyocr_batch_size": 4,
+  "resume_enabled": true,
+  "force": false,
+  "strict_validation": true,
+  "strict_quality": false,
+  "validate_only": false,
+  "keep_temp": false,
+  "temp_dir": "D:\\Desktop\\ArcNote\\PostGraduate\\408\\class\\ocr_analysis_recursive_test\\_tmp",
+  "wall_seconds": 3.607,
+  "validation_passed": true,
+  "cleanup": {
+    "temp_dir": "D:\\Desktop\\ArcNote\\PostGraduate\\408\\class\\ocr_analysis_recursive_test\\_tmp",
+    "kept": false,
+    "removed": false,
+    "reason": "no_temp_dir"
+  }
+}

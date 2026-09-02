@@ -1,0 +1,28 @@
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+
+
+# Ignore Smart Environment folder
+.smart-env
+
+# Ignore large PDF files (textbooks, exam papers, etc.)
+PostGraduate/408/TextBook/
+PostGraduate/答题卡/
+PostGraduate/英语/作文/作文背诵20篇.pdf
+PostGraduate/英语/翻译/唐迟翻译.pdf
+
+# Backups produced by replace-jsdelivr.ps1
+_backups/
+
+# Locally downloaded note images (notes reference GitHub raw URLs instead)
+PostGraduate/408/Notes/img/
+# Python build cache
+__pycache__/
+/PostGraduate/408/思维导图/操作系统复习串讲（公众号：里昂408考研）.pdf
+/PostGraduate/408/思维导图/操作系统复习串讲（公众号：里昂408考研）_compressed.pdf
+/PostGraduate/408/思维导图/计算机组成原理复习串讲（公众号：里昂408考研）.pdf
+/PostGraduate/408/思维导图/计算机网络复习串讲（公众号：里昂408考研）.pdf
+/PostGraduate/408/思维导图/计算机网络复习串讲（公众号：里昂408考研）_compressed.pdf
+/PostGraduate/408/思维导图/里昂学长408考研计算机组成原理笔记（25版）.pdf
+/PostGraduate/英语/作文/2027考研英语-高分写作.pdf
